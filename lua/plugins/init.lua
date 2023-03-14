@@ -67,7 +67,7 @@ return {
 
   {
     "nvim-tree/nvim-tree.lua",
-    tag = "nightly",                 -- optional, updated every week. (see issue #1193)
+    tag = "nightly", -- optional, updated every week. (see issue #1193)
     dependencies = {
       "nvim-tree/nvim-web-devicons", -- optional, for file icons
     },
@@ -153,53 +153,10 @@ return {
   { "tpope/vim-rhubarb" },
   { "lewis6991/gitsigns.nvim" },
 
-  -- Color scheme
-  { "navarasu/onedark.nvim" },
-  { "dracula/vim" },
-  { "folke/tokyonight.nvim" },
-  {
-    "catppuccin/nvim",
-    as = "catppuccin"
-  },
-  { "sainnhe/sonokai" },
-  { "sickill/vim-monokai" },
-  { "edeneast/nightfox.nvim" },
-  { "ayu-theme/ayu-vim" },
-  { "tomasr/molokai" },
-  { "glepnir/oceanic-material" },
-  { "thedenisnikulin/vim-cyberpunk" },
-  { "dunstontc/vim-vscode-theme" },
-  { "adrian5/oceanic-next-vim" },
-  { "nlknguyen/papercolor-theme" },
-  { "nonetallt/vim-neon-dark" },
-  {
-    "loctvl842/monokai-pro.nvim",
-    config = function()
-      require("monokai-pro").setup({
-        terminal_colors = true,
-        devicons = true,    -- highlight the icons of `nvim-web-devicons`
-        italic_comments = true,
-        filter = "octagon", -- classic | octagon | pro | machine | ristretto | spectrum
-      })
-    end
-  },
-  {
-    'uloco/bluloco.nvim',
-    dependencies = { 'rktjmp/lush.nvim' },
-    config = function()
-      require("bluloco").setup({
-        style       = "auto", -- "auto" | "dark" | "light"
-        transparent = false,
-        italics     = true,
-        terminal    = vim.fn.has("gui_running") == 1, -- bluoco colors are enabled in gui terminals per default.
-        guicursor   = true,
-      })
-    end
-  },
-  { "nvim-lualine/lualine.nvim" },           -- Fancier statusline
+  { "nvim-lualine/lualine.nvim" }, -- Fancier statusline
   { "lukas-reineke/indent-blankline.nvim" }, -- Add indentation guides even on blank lines
-  { "numToStr/Comment.nvim" },               -- "gc" to comment visual regions/lines
-  { "tpope/vim-sleuth" },                    -- Detect tabstop and shiftwidth automatically
+  { "numToStr/Comment.nvim" }, -- "gc" to comment visual regions/lines
+  { "tpope/vim-sleuth" }, -- Detect tabstop and shiftwidth automatically
 
   -- Fuzzy Finder (files, lsp, etc)
   {
