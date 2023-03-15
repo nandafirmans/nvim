@@ -192,12 +192,6 @@ return {
     end
   },
 
-  -- Todo Highlight
-  {
-    "folke/todo-comments.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
-  },
-
   -- FineCmdline
   {
     'VonHeikemen/fine-cmdline.nvim',
@@ -259,12 +253,129 @@ return {
   -- Git related plugins
   { "tpope/vim-fugitive" },
   { "tpope/vim-rhubarb" },
-  { "lewis6991/gitsigns.nvim" },
 
-  { "nvim-lualine/lualine.nvim" },           -- Fancier statusline
-  { "lukas-reineke/indent-blankline.nvim" }, -- Add indentation guides even on blank lines
-  { "numToStr/Comment.nvim" },               -- "gc" to comment visual regions/lines
-  { "tpope/vim-sleuth" },                    -- Detect tabstop and shiftwidth automatically
+  {
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      require("gitsigns").setup({
+        signs = {
+          add = { text = "+" },
+          change = { text = "~" },
+          delete = { text = "_" },
+          topdelete = { text = "‾" },
+          changedelete = { text = "~" },
+        },
+      })
+    end
+  },
+
+  -- StatusLine
+  {
+    "nvim-lualine/lualine.nvim",
+    config = function()
+      local function show_macro_recording()
+        local recording_register = vim.fn.reg_recording()
+        if recording_register == "" then
+          return ""
+        else
+          return "Recording @" .. recording_register
+        end
+      end
+
+      local lualine = require("lualine")
+
+      lualine.setup({
+        options = {
+          theme = "auto",
+          -- section_separators = { left = '', right = '' },
+          section_separators = { left = "", right = "" },
+          component_separators = "|",
+          -- component_separators = "┊",
+          -- component_separators = { left = "", right = "" },
+          -- component_separators = { left = '', right = '' },
+          -- disabled_filetypes = { "packer", "NvimTree" },
+          disabled_filetypes = {},
+          globalstatus = true,
+          refresh = {
+            statusline = 100,
+            tabline = 100,
+            winbar = 100,
+          },
+        },
+        sections = {
+          lualine_b = {
+            'branch', 'diff', 'diagnostics',
+            {
+              "macro-recording",
+              fmt = show_macro_recording
+            },
+          },
+          lualine_c = {
+            require("auto-session-library").current_session_name,
+            { 'filename', path = 1, file_status = true },
+          }
+        },
+      })
+
+      vim.api.nvim_create_autocmd("RecordingEnter", {
+        callback = function()
+          lualine.refresh({
+            place = { "statusline" },
+          })
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("RecordingLeave", {
+        callback = function()
+          -- This is going to seem really weird!
+          -- Instead of just calling refresh we need to wait a moment because of the nature of
+          -- `vim.fn.reg_recording`. If we tell lualine to refresh right now it actually will
+          -- still show a recording occuring because `vim.fn.reg_recording` hasn't emptied yet.
+          -- So what we need to do is wait a tiny amount of time (in this instance 50 ms) to
+          -- ensure `vim.fn.reg_recording` is purged before asking lualine to refresh.
+          local timer = vim.loop.new_timer()
+          if (timer ~= nil) then
+            timer:start(
+              50,
+              0,
+              vim.schedule_wrap(function()
+                lualine.refresh({
+                  place = { "statusline" },
+                })
+              end)
+            )
+          end
+        end,
+      })
+    end
+  },
+
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    config = function()
+      require("indent_blankline").setup({
+        char = "┊",
+        show_trailing_blankline_indent = false,
+      })
+    end
+  },
+
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      require("Comment").setup()
+    end
+  },
+
+  {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("todo-comments").setup {}
+    end
+  },
+
+  { "tpope/vim-sleuth" }, -- Detect tabstop and shiftwidth automatically
 
   -- Fuzzy Finder (files, lsp, etc)
   {
