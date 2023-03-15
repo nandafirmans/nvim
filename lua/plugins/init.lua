@@ -15,6 +15,12 @@ return {
     },
   },
 
+  -- Flutter
+  {
+    'akinsho/flutter-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' }
+  },
+
   {
     -- Autocompletion
     "hrsh7th/nvim-cmp",
@@ -68,25 +74,76 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     tag = "nightly", -- optional, updated every week. (see issue #1193)
-    dependencies = {
-      "nvim-tree/nvim-web-devicons", -- optional, for file icons
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    keys = {
+      { "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n" }
     },
+    config = function()
+      require("nvim-tree").setup({
+        update_focused_file = {
+          enable = true,
+        },
+        view = {
+          side = "left",
+          width = 40,
+        },
+        actions = {
+          open_file = {
+            resize_window = true
+          }
+        }
+      })
+
+      local nvimTreeApi = require('nvim-tree.api');
+      local nvimTreeEvent = nvimTreeApi.events.Event;
+      local bufferlineApi = require('bufferline.api')
+
+      local function getTreeSize()
+        return require 'nvim-tree.view'.View.width
+      end
+
+      nvimTreeApi.events.subscribe(nvimTreeEvent.TreeOpen, function()
+        bufferlineApi.set_offset(getTreeSize())
+      end)
+
+      nvimTreeApi.events.subscribe(nvimTreeEvent.Resize, function(size)
+        bufferlineApi.set_offset(size)
+      end)
+
+      nvimTreeApi.events.subscribe(nvimTreeEvent.TreeClose, function()
+        bufferlineApi.set_offset(0)
+      end)
+    end
   },
 
-  { "nvim-tree/nvim-web-devicons" },
   {
     "romgrk/barbar.nvim",
-    dependencies = "nvim-web-devicons",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
   },
 
   -- AutoSession & SessionLens
-  { "rmagatti/auto-session" },
+  {
+    "rmagatti/auto-session",
+    config = function()
+      vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+      require("auto-session").setup({
+        pre_save_cmds = { "tabdo NvimTreeClose", "tabdo DiffviewClose" },
+      })
+    end
+  },
   {
     "rmagatti/session-lens",
     dependencies = {
       "rmagatti/auto-session",
       "nvim-telescope/telescope.nvim"
     },
+    keys = {
+      { "<leader>ss", "<Cmd>SearchSession<CR>",      mode = "n", desc = "[S]earch [S]ession" },
+      { "<leader>sd", "<Cmd>Autosession delete<CR>", mode = "n", desc = "[S]ession [D]elete" }
+    },
+    config = function()
+      require("session-lens").setup({})
+    end
   },
 
   -- Git Diffview
@@ -96,10 +153,22 @@ return {
   },
 
   -- Auto close tag
-  { "windwp/nvim-ts-autotag" },
+  {
+    "windwp/nvim-ts-autotag",
+    config = function()
+      require("nvim-ts-autotag").setup()
+    end
+  },
 
   -- Auto pair char
-  { "windwp/nvim-autopairs" },
+  {
+    "windwp/nvim-autopairs",
+    config = function()
+      require("nvim-autopairs").setup({
+        disable_filetype = { "TelescopePrompt", "vim" },
+      })
+    end
+  },
 
   -- Multi Cursor
   {
@@ -108,12 +177,11 @@ return {
   },
 
   -- Show hex color and rgb
-  { "norcalli/nvim-colorizer.lua" },
-
-  -- Flutter
   {
-    'akinsho/flutter-tools.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' }
+    "norcalli/nvim-colorizer.lua",
+    config = function()
+      require("colorizer").setup()
+    end
   },
 
   -- ZenMode
@@ -133,13 +201,53 @@ return {
   -- FineCmdline
   {
     'VonHeikemen/fine-cmdline.nvim',
-    dependencies = { 'MunifTanjim/nui.nvim' }
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    keys = {
+      { ":", "<Cmd>FineCmdline<CR>", mode = "n", noremap = true }
+    },
+    config = function()
+      require('fine-cmdline').setup({
+        cmdline = {
+          prompt = ' :'
+        },
+        popup = {
+          size = {
+            width = '60%'
+          },
+          border = {
+            text = {
+              top = " Cmdline "
+            },
+          },
+          win_options = {
+            winhighlight = "Normal:Normal,FloatBorder:SpecialChar",
+          },
+        },
+      })
+    end
   },
 
   -- SearchBox
   {
     'VonHeikemen/searchbox.nvim',
-    dependencies = { 'MunifTanjim/nui.nvim' }
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    keys = {
+      { "/",     "<Cmd>SearchBoxMatchAll<CR>", mode = "n", noremap = true },
+      { "<A-c>", "<Cmd>SearchBoxClear<CR>",    mode = "n", noremap = true }
+    },
+    config = function()
+      require('searchbox').setup({
+        defaults = {
+          clear_matches = false,
+          show_matches = true,
+        },
+        popup = {
+          win_options = {
+            winhighlight = "Normal:Normal,FloatBorder:SpecialChar",
+          },
+        },
+      })
+    end
   },
 
   -- VimIlluminate
@@ -153,10 +261,10 @@ return {
   { "tpope/vim-rhubarb" },
   { "lewis6991/gitsigns.nvim" },
 
-  { "nvim-lualine/lualine.nvim" }, -- Fancier statusline
+  { "nvim-lualine/lualine.nvim" },           -- Fancier statusline
   { "lukas-reineke/indent-blankline.nvim" }, -- Add indentation guides even on blank lines
-  { "numToStr/Comment.nvim" }, -- "gc" to comment visual regions/lines
-  { "tpope/vim-sleuth" }, -- Detect tabstop and shiftwidth automatically
+  { "numToStr/Comment.nvim" },               -- "gc" to comment visual regions/lines
+  { "tpope/vim-sleuth" },                    -- Detect tabstop and shiftwidth automatically
 
   -- Fuzzy Finder (files, lsp, etc)
   {

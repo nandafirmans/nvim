@@ -15,6 +15,9 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- set TermGuiColors before loading nvim colorizer
+vim.o.termguicolors = true
+
 require("lazy").setup('plugins')
 
 -- [[ Setting options ]]
@@ -73,10 +76,12 @@ vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
 vim.cmd([[colorscheme bluloco-dark]])
-vim.o.termguicolors = true
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
+
+-- CmdHeight
+vim.o.cmdheight = 0
 
 -- [[ Basic Keymaps ]]
 
@@ -640,7 +645,6 @@ null_ls.setup({
   },
 })
 
-
 -- Flutter
 require("flutter-tools").setup({
   lsp = {
@@ -648,11 +652,6 @@ require("flutter-tools").setup({
     on_attach = on_attach,
   }
 })
--- vim.api.nvim_create_autocmd("BufEnter", {
---   pattern = "*.dart",
---   command = "silent! IndentBlanklineDisable | silent! IndentBlanklineEnable"
--- })
-
 
 -- Disable TS Formatting
 require("lspconfig").tsserver.setup({
@@ -660,62 +659,10 @@ require("lspconfig").tsserver.setup({
   on_attach = function(client)
     client.server_capabilities.documentFormattingProvider = false
   end,
-  -- cmd = { "typescript-language-server", "--stdio" },
 })
 
 -- Eslint Fix All
 vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
--- AutoSession
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
-require("auto-session").setup({
-  pre_save_cmds = { "tabdo NvimTreeClose", "tabdo DiffviewClose" },
-})
-require("session-lens").setup({})
-vim.keymap.set("n", "<leader>ss", "<Cmd>SearchSession<CR>", { desc = "[S]earch [S]ession" })
-vim.keymap.set("n", "<leader>sd", "<Cmd>Autosession delete<CR>", { desc = "[S]ession [D]elete" })
-
--- NvimTree
-require("nvim-tree").setup({
-  update_focused_file = {
-    enable = true,
-  },
-  view = {
-    side = "left",
-    width = 40,
-    auto_resize = true
-  },
-  actions = {
-    open_file = {
-      resize_window = true
-    }
-  }
-})
-
-vim.keymap.set("n", "<leader>n", ":NvimTreeToggle<CR>")
-
-vim.api.nvim_create_autocmd("VimEnter", {
-  pattern = "*",
-  command = "NvimTreeFindFile!",
-})
-local nvimTreeApi = require('nvim-tree.api');
-local nvimTreeEvent = nvimTreeApi.events.Event;
-local bufferlineApi = require('bufferline.api')
-
-local function getTreeSize()
-  return require 'nvim-tree.view'.View.width
-end
-
-nvimTreeApi.events.subscribe(nvimTreeEvent.TreeOpen, function()
-  bufferlineApi.set_offset(getTreeSize())
-end)
-
-nvimTreeApi.events.subscribe(nvimTreeEvent.Resize, function(size)
-  bufferlineApi.set_offset(size)
-end)
-
-nvimTreeApi.events.subscribe(nvimTreeEvent.TreeClose, function()
-  bufferlineApi.set_offset(0)
-end)
 
 -- BarBar
 require("bufferline").setup({
@@ -777,78 +724,6 @@ vim.keymap.set("n", "<leader>dr", "<Cmd>DiffviewRefresh<CR>", baseKeymapsOpts)
 vim.keymap.set("n", "<leader>dhf", "<Cmd>DiffviewFileHistory %<CR>", baseKeymapsOpts)
 vim.keymap.set("n", "<leader>dh", "<Cmd>DiffviewFileHistory<CR>", baseKeymapsOpts)
 vim.keymap.set("n", "<leader>dc", "<Cmd>DiffviewClose<CR>", baseKeymapsOpts)
-
-
--- FineCmdline
-require('fine-cmdline').setup({
-  cmdline = {
-    prompt = ' :'
-  },
-  popup = {
-    size = {
-      width = '60%'
-    },
-    border = {
-      text = {
-        top = " Cmdline "
-      },
-    },
-    win_options = {
-      winhighlight = "Normal:Normal,FloatBorder:SpecialChar",
-    },
-  },
-})
-vim.o.cmdheight = 0
-vim.keymap.set({ "n" }, ":", "<Esc><Cmd>FineCmdline<CR>", { noremap = true })
-
--- Searchbox
-require('searchbox').setup({
-  defaults = {
-    clear_matches = false,
-    show_matches = true,
-  },
-  popup = {
-    win_options = {
-      winhighlight = "Normal:Normal,FloatBorder:SpecialChar",
-    },
-  },
-})
-vim.keymap.set({ "n", "v" }, "/", "<Cmd>SearchBoxMatchAll<CR>", { noremap = true })
-vim.keymap.set({ "n", "v" }, "<A-c>", "<Cmd>SearchBoxClear<CR>", { noremap = true })
-
-
--- Nvim Colorizer
-require("colorizer").setup()
-
--- Auto close tag
-require("nvim-ts-autotag").setup()
-
--- Auto close char
-require("nvim-autopairs").setup({
-  disable_filetype = { "TelescopePrompt", "vim" },
-})
-
--- ToggleTerm
-local defaultToggleTermConfig = {
-  direction = "float",
-  close_on_exit = true,
-  hide_numbers = true,
-  shade_filetypes = {},
-  shade_terminals = true,
-  shading_factor = 5,
-  start_in_insert = true,
-  insert_mappings = true,
-  persist_size = true,
-  shell = vim.o.shell,
-  float_opts = {
-    border = "curved",
-    winblend = 0,
-    highlights = {
-      border = "Normal",
-      background = "Normal",
-    }
-  }
-}
 
 require("toggleterm").setup({
   size = 15,
@@ -939,7 +814,4 @@ end
 
 vim.keymap.set("n", "<C-t>g", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", { desc = "Toggle LazyGit" })
 vim.keymap.set("n", "<C-t>t", "<CMD>lua _TOP_TOGGLE()<CR>", { desc = "Toggle htop" })
-vim.keymap.set("n", "<C-t>n", "<CMD>lua _NODE_INTERACTIVE_TOGGLE()<CR>", { desc = "Toggle Node Interactive" })
-vim.keymap.set("n", "<C-t>n", "<CMD>lua _NODE_INTERACTIVE_TOGGLE()<CR>", { desc = "Toggle Node Interactive" })
-vim.keymap.set("n", "<C-t>n", "<CMD>lua _NODE_INTERACTIVE_TOGGLE()<CR>", { desc = "Toggle Node Interactive" })
 vim.keymap.set("n", "<C-t>n", "<CMD>lua _NODE_INTERACTIVE_TOGGLE()<CR>", { desc = "Toggle Node Interactive" })
