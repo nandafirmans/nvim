@@ -1,25 +1,4 @@
 return {
-  {
-    -- LSP Configuration & Plugins
-    "neovim/nvim-lspconfig",
-    dependencies = {
-      -- Automatically install LSPs to stdpath for neovim
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-
-      -- Useful status updates for LSP
-      "j-hui/fidget.nvim",
-
-      -- Additional lua configuration, makes nvim stuff amazing
-      "folke/neodev.nvim",
-    },
-  },
-
-  -- Flutter
-  {
-    'akinsho/flutter-tools.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' }
-  },
 
   {
     -- Autocompletion
@@ -46,30 +25,10 @@ return {
   { "onsails/lspkind.nvim" },
 
   {
-    -- Highlight, edit, and navigate code
-    "nvim-treesitter/nvim-treesitter",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-    },
-    build = function()
-      pcall(require("nvim-treesitter.install").update({ with_sync = true }))
-    end,
-  },
-
-  {
     "jose-elias-alvarez/null-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
 
-  {
-    "glepnir/lspsaga.nvim",
-    branch = "main",
-    dependencies = {
-      { "nvim-tree/nvim-web-devicons" },
-      --Please make sure you install markdown and markdown_inline parser
-      { "nvim-treesitter/nvim-treesitter" },
-    },
-  },
 
   {
     "nvim-tree/nvim-tree.lua",
@@ -188,7 +147,7 @@ return {
   {
     "folke/zen-mode.nvim",
     config = function()
-      require("zen-mode").setup {}
+      require("zen-mode").setup({})
     end
   },
 
