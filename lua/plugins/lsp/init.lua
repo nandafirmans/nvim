@@ -55,6 +55,12 @@ return {
         desc = "[C]ode [A]ction"
       },
       {
+        "<leader>rn",
+        "<cmd>Lspsaga rename<CR>",
+        mode = "n",
+        desc = "[R]e[N]ame"
+      },
+      {
         "gp",
         "<cmd>Lspsaga peek_definition<CR>",
         mode = "n",
