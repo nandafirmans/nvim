@@ -21,7 +21,7 @@ return {
         terminal_colors = true,
         devicons = true, -- highlight the icons of `nvim-web-devicons`
         italic_comments = true,
-        filter = "octagon", -- classic | octagon | pro | machine | ristretto | spectrum
+        filter = "spectrum", -- classic | octagon | pro | machine | ristretto | spectrum
       })
     end
   },
