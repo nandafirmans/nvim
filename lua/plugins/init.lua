@@ -10,6 +10,8 @@ return {
         ["javascript"] = true,
         ["typescript"] = true,
         ["css"] = true,
+        ["scss"] = true,
+        ["less"] = true,
         ["html"] = true,
         ["lua"] = false,
         ["rust"] = false,
@@ -50,7 +52,6 @@ return {
     "jose-elias-alvarez/null-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
   },
-
 
   {
     "nvim-tree/nvim-tree.lua",
