@@ -15,6 +15,17 @@ return {
     },
   },
 
+  -- LSP File Operations
+  {
+    "antosha417/nvim-lsp-file-operations",
+    dependencies = {
+      { "nvim-lua/plenary.nvim" },
+    },
+    config = function()
+      require("lsp-file-operations").setup()
+    end
+  },
+
   -- Flutter
   {
     'akinsho/flutter-tools.nvim',
