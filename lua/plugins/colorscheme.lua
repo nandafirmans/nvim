@@ -14,6 +14,10 @@ return {
   { "adrian5/oceanic-next-vim" },
   { "nlknguyen/papercolor-theme" },
   { "nonetallt/vim-neon-dark" },
+  { "rebelot/kanagawa.nvim" },
+  { "morhetz/gruvbox" },
+  { "sainnhe/edge" },
+  { "sainnhe/gruvbox-material" },
   {
     "loctvl842/monokai-pro.nvim",
     config = function()
