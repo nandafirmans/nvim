@@ -1,5 +1,14 @@
 local M = {}
 
+-- Enable the following language servers
+M.servers = {
+  -- clangd = {},
+  gopls = {},
+  -- pyright = {},
+  -- rust_analyzer = {},
+  tsserver = {},
+}
+
 local capabilities = vim.lsp.protocol.make_client_capabilities();
 M.capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 

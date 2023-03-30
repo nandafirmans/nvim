@@ -2,6 +2,7 @@ return {
 
   {
     "github/copilot.vim",
+    lazy = false,
     config = function()
       vim.g.copilot_no_tab_map = true
       vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
@@ -47,11 +48,6 @@ return {
 
   -- VSCode like picktogram
   { "onsails/lspkind.nvim" },
-
-  {
-    "jose-elias-alvarez/null-ls.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
-  },
 
   {
     "nvim-tree/nvim-tree.lua",
@@ -269,13 +265,8 @@ return {
       lualine.setup({
         options = {
           theme = "auto",
-          -- section_separators = { left = '', right = '' },
           section_separators = { left = "", right = "" },
           component_separators = "|",
-          -- component_separators = "┊",
-          -- component_separators = { left = "", right = "" },
-          -- component_separators = { left = '', right = '' },
-          -- disabled_filetypes = { "packer", "NvimTree" },
           disabled_filetypes = {},
           globalstatus = true,
           refresh = {
@@ -294,7 +285,7 @@ return {
           },
           lualine_c = {
             require("auto-session-library").current_session_name,
-            { 'filename', path = 1, file_status = true },
+            { 'filename', path = 0, file_status = true },
           }
         },
       })
