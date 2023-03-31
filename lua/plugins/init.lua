@@ -62,8 +62,8 @@ return {
           enable = true,
         },
         view = {
-          side = "left",
-          width = 50,
+          side = "right",
+          width = 60,
         },
         actions = {
           open_file = {
@@ -72,25 +72,25 @@ return {
         }
       })
 
-      local nvimTreeApi = require('nvim-tree.api');
-      local nvimTreeEvent = nvimTreeApi.events.Event;
-      local bufferlineApi = require('bufferline.api')
-
-      local function getTreeSize()
-        return require 'nvim-tree.view'.View.width
-      end
-
-      nvimTreeApi.events.subscribe(nvimTreeEvent.TreeOpen, function()
-        bufferlineApi.set_offset(getTreeSize())
-      end)
-
-      nvimTreeApi.events.subscribe(nvimTreeEvent.Resize, function(size)
-        bufferlineApi.set_offset(size)
-      end)
-
-      nvimTreeApi.events.subscribe(nvimTreeEvent.TreeClose, function()
-        bufferlineApi.set_offset(0)
-      end)
+      -- local nvimTreeApi = require('nvim-tree.api');
+      -- local nvimTreeEvent = nvimTreeApi.events.Event;
+      -- local bufferlineApi = require('bufferline.api')
+      --
+      -- local function getTreeSize()
+      --   return require 'nvim-tree.view'.View.width
+      -- end
+      --
+      -- nvimTreeApi.events.subscribe(nvimTreeEvent.TreeOpen, function()
+      --   bufferlineApi.set_offset(getTreeSize())
+      -- end)
+      --
+      -- nvimTreeApi.events.subscribe(nvimTreeEvent.Resize, function(size)
+      --   bufferlineApi.set_offset(size)
+      -- end)
+      --
+      -- nvimTreeApi.events.subscribe(nvimTreeEvent.TreeClose, function()
+      --   bufferlineApi.set_offset(0)
+      -- end)
     end
   },
 

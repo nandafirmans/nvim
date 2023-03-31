@@ -75,7 +75,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme gruvbox-material]])
+vim.cmd([[colorscheme kanagawa]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -159,12 +159,15 @@ require("telescope").setup({
         ["<C-d>"] = false,
       },
     },
+    path_display = {
+      truncate = 3
+    }
   },
   pickers = {
     colorscheme = {
       theme = "dropdown",
       enable_preview = true,
-    }
+    },
   },
   extensions = {
     file_browser = {
