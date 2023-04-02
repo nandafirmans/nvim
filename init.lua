@@ -217,12 +217,14 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
 
 -- BarBar
 require("bufferline").setup({
-  diagnostics = {
-    [vim.diagnostic.severity.ERROR] = { enabled = true, icon = '' },
-    [vim.diagnostic.severity.WARN] = { enabled = false, icon = 'ﬀ' },
-    [vim.diagnostic.severity.INFO] = { enabled = false },
-    [vim.diagnostic.severity.HINT] = { enabled = true },
-  },
+  icons = {
+    diagnostics = {
+      [vim.diagnostic.severity.ERROR] = { enabled = true, icon = '' },
+      [vim.diagnostic.severity.WARN] = { enabled = false, icon = 'ﬀ' },
+      [vim.diagnostic.severity.INFO] = { enabled = false },
+      [vim.diagnostic.severity.HINT] = { enabled = true },
+    },
+  }
 })
 local baseKeymapsOpts = { noremap = true, silent = true }
 
