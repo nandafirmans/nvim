@@ -46,11 +46,12 @@ return {
     end
   },
 
+  -- null-ls is used for formatters/diagnostics not provided by the language server
   {
     "jose-elias-alvarez/null-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-      -- null-ls is used for formatters/diagnostics not provided by the language server
+      local lsp_util = require("plugins.lsp.util")
       local null_ls = require("null-ls")
       null_ls.setup({
         sources = {
@@ -60,6 +61,7 @@ return {
           null_ls.builtins.formatting.goimports_reviser,
           null_ls.builtins.formatting.golines,
         },
+        on_attach = lsp_util.on_attach
       })
     end
   },

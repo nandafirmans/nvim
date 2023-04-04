@@ -25,6 +25,32 @@ return {
     end
   },
 
+  -- {
+  --   "zbirenbaum/copilot.lua",
+  --   cmd = "Copilot",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require("copilot").setup({
+  --       suggestion = { enabled = false },
+  --       panel = { enabled = false },
+  --     })
+  --   end,
+  -- },
+  --
+  -- {
+  --   "zbirenbaum/copilot-cmp",
+  --   dependencies = { "copilot.lua" },
+  --   config = function()
+  --     require("copilot_cmp").setup({
+  --       formatters = {
+  --         label = require("copilot_cmp.format").format_label_text,
+  --         insert_text = require("copilot_cmp.format").format_insert_text,
+  --         preview = require("copilot_cmp.format").deindent,
+  --       },
+  --     })
+  --   end
+  -- },
+
   {
     -- Autocompletion
     "hrsh7th/nvim-cmp",
@@ -39,6 +65,12 @@ return {
       "rafamadriz/friendly-snippets",
     },
     config = function()
+      -- local has_words_before = function()
+      --   if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+      --   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+      --   return col ~= 0 and vim.api.nvim_buf_get_text(0, line - 1, 0, line - 1, col, {})[1]:match("^%s*$") == nil
+      -- end
+
       -- nvim-cmp setup
       local cmp = require("cmp")
       local luasnip = require("luasnip")
@@ -56,8 +88,7 @@ return {
         },
         formatting = {
           format = require('lspkind').cmp_format({
-            mode = 'symbol_text',
-            ellipsis_char = '...',
+            mode = 'symbol',
             maxwidth = 50,
           }),
         },
@@ -70,6 +101,7 @@ return {
             select = true,
           }),
           ["<Tab>"] = cmp.mapping(function(fallback)
+            -- if cmp.visible() and has_words_before() then
             if cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
@@ -89,10 +121,10 @@ return {
           end, { "i", "s" }),
         }),
         sources = {
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "path" },
-          -- { name = "buffer" },
+          -- { name = "copilot",  group_index = 2 },
+          { name = "nvim_lsp", group_index = 2 },
+          { name = "luasnip",  group_index = 2 },
+          { name = "path",     group_index = 2 },
         },
       })
     end
@@ -203,6 +235,30 @@ return {
         disable_filetype = { "TelescopePrompt", "vim" },
       })
     end
+  },
+
+  -- Auto close buffer on inactivity
+  {
+    "chrisgrieser/nvim-early-retirement",
+    event = "VeryLazy",
+    opts = {
+      -- if a buffer has been inactive for this many minutes, close it
+      retirementAgeMins = 20,
+      -- filetypes to ignore
+      ignoredFiletypes = {},
+      -- will not close the alternate file
+      ignoreAltFile = true,
+      -- will ignore buffers with unsaved changes. If false, the buffers will
+      -- automatically be written and then closed.
+      ignoreUnsavedChangesBufs = true,
+      -- ignore non-empty buftypes, e.g. terminal buffers
+      ignoreSpecialBuftypes = true,
+      -- uses vim.notify for plugins like nvim-notify
+      notificationOnAutoClose = false,
+    },
+    config = function(_, opts)
+      require("early-retirement").setup(opts)
+    end,
   },
 
   -- Multi Cursor
