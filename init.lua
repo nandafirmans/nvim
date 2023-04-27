@@ -18,6 +18,8 @@ vim.g.maplocalleader = " "
 -- set TermGuiColors before loading nvim colorizer
 vim.o.termguicolors = true
 
+
+
 require("lazy").setup('plugins')
 
 -- [[ Setting options ]]
@@ -33,6 +35,7 @@ vim.o.history = 5000
 vim.o.hidden = true
 vim.o.swapfile = false
 vim.o.clipboard = "unnamedplus"
+vim.o.guifont = "Victor Mono Nerd Font:h15"
 
 -- Folding
 vim.o.foldmethod = "indent"
