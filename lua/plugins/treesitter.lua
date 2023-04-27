@@ -24,7 +24,7 @@ return {
       "scss",
       "dart",
       "php",
-      "help",
+      "vimdoc",
       "markdown",
       "markdown_inline",
       "vim",
