@@ -124,11 +124,13 @@ vim.keymap.set("n", "<C-w><up>", "<C-w>+")
 vim.keymap.set("n", "<C-w><down>", "<C-w>-")
 
 -- Tabs
-vim.keymap.set("n", "<leader>td", ":tabNext<CR>")
-vim.keymap.set("n", "<leader>ta", ":tabprevious<CR>")
-vim.keymap.set("n", "<leader>tc", ":tabclose<CR>")
-vim.keymap.set("n", "<leader>tn", ":tabnew<CR>")
-vim.keymap.set("n", "<leader>tt", ":tabs<CR>")
+vim.keymap.set("n", "<A-}>", ":tabNext<CR>")
+vim.keymap.set("n", "<A-{>", ":tabprevious<CR>")
+vim.keymap.set("n", "<A-W>", ":tabclose<CR>")
+vim.keymap.set("n", "<A-T>n", ":tabnew<CR>")
+vim.keymap.set("n", "<A-T>l", ":tabs<CR>")
+
+
 -- Toggle show hide tabline
 function toggle_tabline()
   if vim.o.showtabline == 0 then
