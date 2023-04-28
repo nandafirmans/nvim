@@ -233,25 +233,18 @@ return {
   -- AutoSession & SessionLens
   {
     "rmagatti/auto-session",
+    lazy = false,
+    keys = {
+      { "<leader>sd", "<Cmd>Autosession delete<CR>",                       mode = "n", desc = "[S]ession [D]elete" }
+    },
     config = function()
       vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+
       require("auto-session").setup({
         pre_save_cmds = { "tabdo NvimTreeClose", "tabdo DiffviewClose" },
       })
-    end
-  },
-  {
-    "rmagatti/session-lens",
-    dependencies = {
-      "rmagatti/auto-session",
-      "nvim-telescope/telescope.nvim"
-    },
-    keys = {
-      { "<leader>ss", "<Cmd>SearchSession<CR>",      mode = "n", desc = "[S]earch [S]ession" },
-      { "<leader>sd", "<Cmd>Autosession delete<CR>", mode = "n", desc = "[S]ession [D]elete" }
-    },
-    config = function()
-      require("session-lens").setup({})
+
+      vim.keymap.set("n", "<leader>ss", require("auto-session.session-lens").search_session, { silent = true })
     end
   },
 
@@ -439,7 +432,7 @@ return {
             },
           },
           lualine_c = {
-            require("auto-session-library").current_session_name,
+            require("auto-session.lib").current_session_name,
             { 'filename', path = 0, file_status = true },
           }
         },
