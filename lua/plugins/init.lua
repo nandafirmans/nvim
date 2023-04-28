@@ -14,7 +14,7 @@ return {
         ["scss"] = true,
         ["less"] = true,
         ["html"] = true,
-        ["lua"] = false,
+        ["lua"] = true,
         ["rust"] = false,
         ["c"] = false,
         ["c#"] = false,
@@ -235,7 +235,7 @@ return {
     "rmagatti/auto-session",
     lazy = false,
     keys = {
-      { "<leader>sd", "<Cmd>Autosession delete<CR>",                       mode = "n", desc = "[S]ession [D]elete" }
+      { "<leader>sd", "<Cmd>Autosession delete<CR>", mode = "n", desc = "[S]ession [D]elete" }
     },
     config = function()
       vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"

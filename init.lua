@@ -78,7 +78,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme tokyonight-night]])
+vim.cmd([[colorscheme tender]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -111,6 +111,12 @@ vim.keymap.set("n", "<leader>qq", ":qa<CR>")
 -- Select all
 vim.keymap.set("n", "<C-a>", "gg<S-v>G")
 
+-- Delete without yanking
+vim.keymap.set({ "n", "v" }, "<leader>d", '"_d')
+
+-- Paste without yanking in visual mode
+vim.keymap.set("v", "p", 'P', { noremap = true, silent = true })
+
 -- Buffer New
 vim.keymap.set("n", "<leader>bn", ":enew<CR>", { desc = "[B]uffer [N]ew" })
 
@@ -131,7 +137,7 @@ vim.keymap.set("n", "<A-}>", ":tabNext<CR>")
 vim.keymap.set("n", "<A-{>", ":tabprevious<CR>")
 vim.keymap.set("n", "<A-W>", ":tabclose<CR>")
 vim.keymap.set("n", "<A-T>n", ":tabnew<CR>")
-vim.keymap.set("n", "<A-T>l", ":tabs<CR>")
+vim.keymap.set("n", "<A-T>l", ":tabs<CR>", { desc = "Tab List" })
 
 
 -- Toggle show hide tabline
@@ -223,6 +229,7 @@ vim.keymap.set("n", "<leader>fg", require("telescope.builtin").live_grep, { desc
 vim.keymap.set("n", "<leader>fd", require("telescope.builtin").diagnostics, { desc = "[F]ind [D]iagnostics" })
 vim.keymap.set("n", "<leader>fc", require("telescope.builtin").commands, { desc = "[F]ind [C]ommands" })
 vim.keymap.set("n", "<leader>fs", require("telescope.builtin").colorscheme, { desc = "[F]ind color[S]chemes" })
+vim.keymap.set("n", "<leader>fk", require("telescope.builtin").keymaps, { desc = "[F]ind [K]eymaps" })
 vim.keymap.set(
   "n",
   "<leader>fb",
