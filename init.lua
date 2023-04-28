@@ -135,7 +135,7 @@ vim.keymap.set("n", "<A-T>l", ":tabs<CR>")
 
 
 -- Toggle show hide tabline
-function toggle_tabline()
+function TOGGLE_TABLINE()
   if vim.o.showtabline == 0 then
     vim.o.showtabline = 2
   else
@@ -143,14 +143,14 @@ function toggle_tabline()
   end
 end
 
-vim.api.nvim_set_keymap('n', '<leader>t', ':lua toggle_tabline()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>t', ':lua TOGGLE_TABLINE()<CR>', { noremap = true, silent = true })
 -- Hide the tabline on VimEnter
-vim.cmd([[
-  augroup hide_tabline
-    autocmd!
-    autocmd VimEnter * set showtabline=0
-  augroup END
-]])
+-- vim.cmd([[
+--   augroup hide_tabline
+--     autocmd!
+--     autocmd VimEnter * set showtabline=0
+--   augroup END
+-- ]])
 
 -- Git Blame
 vim.keymap.set("n", "<leader>b", "<Cmd>Gitsigns toggle_current_line_blame<CR>")

@@ -7,7 +7,6 @@ M.servers = {
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},
-  bash = {},
 }
 
 local capabilities = vim.lsp.protocol.make_client_capabilities();
