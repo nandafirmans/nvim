@@ -6,7 +6,7 @@ return {
   { "sainnhe/sonokai",                  lazy = false,     priority = 1000 },
   { "sickill/vim-monokai",              lazy = false,     priority = 1000 },
   { "edeneast/nightfox.nvim",           lazy = false,     priority = 1000 },
-  { "ayu-theme/ayu-vim",                lazy = false,     priority = 1000 },
+  { "Shatur/neovim-ayu",                lazy = false,     priority = 1000 },
   { "tomasr/molokai",                   lazy = false,     priority = 1000 },
   { "glepnir/oceanic-material",         lazy = false,     priority = 1000 },
   { "thedenisnikulin/vim-cyberpunk",    lazy = false,     priority = 1000 },
@@ -55,6 +55,19 @@ return {
     priority = 1000,
     config = function()
       require 'nordic'.load()
+    end
+  },
+  {
+    'maxmx03/fluoromachine.nvim',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require('fluoromachine').setup({
+        glow = false,
+        theme = 'retrowave',
+        -- theme = 'fluoromachine',
+        transparent = 'full'
+      })
     end
   }
 }

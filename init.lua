@@ -78,7 +78,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme nordic]])
+vim.cmd([[colorscheme fluoromachine]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
