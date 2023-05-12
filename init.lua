@@ -78,7 +78,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme fluoromachine]])
+vim.cmd([[colorscheme monokai-pro]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"

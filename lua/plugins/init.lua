@@ -38,35 +38,35 @@ return {
   --   }
   -- },
 
-  {
-    "Bryley/neoai.nvim",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-    },
-    cmd = {
-      "NeoAI",
-      "NeoAIOpen",
-      "NeoAIClose",
-      "NeoAIToggle",
-      "NeoAIContext",
-      "NeoAIContextOpen",
-      "NeoAIContextClose",
-      "NeoAIInject",
-      "NeoAIInjectCode",
-      "NeoAIInjectContext",
-      "NeoAIInjectContextCode",
-    },
-    keys = {
-      { "<leader>as", desc = "summarize text" },
-      { "<leader>ag", desc = "generate git message" },
-    },
-    config = function()
-      require("neoai").setup({
-        -- Options go here
-      })
-    end,
-  },
-
+  -- {
+  --   "Bryley/neoai.nvim",
+  --   dependencies = {
+  --     "MunifTanjim/nui.nvim",
+  --   },
+  --   cmd = {
+  --     "NeoAI",
+  --     "NeoAIOpen",
+  --     "NeoAIClose",
+  --     "NeoAIToggle",
+  --     "NeoAIContext",
+  --     "NeoAIContextOpen",
+  --     "NeoAIContextClose",
+  --     "NeoAIInject",
+  --     "NeoAIInjectCode",
+  --     "NeoAIInjectContext",
+  --     "NeoAIInjectContextCode",
+  --   },
+  --   keys = {
+  --     { "<leader>as", desc = "summarize text" },
+  --     { "<leader>ag", desc = "generate git message" },
+  --   },
+  --   config = function()
+  --     require("neoai").setup({
+  --       -- Options go here
+  --     })
+  --   end,
+  -- },
+  --
   -- {
   --   "zbirenbaum/copilot.lua",
   --   cmd = "Copilot",
@@ -203,6 +203,11 @@ return {
         }
       })
 
+
+      -- vim.api.nvim_create_autocmd("BufEnter", {
+      --   command = "NvimTreeFindFile",
+      -- })
+
       -- local nvimTreeApi = require('nvim-tree.api');
       -- local nvimTreeEvent = nvimTreeApi.events.Event;
       -- local bufferlineApi = require('bufferline.api')
@@ -272,30 +277,6 @@ return {
     end
   },
 
-  -- Auto close buffer on inactivity
-  -- {
-  --   "chrisgrieser/nvim-early-retirement",
-  --   event = "VeryLazy",
-  --   opts = {
-  --     -- if a buffer has been inactive for this many minutes, close it
-  --     retirementAgeMins = 20,
-  --     -- filetypes to ignore
-  --     ignoredFiletypes = {},
-  --     -- will not close the alternate file
-  --     ignoreAltFile = true,
-  --     -- will ignore buffers with unsaved changes. If false, the buffers will
-  --     -- automatically be written and then closed.
-  --     ignoreUnsavedChangesBufs = true,
-  --     -- ignore non-empty buftypes, e.g. terminal buffers
-  --     ignoreSpecialBuftypes = true,
-  --     -- uses vim.notify for plugins like nvim-notify
-  --     notificationOnAutoClose = false,
-  --   },
-  --   config = function(_, opts)
-  --     require("early-retirement").setup(opts)
-  --   end,
-  -- },
-
   -- Multi Cursor
   {
     "mg979/vim-visual-multi",
@@ -352,8 +333,8 @@ return {
     'VonHeikemen/searchbox.nvim',
     dependencies = { 'MunifTanjim/nui.nvim' },
     keys = {
-      { "/",     "<Cmd>SearchBoxMatchAll<CR>", mode = "n", noremap = true },
-      { "<A-c>", "<Cmd>SearchBoxClear<CR>",    mode = "n", noremap = true }
+      { "<leader>/", "<Cmd>SearchBoxMatchAll<CR>", mode = "n", noremap = true },
+      { "<A-c>",       "<Cmd>SearchBoxClear<CR>",    mode = "n", noremap = true }
     },
     config = function()
       require('searchbox').setup({

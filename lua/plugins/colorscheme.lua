@@ -62,11 +62,12 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      require('fluoromachine').setup({
+      local fm = require('fluoromachine')
+      fm.setup({
         glow = false,
         theme = 'retrowave',
         -- theme = 'fluoromachine',
-        transparent = 'full'
+        -- transparent = 'full'
       })
     end
   }
