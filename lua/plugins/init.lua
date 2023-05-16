@@ -234,6 +234,7 @@ return {
   --   "romgrk/barbar.nvim",
   --   dependencies = { "nvim-tree/nvim-web-devicons" },
   -- },
+
   {
     'ojroques/nvim-bufdel',
     lazy = false,
@@ -259,7 +260,7 @@ return {
       { "<C-.>",  "<Cmd>BufferLineMoveNext<CR>",        mode = "n", desc = "BufferLine Move Next" },
       { "<C-,>",  "<Cmd>BufferLineMovePrev<CR>",        mode = "n", desc = "BufferLine Move Prev" },
       { "<A-p>p", "<Cmd>BufferLinePick<CR>",            mode = "n", desc = "BufferLine Pick" },
-      { "<A-p>c", "<Cmd>BufferLinePickClose<CR>",       mode = "n", desc = "BufferLine Pick Close" },
+      { "<A-p>w", "<Cmd>BufferLinePickClose<CR>",       mode = "n", desc = "BufferLine Pick Close" },
       { "<A-s>e", "<Cmd>BufferLineSortByTabs<CR>",      mode = "n", desc = "BufferLine Sort By Tabs" },
       { "<A-s>e", "<Cmd>BufferLineSortByExtension<CR>", mode = "n", desc = "BufferLine Sort By Extension" },
       { "<A-s>d", "<Cmd>BufferLineSortByDirectory<CR>", mode = "n", desc = "BufferLine Sort By Directory" },
@@ -274,7 +275,8 @@ return {
     config = function()
       require("bufferline").setup({
         options = {
-          diagnostics = 'nvim_lsp'
+          diagnostics = 'nvim_lsp',
+          truncate_names = false,
         }
       })
     end
