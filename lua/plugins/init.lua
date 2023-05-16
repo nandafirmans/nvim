@@ -230,9 +230,54 @@ return {
     end
   },
 
+  -- {
+  --   "romgrk/barbar.nvim",
+  --   dependencies = { "nvim-tree/nvim-web-devicons" },
+  -- },
   {
-    "romgrk/barbar.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    'ojroques/nvim-bufdel',
+    lazy = false,
+    keys = {
+      { "<A-w>", "<Cmd>BufDel<CR>", mode = "n", desc = "Buffer Close" }
+    },
+    config = function()
+      require('bufdel').setup({
+        next = 'alternate', -- or 'previous'
+        quit = false,       -- exit vim if last buffer deleted
+      })
+    end
+  },
+
+  {
+    'akinsho/bufferline.nvim',
+    version = "*",
+    lazy = false,
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    keys = {
+      { "<A-.>",  "<Cmd>BufferLineCycleNext<CR>",       mode = "n", desc = "BufferLine Cycle Next" },
+      { "<A-,>",  "<Cmd>BufferLineCyclePrev<CR>",       mode = "n", desc = "BufferLine Cycle Prev" },
+      { "<C-.>",  "<Cmd>BufferLineMoveNext<CR>",        mode = "n", desc = "BufferLine Move Next" },
+      { "<C-,>",  "<Cmd>BufferLineMovePrev<CR>",        mode = "n", desc = "BufferLine Move Prev" },
+      { "<A-p>p", "<Cmd>BufferLinePick<CR>",            mode = "n", desc = "BufferLine Pick" },
+      { "<A-p>c", "<Cmd>BufferLinePickClose<CR>",       mode = "n", desc = "BufferLine Pick Close" },
+      { "<A-s>e", "<Cmd>BufferLineSortByTabs<CR>",      mode = "n", desc = "BufferLine Sort By Tabs" },
+      { "<A-s>e", "<Cmd>BufferLineSortByExtension<CR>", mode = "n", desc = "BufferLine Sort By Extension" },
+      { "<A-s>d", "<Cmd>BufferLineSortByDirectory<CR>", mode = "n", desc = "BufferLine Sort By Directory" },
+      {
+        "<A-s>r",
+        "<Cmd>BufferLineSortByRelativeDirectory<CR>",
+        mode = "n",
+        desc =
+        "BufferLine Sort By Relative Directory"
+      },
+    },
+    config = function()
+      require("bufferline").setup({
+        options = {
+          diagnostics = 'nvim_lsp'
+        }
+      })
+    end
   },
 
   -- AutoSession & SessionLens
@@ -334,7 +379,7 @@ return {
     dependencies = { 'MunifTanjim/nui.nvim' },
     keys = {
       { "<leader>/", "<Cmd>SearchBoxMatchAll<CR>", mode = "n", noremap = true },
-      { "<A-c>",       "<Cmd>SearchBoxClear<CR>",    mode = "n", noremap = true }
+      { "<A-c>",     "<Cmd>SearchBoxClear<CR>",    mode = "n", noremap = true }
     },
     config = function()
       require('searchbox').setup({
