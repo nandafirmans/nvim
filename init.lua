@@ -18,8 +18,6 @@ vim.g.maplocalleader = " "
 -- set TermGuiColors before loading nvim colorizer
 vim.o.termguicolors = true
 
-
-
 require("lazy").setup('plugins')
 
 -- [[ Setting options ]]
@@ -78,7 +76,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme kanagawa]])
+vim.cmd([[colorscheme moonfly]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -222,6 +220,7 @@ vim.keymap.set("n", "<leader>f/", function()
   }))
 end, { desc = "[/] Fuzzily search in current buffer]" })
 
+vim.keymap.set("n", "<leader>fr", require("telescope.builtin").resume, { desc = "[ ] Resume Last Find" })
 vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "[F]ind [F]iles" })
 vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, { desc = "[F]ind [H]elp" })
 vim.keymap.set("n", "<leader>fw", require("telescope.builtin").grep_string, { desc = "[F]ind current [W]ord" })
