@@ -23,6 +23,7 @@ return {
   { 'nyoom-engineering/oxocarbon.nvim', lazy = false,       priority = 1000 },
   { 'AhmedAbdulrahman/aylin.vim',       lazy = false,       priority = 1000 },
   { 'pineapplegiant/spaceduck',         lazy = false,       priority = 1000 },
+  { 'jaredgorski/spacecamp',            lazy = false,       priority = 1000 },
   { "bluz71/vim-nightfly-colors",       name = "nightfly",  lazy = false,   priority = 1000 },
   { "bluz71/vim-moonfly-colors",        name = "moonfly",   lazy = false,   priority = 1000 },
   { 'rose-pine/neovim',                 name = 'rose-pine', lazy = false,   priority = 1000 },
@@ -68,12 +69,12 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      local fm = require('fluoromachine')
-      fm.setup({
+      require('fluoromachine').setup({
         glow = false,
         theme = 'retrowave',
+        -- theme = 'delta',
         -- theme = 'fluoromachine',
-        -- transparent = 'full'
+        --transparent = 'full'
       })
     end
   }

@@ -26,48 +26,6 @@ return {
   },
 
   -- {
-  --   "jackMort/ChatGPT.nvim",
-  --   event = "VeryLazy",
-  --   config = function()
-  --     require("chatgpt").setup()
-  --   end,
-  --   dependencies = {
-  --     "MunifTanjim/nui.nvim",
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-telescope/telescope.nvim"
-  --   }
-  -- },
-
-  -- {
-  --   "Bryley/neoai.nvim",
-  --   dependencies = {
-  --     "MunifTanjim/nui.nvim",
-  --   },
-  --   cmd = {
-  --     "NeoAI",
-  --     "NeoAIOpen",
-  --     "NeoAIClose",
-  --     "NeoAIToggle",
-  --     "NeoAIContext",
-  --     "NeoAIContextOpen",
-  --     "NeoAIContextClose",
-  --     "NeoAIInject",
-  --     "NeoAIInjectCode",
-  --     "NeoAIInjectContext",
-  --     "NeoAIInjectContextCode",
-  --   },
-  --   keys = {
-  --     { "<leader>as", desc = "summarize text" },
-  --     { "<leader>ag", desc = "generate git message" },
-  --   },
-  --   config = function()
-  --     require("neoai").setup({
-  --       -- Options go here
-  --     })
-  --   end,
-  -- },
-  --
-  -- {
   --   "zbirenbaum/copilot.lua",
   --   cmd = "Copilot",
   --   event = "InsertEnter",
@@ -202,38 +160,8 @@ return {
           }
         }
       })
-
-
-      -- vim.api.nvim_create_autocmd("BufEnter", {
-      --   command = "NvimTreeFindFile",
-      -- })
-
-      -- local nvimTreeApi = require('nvim-tree.api');
-      -- local nvimTreeEvent = nvimTreeApi.events.Event;
-      -- local bufferlineApi = require('bufferline.api')
-      --
-      -- local function getTreeSize()
-      --   return require 'nvim-tree.view'.View.width
-      -- end
-      --
-      -- nvimTreeApi.events.subscribe(nvimTreeEvent.TreeOpen, function()
-      --   bufferlineApi.set_offset(getTreeSize())
-      -- end)
-      --
-      -- nvimTreeApi.events.subscribe(nvimTreeEvent.Resize, function(size)
-      --   bufferlineApi.set_offset(size)
-      -- end)
-      --
-      -- nvimTreeApi.events.subscribe(nvimTreeEvent.TreeClose, function()
-      --   bufferlineApi.set_offset(0)
-      -- end)
     end
   },
-
-  -- {
-  --   "romgrk/barbar.nvim",
-  --   dependencies = { "nvim-tree/nvim-web-devicons" },
-  -- },
 
   {
     'ojroques/nvim-bufdel',

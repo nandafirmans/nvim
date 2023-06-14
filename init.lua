@@ -76,7 +76,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme moonfly]])
+vim.cmd([[colorscheme monokai-pro-classic]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -148,13 +148,6 @@ function TOGGLE_TABLINE()
 end
 
 vim.api.nvim_set_keymap('n', '<leader>t', ':lua TOGGLE_TABLINE()<CR>', { noremap = true, silent = true })
--- Hide the tabline on VimEnter
--- vim.cmd([[
---   augroup hide_tabline
---     autocmd!
---     autocmd VimEnter * set showtabline=0
---   augroup END
--- ]])
 
 -- Git Blame
 vim.keymap.set("n", "<leader>b", "<Cmd>Gitsigns toggle_current_line_blame<CR>")
@@ -244,62 +237,6 @@ vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float)
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
 
 local baseKeymapsOpts = { noremap = true, silent = true }
-
--- BarBar
--- require("bufferline").setup({
---   icons = {
---     diagnostics = {
---       [vim.diagnostic.severity.ERROR] = { enabled = true, icon = '' },
---       [vim.diagnostic.severity.WARN] = { enabled = false, icon = 'ﬀ' },
---       [vim.diagnostic.severity.INFO] = { enabled = false },
---       [vim.diagnostic.severity.HINT] = { enabled = true },
---     },
---   }
--- })
---
--- -- Move to previous/next
--- vim.keymap.set("n", "<A-,>", "<Cmd>BufferPrevious<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-.>", "<Cmd>BufferNext<CR>", baseKeymapsOpts)
---
--- -- Re-order to previous/next
--- vim.keymap.set("n", "<C-,>", "<Cmd>BufferMovePrevious<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<C-.>", "<Cmd>BufferMoveNext<CR>", baseKeymapsOpts)
---
--- -- Goto buffer in position...
--- vim.keymap.set("n", "<A-1>", "<Cmd>BufferGoto 1<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-2>", "<Cmd>BufferGoto 2<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-3>", "<Cmd>BufferGoto 3<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-4>", "<Cmd>BufferGoto 4<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-5>", "<Cmd>BufferGoto 5<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-6>", "<Cmd>BufferGoto 6<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-7>", "<Cmd>BufferGoto 7<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-8>", "<Cmd>BufferGoto 8<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-9>", "<Cmd>BufferGoto 9<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<A-0>", "<Cmd>BufferLast<CR>", baseKeymapsOpts)
---
--- -- Pin/unpin buffer
--- vim.keymap.set("n", "<A-p>", "<Cmd>BufferPin<CR>", baseKeymapsOpts)
---
--- -- Close buffer
--- vim.keymap.set("n", "<A-w>", "<Cmd>BufferClose<CR>", baseKeymapsOpts)
--- -- Wipeout buffer
--- -- :BufferWipeout
--- -- Close commands
--- -- :BufferCloseAllButCurrent
--- -- :BufferCloseAllButPinned
--- -- :BufferCloseAllButCurrentOrPinned
--- -- :BufferCloseBuffersLeft
--- -- :BufferCloseBuffersRight
---
--- -- Magic buffer-picking mode
--- vim.keymap.set("n", "<C-p>", "<Cmd>BufferPick<CR>", baseKeymapsOpts)
---
--- -- Sort automatically by...
--- vim.keymap.set("n", "<Space>bb", "<Cmd>BufferOrderByBufferNumber<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<Space>bd", "<Cmd>BufferOrderByDirectory<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<Space>bl", "<Cmd>BufferOrderByLanguage<CR>", baseKeymapsOpts)
--- vim.keymap.set("n", "<Space>bw", "<Cmd>BufferOrderByWindowNumber<CR>", baseKeymapsOpts)
---
 
 -- Diffview
 vim.keymap.set("n", "<leader>dd", "<Cmd>DiffviewOpen<CR>", baseKeymapsOpts)
