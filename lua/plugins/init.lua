@@ -151,28 +151,14 @@ return {
           enable = true,
         },
         view = {
-          side = "right",
-          width = 60,
+          side = "left",
+          width = 50,
         },
         actions = {
           open_file = {
             resize_window = true
           }
         }
-      })
-    end
-  },
-
-  {
-    'ojroques/nvim-bufdel',
-    lazy = false,
-    keys = {
-      { "<A-w>", "<Cmd>BufDel<CR>", mode = "n", desc = "Buffer Close" }
-    },
-    config = function()
-      require('bufdel').setup({
-        next = 'alternate', -- or 'previous'
-        quit = false,       -- exit vim if last buffer deleted
       })
     end
   },
@@ -196,8 +182,7 @@ return {
         "<A-s>r",
         "<Cmd>BufferLineSortByRelativeDirectory<CR>",
         mode = "n",
-        desc =
-        "BufferLine Sort By Relative Directory"
+        desc = "BufferLine Sort By Relative Directory"
       },
     },
     config = function()
@@ -205,7 +190,54 @@ return {
         options = {
           diagnostics = 'nvim_lsp',
           truncate_names = false,
+          -- separator_style = 'slant',
+          offsets = {
+            {
+              filetype = "NvimTree",
+              text = "File Explorer",
+              text_align = "center",
+              separator = true
+            }
+          },
         }
+      })
+    end
+  },
+
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    opts = {},
+    keys = {
+      {
+        "s",
+        mode = { "n", "x", "o" },
+        function()
+          -- default options: exact mode, multi window, all directions, with a backdrop
+          require("flash").jump()
+        end,
+      },
+      {
+        "S",
+        mode = { "o", "x" },
+        function()
+          require("flash").treesitter()
+        end,
+      },
+    },
+  },
+
+
+  {
+    'ojroques/nvim-bufdel',
+    lazy = false,
+    keys = {
+      { "<A-w>", "<Cmd>BufDel<CR>", mode = "n", desc = "Buffer Close" }
+    },
+    config = function()
+      require('bufdel').setup({
+        next = 'alternate', -- or 'previous'
+        quit = false,       -- exit vim if last buffer deleted
       })
     end
   },
