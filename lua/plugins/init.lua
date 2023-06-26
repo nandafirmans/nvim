@@ -151,7 +151,7 @@ return {
           enable = true,
         },
         view = {
-          side = "left",
+          side = "right",
           width = 50,
         },
         actions = {
@@ -190,6 +190,14 @@ return {
         options = {
           diagnostics = 'nvim_lsp',
           truncate_names = false,
+          indicator = {
+            style = "none",
+          },
+          hover = {
+            enabled = true,
+            delay = 100,
+            reveal = { 'close' },
+          },
           -- separator_style = 'slant',
           offsets = {
             {
@@ -219,7 +227,7 @@ return {
       },
       {
         "S",
-        mode = { "o", "x" },
+        mode = { "n", "o", "x" },
         function()
           require("flash").treesitter()
         end,
