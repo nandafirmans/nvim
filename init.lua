@@ -76,7 +76,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme srcery]])
+vim.cmd([[colorscheme oxocarbon]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -148,13 +148,6 @@ function TOGGLE_TABLINE()
 end
 
 vim.api.nvim_set_keymap('n', '<leader>t', ':lua TOGGLE_TABLINE()<CR>', { noremap = true, silent = true })
-
--- Git Blame
-vim.keymap.set("n", "<leader>b", "<Cmd>Gitsigns toggle_current_line_blame<CR>")
-
--- Git Blame
-vim.keymap.set("n", "<leader>zz", "<Cmd>ZenMode<CR>")
-
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`

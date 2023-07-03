@@ -212,28 +212,28 @@ return {
     end
   },
 
-  {
-    "folke/flash.nvim",
-    event = "VeryLazy",
-    opts = {},
-    keys = {
-      {
-        "s",
-        mode = { "n", "x", "o" },
-        function()
-          -- default options: exact mode, multi window, all directions, with a backdrop
-          require("flash").jump()
-        end,
-      },
-      {
-        "S",
-        mode = { "n", "o", "x" },
-        function()
-          require("flash").treesitter()
-        end,
-      },
-    },
-  },
+  -- {
+  --   "folke/flash.nvim",
+  --   event = "VeryLazy",
+  --   opts = {},
+  --   keys = {
+  --     {
+  --       "s",
+  --       mode = { "n", "x", "o" },
+  --       function()
+  --         -- default options: exact mode, multi window, all directions, with a backdrop
+  --         require("flash").jump()
+  --       end,
+  --     },
+  --     {
+  --       "S",
+  --       mode = { "n", "o", "x" },
+  --       function()
+  --         require("flash").treesitter()
+  --       end,
+  --     },
+  --   },
+  -- },
 
 
   {
@@ -309,6 +309,9 @@ return {
   -- ZenMode
   {
     "folke/zen-mode.nvim",
+    keys = {
+      { "<leader>zz", "<Cmd>ZenMode<CR>", mode = "n", desc = "[Z]en [M]ode" }
+    },
     config = function()
       require("zen-mode").setup({})
     end
@@ -378,6 +381,13 @@ return {
 
   {
     "lewis6991/gitsigns.nvim",
+    keys = {
+      {
+        "<leader>b",
+        "<Cmd>Gitsigns toggle_current_line_blame<CR>",
+        mode = "n",
+      },
+    },
     config = function()
       require("gitsigns").setup({
         signs = {
