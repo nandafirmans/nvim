@@ -528,6 +528,14 @@ return {
             theme = "dropdown",
             enable_preview = true,
           },
+          buffers = {
+            theme = "dropdown",
+            previewer = false,
+            path_display = {
+              shorten = 2,
+              truncate = 3,
+            }
+          },
         },
         extensions = {
           file_browser = {
