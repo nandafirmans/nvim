@@ -381,6 +381,7 @@ return {
 
   {
     "lewis6991/gitsigns.nvim",
+    lazy = false,
     keys = {
       {
         "<leader>b",
