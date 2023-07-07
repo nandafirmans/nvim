@@ -67,15 +67,6 @@ return {
   },
 
   {
-    -- Useful status updates for LSP
-    "j-hui/fidget.nvim",
-    config = function()
-      -- Turn on lsp status information
-      require("fidget").setup()
-    end
-  },
-
-  {
     -- Additional lua configuration, makes nvim stuff amazing
     "folke/neodev.nvim",
     config = function()

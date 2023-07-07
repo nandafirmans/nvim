@@ -317,54 +317,21 @@ return {
     end
   },
 
-  -- FineCmdline
   {
-    'VonHeikemen/fine-cmdline.nvim',
-    dependencies = { 'MunifTanjim/nui.nvim' },
-    keys = {
-      { ":", "<Cmd>FineCmdline<CR>", mode = "n", noremap = true }
-    },
+    "folke/noice.nvim",
+    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify", },
     config = function()
-      require('fine-cmdline').setup({
+      require("noice").setup({
         cmdline = {
-          prompt = ' :'
-        },
-        popup = {
-          size = {
-            width = '60%'
-          },
-          border = {
-            text = {
-              top = " Cmdline "
-            },
-          },
-          win_options = {
-            winhighlight = "Normal:Normal,FloatBorder:SpecialChar",
-          },
-        },
-      })
-    end
-  },
-
-  -- SearchBox
-  {
-    'VonHeikemen/searchbox.nvim',
-    dependencies = { 'MunifTanjim/nui.nvim' },
-    keys = {
-      { "<leader>/", "<Cmd>SearchBoxMatchAll<CR>", mode = "n", noremap = true },
-      { "<A-c>",     "<Cmd>SearchBoxClear<CR>",    mode = "n", noremap = true }
-    },
-    config = function()
-      require('searchbox').setup({
-        defaults = {
-          clear_matches = false,
-          show_matches = true,
-        },
-        popup = {
-          win_options = {
-            winhighlight = "Normal:Normal,FloatBorder:SpecialChar",
-          },
-        },
+          format = {
+            cmdline = { icon = ">" },
+            search_down = { icon = "search [v]" },
+            search_up = { icon = "search [^]" },
+            filter = { icon = "filter" },
+            lua = { icon = "lua" },
+            help = { icon = "help" },
+          }
+        }
       })
     end
   },
