@@ -196,56 +196,33 @@ return {
         desc = "BufferLine Sort By Relative Directory"
       },
     },
-    config = function()
-      require("bufferline").setup({
-        options = {
-          diagnostics = 'nvim_lsp',
-          truncate_names = false,
-          indicator = {
-            style = "none",
-          },
-          hover = {
-            enabled = true,
-            delay = 100,
-            reveal = { 'close' },
-          },
-          -- separator_style = 'slant',
-          offsets = {
-            {
-              filetype = "NvimTree",
-              text = "File Explorer",
-              text_align = "center",
-              separator = true
-            }
-          },
-        }
-      })
+    opts = {
+      options = {
+        diagnostics = 'nvim_lsp',
+        truncate_names = false,
+        indicator = {
+          style = "none",
+        },
+        hover = {
+          enabled = true,
+          delay = 100,
+          reveal = { 'close' },
+        },
+        -- separator_style = 'slant',
+        offsets = {
+          {
+            filetype = "NvimTree",
+            text = "File Explorer",
+            text_align = "center",
+            separator = true
+          }
+        },
+      }
+    },
+    config = function(_, opts)
+      require("bufferline").setup(opts)
     end
   },
-
-  -- {
-  --   "folke/flash.nvim",
-  --   event = "VeryLazy",
-  --   opts = {},
-  --   keys = {
-  --     {
-  --       "s",
-  --       mode = { "n", "x", "o" },
-  --       function()
-  --         -- default options: exact mode, multi window, all directions, with a backdrop
-  --         require("flash").jump()
-  --       end,
-  --     },
-  --     {
-  --       "S",
-  --       mode = { "n", "o", "x" },
-  --       function()
-  --         require("flash").treesitter()
-  --       end,
-  --     },
-  --   },
-  -- },
-
 
   {
     'ojroques/nvim-bufdel',
@@ -339,59 +316,60 @@ return {
   {
     "folke/noice.nvim",
     dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify", },
-    config = function()
-      require("noice").setup({
-        routes = {
-          {
-            filter = {
-              event = "msg_show",
-              kind = "",
-              find = "written",
-            },
-            opts = { skip = true },
+    opts = {
+      routes = {
+        {
+          filter = {
+            event = "msg_show",
+            kind = "",
+            find = "written",
+          },
+          opts = { skip = true },
+        },
+      },
+      cmdline = {
+        format = {
+          cmdline = { icon = ">" },
+          search_down = { icon = "search [v]" },
+          search_up = { icon = "search [^]" },
+          filter = { icon = "filter" },
+          lua = { icon = "lua" },
+          help = { icon = "help" },
+        }
+      },
+      views = {
+        cmdline_popup = {
+          position = {
+            row = 5,
+            col = "50%",
+          },
+          size = {
+            width = 60,
+            height = "auto",
           },
         },
-        cmdline = {
-          format = {
-            cmdline = { icon = ">" },
-            search_down = { icon = "search [v]" },
-            search_up = { icon = "search [^]" },
-            filter = { icon = "filter" },
-            lua = { icon = "lua" },
-            help = { icon = "help" },
-          }
-        },
-        views = {
-          cmdline_popup = {
-            position = {
-              row = 5,
-              col = "50%",
-            },
-            size = {
-              width = 60,
-              height = "auto",
-            },
+        popupmenu = {
+          relative = "editor",
+          position = {
+            row = 8,
+            col = "50%",
           },
-          popupmenu = {
-            relative = "editor",
-            position = {
-              row = 8,
-              col = "50%",
-            },
-            size = {
-              width = 60,
-              height = 10,
-            },
-            border = {
-              style = "rounded",
-              padding = { 0, 1 },
-            },
-            win_options = {
-              winhighlight = { Normal = "Normal", FloatBorder = "DiagnosticInfo" },
-            },
+          size = {
+            width = 60,
+            height = 10,
+          },
+          border = {
+            style = "rounded",
+            padding = { 0, 1 },
+          },
+          win_options = {
+            winhighlight = { Normal = "Normal", FloatBorder = "DiagnosticInfo" },
           },
         },
-      })
+      },
+    },
+    config = function(_, opts)
+      require("noice").setup(opts)
     end
   },
 
@@ -399,7 +377,94 @@ return {
   { "RRethy/vim-illuminate" },
 
   -- ToggleTerm
-  { "akinsho/toggleterm.nvim" },
+  {
+    "akinsho/toggleterm.nvim",
+    lazy = false,
+    opts = {
+      size = 15,
+      open_mapping = [[<A-t>]],
+      direction = "float",
+      close_on_exit = true,
+      hide_numbers = true,
+      shade_filetypes = {},
+      shade_terminals = true,
+      shading_factor = 5,
+      start_in_insert = true,
+      insert_mappings = true,
+      persist_size = true,
+      shell = vim.o.shell,
+      float_opts = {
+        border = "curved",
+        winblend = 0,
+        highlights = {
+          border = "Normal",
+          background = "Normal",
+        }
+      }
+    },
+    keys = {
+      { "<C-t>g", "<CMD>lua _LAZYGIT_TOGGLE()<CR>",          mode = "n", desc = "Toggle LazyGit" },
+      { "<C-t>t", "<CMD>lua _TOP_TOGGLE()<CR>",              mode = "n", desc = "Toggle htop" },
+      { "<C-t>n", "<CMD>lua _NODE_INTERACTIVE_TOGGLE()<CR>", mode = "n", desc = "Toggle Node Interactive" },
+    },
+    config = function(_, opts)
+      require("toggleterm").setup(opts)
+
+      function _G.set_terminal_keymaps()
+        local option = { buffer = 0 }
+        vim.keymap.set('t', '<C-esc>', [[<C-\><C-n>]], option)
+        -- vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+        vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], option)
+        vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], option)
+        vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], option)
+        vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], option)
+        vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], option)
+      end
+
+      -- if you only want these mappings for toggle term use term://*toggleterm#* instead
+      vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+
+      local Terminal = require("toggleterm.terminal").Terminal
+      local lazygit  = Terminal:new({
+        cmd = "lazygit",
+        hidden = true,
+        direction = "tab",
+        close_on_exit = true,
+        hide_numbers = true,
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 5,
+        start_in_insert = true,
+        insert_mappings = true,
+        persist_size = true,
+        shell = vim.o.shell,
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+          highlights = {
+            border = "Normal",
+            background = "Normal",
+          }
+        }
+      })
+
+      local top      = Terminal:new({
+        cmd = "gotop",
+        hidden = true,
+        direction = "float",
+        close_on_exit = true,
+        start_in_insert = true,
+      })
+
+      function _LAZYGIT_TOGGLE()
+        lazygit:toggle()
+      end
+
+      function _TOP_TOGGLE()
+        top:toggle()
+      end
+    end
+  },
 
   -- Git related plugins
   { "tpope/vim-fugitive" },
