@@ -126,7 +126,7 @@ return {
     keys = {
       {
         "gh",
-        "<cmd>Lspsaga lsp_finder<CR>",
+        "<cmd>Lspsaga finder<CR>",
         mode = "n"
       },
       {
