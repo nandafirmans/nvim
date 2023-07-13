@@ -1,4 +1,15 @@
 return {
+  -- Startup screen
+  {
+    "startup-nvim/startup.nvim",
+    lazy = false,
+    depedencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+    config = function()
+      -- vim.g.startup_disable_on_startup = true
+      require "startup".setup()
+    end
+  },
+
 
   {
     "github/copilot.vim",
@@ -317,6 +328,7 @@ return {
     end
   },
 
+  -- command, search input & notification
   {
     "folke/noice.nvim",
     dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify", },
