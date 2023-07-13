@@ -283,6 +283,13 @@ return {
   {
     "sindrets/diffview.nvim",
     dependencies = "nvim-lua/plenary.nvim",
+    keys = {
+      { "<leader>dd",  "<Cmd>DiffviewOpen<CR>",          mode = "n", },
+      { "<leader>dr",  "<Cmd>DiffviewRefresh<CR>",       mode = "n", },
+      { "<leader>dhf", "<Cmd>DiffviewFileHistory %<CR>", mode = "n", },
+      { "<leader>dh",  "<Cmd>DiffviewFileHistory<CR>",   mode = "n", },
+      { "<leader>dc",  "<Cmd>DiffviewClose<CR>",         mode = "n", },
+    }
   },
 
   -- Auto close tag
