@@ -3,10 +3,8 @@ return {
   {
     "github/copilot.vim",
     lazy = false,
-    keys = {
-      { "<A-j>", 'copilot#Accept("<CR>")', mode = "i", silent = true, expr = true }
-    },
     config = function()
+      vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_filetypes = {
         ["*"] = false,
