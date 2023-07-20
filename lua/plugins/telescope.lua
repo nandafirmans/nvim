@@ -13,9 +13,15 @@ return {
               ["<C-d>"] = false,
             },
           },
-          path_display = {
-            truncate = 3
-          }
+          -- path_display = {
+          --   truncate = 3
+          -- }
+          path_display = function(opts, path)
+            local tail = require("telescope.utils").path_tail(path)
+            local formated_path = require("telescope.utils").transform_path({ path_display = { truncate = 3 } }, path)
+            formated_path = formated_path:gsub("/" .. tail, "")
+            return string.format("%s - %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
+          end,
         },
         pickers = {
           colorscheme = {
@@ -25,10 +31,10 @@ return {
           buffers = {
             theme = "dropdown",
             previewer = false,
-            path_display = {
-              shorten = 2,
-              truncate = 3,
-            }
+            -- path_display = {
+            --   shorten = 2,
+            --   truncate = 3,
+            -- }
           },
         },
         extensions = {
