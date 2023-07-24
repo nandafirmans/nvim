@@ -4,6 +4,10 @@ return {
     "neovim/nvim-lspconfig",
   },
 
+  -- VSCode like picktogram
+  { "onsails/lspkind.nvim" },
+
+
   {
     -- Automatically install LSPs to stdpath for neovim
     "williamboman/mason.nvim",

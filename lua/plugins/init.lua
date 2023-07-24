@@ -1,8 +1,5 @@
 return {
 
-  -- VSCode like picktogram
-  { "onsails/lspkind.nvim" },
-
   {
     'ojroques/nvim-bufdel',
     lazy = false,
