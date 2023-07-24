@@ -32,7 +32,11 @@ return {
 
 
       local function close_alpha_if_open()
-
+        vim.cmd([[
+          if &ft == 'alpha'
+            Alpha
+          endif
+        ]])
       end
 
       require("auto-session").setup({
