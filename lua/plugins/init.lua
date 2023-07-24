@@ -29,8 +29,14 @@ return {
     },
     config = function()
       vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+
+
+      local function close_alpha_if_open()
+
+      end
+
       require("auto-session").setup({
-        pre_save_cmds = { "tabdo NvimTreeClose", "tabdo DiffviewClose" },
+        pre_save_cmds = { close_alpha_if_open, "tabdo NvimTreeClose", "tabdo DiffviewClose", },
       })
     end
   },
