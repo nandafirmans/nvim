@@ -155,8 +155,8 @@ return {
       lualine.setup({
         options = {
           theme = "auto",
-          section_separators = { left = "", right = "" },
-          component_separators = "|",
+          -- section_separators = { left = "", right = "" },
+          component_separators = '|',
           disabled_filetypes = {},
           globalstatus = true,
           refresh = {

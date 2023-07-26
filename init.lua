@@ -76,7 +76,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme tokyonight-night]])
+vim.cmd([[colorscheme kanagawa]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -148,6 +148,11 @@ function TOGGLE_TABLINE()
 end
 
 vim.api.nvim_set_keymap('n', '<leader>t', ':lua TOGGLE_TABLINE()<CR>', { noremap = true, silent = true })
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    TOGGLE_TABLINE()
+  end,
+})
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`

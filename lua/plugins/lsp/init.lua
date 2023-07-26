@@ -115,11 +115,10 @@ return {
     },
     opts = {
       symbol_in_winbar = {
-        enable = true,
-        separator = "  ",
-        hide_keyword = true,
+        enable = false,
+        hide_keyword = false,
         show_file = true,
-        folder_level = 2,
+        folder_level = 1,
         respect_root = false,
         color_mode = true,
       },
