@@ -19,5 +19,5 @@ vim.g.maplocalleader = " "
 vim.o.termguicolors = true
 
 require("lazy").setup('plugins')
-require("./lua/option")
-require("./lua/keymap")
+require("option")
+require("keymap")
