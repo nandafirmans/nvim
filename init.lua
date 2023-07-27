@@ -11,11 +11,11 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Set <space> as the leader key
+-- NOTE: Set <space> as the leader key
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- set TermGuiColors before loading nvim colorizer
+-- NOTE: set TermGuiColors before loading nvim colorizer
 vim.o.termguicolors = true
 
 require("lazy").setup('plugins')
@@ -84,6 +84,16 @@ vim.o.completeopt = "menuone,noselect"
 -- CmdHeight
 vim.o.cmdheight = 0
 
+-- NOTE: Highlight on yank
+local highlight_group = vim.api.nvim_create_augroup("YankHighlight", { clear = true })
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+  group = highlight_group,
+  pattern = "*",
+})
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -136,34 +146,6 @@ vim.keymap.set("n", "<A-{>", ":tabprevious<CR>")
 vim.keymap.set("n", "<A-W>", ":tabclose<CR>")
 vim.keymap.set("n", "<A-T>n", ":tabnew<CR>")
 vim.keymap.set("n", "<A-T>l", ":tabs<CR>", { desc = "Tab List" })
-
-
--- Toggle show hide tabline
-function TOGGLE_TABLINE()
-  if vim.o.showtabline == 0 then
-    vim.o.showtabline = 2
-  else
-    vim.o.showtabline = 0
-  end
-end
-
-vim.api.nvim_set_keymap('n', '<leader>t', ':lua TOGGLE_TABLINE()<CR>', { noremap = true, silent = true })
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    TOGGLE_TABLINE()
-  end,
-})
-
--- [[ Highlight on yank ]]
--- See `:help vim.highlight.on_yank()`
-local highlight_group = vim.api.nvim_create_augroup("YankHighlight", { clear = true })
-vim.api.nvim_create_autocmd("TextYankPost", {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = "*",
-})
 
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
