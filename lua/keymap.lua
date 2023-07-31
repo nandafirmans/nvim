@@ -20,6 +20,15 @@ vim.keymap.set("n", "<A-q>q", ":q!<CR>")
 -- Quit neovim
 vim.keymap.set("n", "<leader>qq", ":qa<CR>")
 
+-- Previous Buffer
+vim.keymap.set("n", "<s-tab>", "<Cmd>bprevious<CR>", { desc = "Previous Buffer" })
+
+-- Next Buffer
+vim.keymap.set("n", "<tab>", "<Cmd>bnext<CR>", { desc = "Next Buffer" })
+
+-- Clear Search
+vim.keymap.set({ "n", "v", "i" }, "<A-c>", "<Cmd>nohlsearch<CR>", { desc = "Clear Search" })
+
 -- Select all
 vim.keymap.set("n", "<C-a>", "gg<S-v>G")
 
