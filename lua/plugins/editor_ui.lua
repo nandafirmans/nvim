@@ -175,9 +175,12 @@ return {
       lualine.setup({
         options = {
           theme = "auto",
-          -- section_separators = { left = "", right = "" },
+          icons_enabled = true,
+          -- section_separators = { left = "", right = "" },
+          section_separators = { left = "", right = "" },
           component_separators = '|',
           disabled_filetypes = {},
+          always_divide_middle = true,
           globalstatus = true,
           refresh = {
             statusline = 100,
@@ -187,6 +190,8 @@ return {
         },
         sections = {
           lualine_b = {
+
+            require("auto-session.lib").current_session_name,
             'branch', 'diff', 'diagnostics',
             {
               "macro-recording",
@@ -194,8 +199,36 @@ return {
             },
           },
           lualine_c = {
-            require("auto-session.lib").current_session_name,
-            { 'filename', path = 0, file_status = true },
+            -- { 'filename', path = 0, file_status = true },
+            {
+              "buffers",
+              show_filename_only = true,       -- Shows shortened relative path when set to false.
+              hide_filename_extension = false, -- Hide filename extension when set to true.
+              show_modified_status = true,     -- Shows indicator when the buffer is modified.
+
+              -- mode = 2,
+
+              max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
+
+              filetype_names = {
+                TelescopePrompt = "Telescope",
+                dashboard = "Dashboard",
+                packer = "Packer",
+                fzf = "FZF",
+                alpha = "Alpha",
+                NvimTree = "NvimTree"
+              },
+
+              buffers_color = {
+                -- inactive = "lualine_c_normal", -- Color for active buffer.
+                active = "lualine_a_inactive", -- Color for inactive buffer.
+              },
+              symbols = {
+                modified = " ●",   -- Text to show when the buffer is modified
+                alternate_file = "", -- Text to show to identify the alternate file
+                directory = "",   -- Text to show when the buffer is a directory
+              },
+            },
           }
         },
       })
