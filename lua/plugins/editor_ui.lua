@@ -141,126 +141,21 @@ return {
     config = function(_, opts)
       require("bufferline").setup(opts)
 
+      local lualine_util = require("plugins.lualine.util")
+
       function TOGGLE_TABLINE()
         if vim.o.showtabline == 0 then
           vim.o.showtabline = 2
+          lualine_util.hide_lualine_buffers()
         else
           vim.o.showtabline = 0
+          lualine_util.show_lualine_buffers()
         end
       end
 
       vim.api.nvim_create_autocmd("VimEnter", {
         callback = function()
           TOGGLE_TABLINE()
-        end,
-      })
-    end
-  },
-
-  -- StatusLine
-  {
-    "nvim-lualine/lualine.nvim",
-    config = function()
-      local function show_macro_recording()
-        local recording_register = vim.fn.reg_recording()
-        if recording_register == "" then
-          return ""
-        else
-          return "Recording @" .. recording_register
-        end
-      end
-
-      local lualine = require("lualine")
-
-      lualine.setup({
-        options = {
-          theme = "auto",
-          icons_enabled = true,
-          -- section_separators = { left = "", right = "" },
-          section_separators = { left = "", right = "" },
-          component_separators = '|',
-          disabled_filetypes = {},
-          always_divide_middle = true,
-          globalstatus = true,
-          refresh = {
-            statusline = 100,
-            tabline = 100,
-            winbar = 100,
-          },
-        },
-        sections = {
-          lualine_b = {
-
-            require("auto-session.lib").current_session_name,
-            'branch', 'diff', 'diagnostics',
-            {
-              "macro-recording",
-              fmt = show_macro_recording
-            },
-          },
-          lualine_c = {
-            -- { 'filename', path = 0, file_status = true },
-            {
-              "buffers",
-              show_filename_only = true,       -- Shows shortened relative path when set to false.
-              hide_filename_extension = false, -- Hide filename extension when set to true.
-              show_modified_status = true,     -- Shows indicator when the buffer is modified.
-
-              -- mode = 2,
-
-              max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
-
-              filetype_names = {
-                TelescopePrompt = "Telescope",
-                dashboard = "Dashboard",
-                packer = "Packer",
-                fzf = "FZF",
-                alpha = "Alpha",
-                NvimTree = "NvimTree"
-              },
-
-              buffers_color = {
-                -- inactive = "lualine_c_normal", -- Color for active buffer.
-                active = "lualine_a_inactive", -- Color for inactive buffer.
-              },
-              symbols = {
-                modified = " ●",   -- Text to show when the buffer is modified
-                alternate_file = "", -- Text to show to identify the alternate file
-                directory = "",   -- Text to show when the buffer is a directory
-              },
-            },
-          }
-        },
-      })
-
-      vim.api.nvim_create_autocmd("RecordingEnter", {
-        callback = function()
-          lualine.refresh({
-            place = { "statusline" },
-          })
-        end,
-      })
-
-      vim.api.nvim_create_autocmd("RecordingLeave", {
-        callback = function()
-          -- This is going to seem really weird!
-          -- Instead of just calling refresh we need to wait a moment because of the nature of
-          -- `vim.fn.reg_recording`. If we tell lualine to refresh right now it actually will
-          -- still show a recording occuring because `vim.fn.reg_recording` hasn't emptied yet.
-          -- So what we need to do is wait a tiny amount of time (in this instance 50 ms) to
-          -- ensure `vim.fn.reg_recording` is purged before asking lualine to refresh.
-          local timer = vim.loop.new_timer()
-          if (timer ~= nil) then
-            timer:start(
-              50,
-              0,
-              vim.schedule_wrap(function()
-                lualine.refresh({
-                  place = { "statusline" },
-                })
-              end)
-            )
-          end
         end,
       })
     end
