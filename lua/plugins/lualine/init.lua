@@ -23,14 +23,19 @@ return {
       },
       sections = {
         lualine_b = {
-          require("auto-session.lib").current_session_name,
           'branch',
-          'diff',
-          'diagnostics',
+          -- 'diff',
+          -- 'diagnostics',
           {
             "macro-recording",
             fmt = lualine_util.show_macro_recording,
           },
+        },
+        lualine_x = {
+          require("auto-session.lib").current_session_name,
+          'encoding',
+          'fileformat',
+          'filetype'
         },
       },
     })
