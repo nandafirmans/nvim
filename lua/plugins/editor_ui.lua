@@ -75,7 +75,7 @@ return {
         },
         view = {
           side = "left",
-          width = 50,
+          width = 40,
         },
         actions = {
           open_file = {

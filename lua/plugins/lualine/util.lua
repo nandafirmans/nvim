@@ -37,6 +37,7 @@ M.show_lualine_buffers = function()
           },
         },
         'diagnostics',
+        'diff',
       }
     }
   })
@@ -52,6 +53,7 @@ M.hide_lualine_buffers = function()
           file_status = true
         },
         'diagnostics',
+        'diff',
       }
     }
   })
