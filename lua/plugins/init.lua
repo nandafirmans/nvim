@@ -132,6 +132,12 @@ return {
   },
 
   {
+    'akinsho/git-conflict.nvim',
+    version = "*",
+    config = true,
+  },
+
+  {
     "lukas-reineke/indent-blankline.nvim",
     config = function()
       require("indent_blankline").setup({

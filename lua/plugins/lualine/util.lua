@@ -20,7 +20,7 @@ M.lualine_config_buffers = {
   },
 
   buffers_color = {
-    -- inactive = "lualine_c_normal",
+    inactive = "lualine_c_normal",
     active = "lualine_a_inactive",
   },
   symbols = {
