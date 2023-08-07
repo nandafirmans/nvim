@@ -13,7 +13,9 @@ M.show_lualine_buffers = function()
 
           -- mode = 2,
 
-          max_length = vim.o.columns * 2 / 3,
+          -- max_length = vim.o.columns * 2 / 3,
+          max_length = vim.o.columns * 1 / 2,
+
 
           filetype_names = {
             TelescopePrompt = "Telescope",
