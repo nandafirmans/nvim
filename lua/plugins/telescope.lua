@@ -39,9 +39,12 @@ return {
         },
         extensions = {
           file_browser = {
-            theme = "dropdown",
+            -- theme = "dropdown",
             hijack_netrw = true,
-            previewer = false,
+            previewer = true,
+            path_display = {
+              truncate = 3
+            }
           },
         },
       })
