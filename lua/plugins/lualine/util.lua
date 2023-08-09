@@ -27,8 +27,8 @@ M.show_lualine_buffers = function()
           },
 
           buffers_color = {
-            inactive = "lualine_c_normal",
-            active = "lualine_a_inactive",
+            -- inactive = "lualine_c_normal",
+            active = "lualine_a_normal",
             -- inactive = "lualine_a_inactive",
             -- active = "lualine_a_insert",
           },
