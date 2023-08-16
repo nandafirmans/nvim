@@ -84,7 +84,12 @@ return {
       { "<leader>zz", "<Cmd>ZenMode<CR>", mode = "n", desc = "[Z]en [M]ode" }
     },
     config = function()
-      require("zen-mode").setup({})
+      require("zen-mode").setup({
+        window = {
+          backdrop = 0.8,
+          width = 0.58,
+        }
+      })
     end
   },
 
