@@ -1,49 +1,49 @@
 return {
 
-  -- {
-  --   "github/copilot.vim",
-  --   lazy = false,
-  --   config = function()
-  --     vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
-  --     vim.g.copilot_no_tab_map = true
-  --     vim.g.copilot_filetypes = {
-  --       ["*"] = false,
-  --       ["javascript"] = true,
-  --       ["typescript"] = true,
-  --       ["css"] = true,
-  --       ["scss"] = true,
-  --       ["less"] = true,
-  --       ["html"] = true,
-  --       ["lua"] = true,
-  --       ["rust"] = false,
-  --       ["c"] = false,
-  --       ["c#"] = false,
-  --       ["c++"] = false,
-  --       ["go"] = true,
-  --       ["python"] = false,
-  --     }
-  --   end
-  -- },
-
   {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
+    "github/copilot.vim",
+    lazy = false,
     config = function()
-      require("copilot").setup({
-        suggestion = { enabled = false },
-        panel = { enabled = false },
-      })
-    end,
-  },
-
-  {
-    "zbirenbaum/copilot-cmp",
-    dependencies = { "copilot.lua" },
-    config = function()
-      require("copilot_cmp").setup()
+      vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+      vim.g.copilot_no_tab_map = true
+      vim.g.copilot_filetypes = {
+        ["*"] = false,
+        ["javascript"] = true,
+        ["typescript"] = true,
+        ["css"] = true,
+        ["scss"] = true,
+        ["less"] = true,
+        ["html"] = true,
+        ["lua"] = true,
+        ["rust"] = false,
+        ["c"] = false,
+        ["c#"] = false,
+        ["c++"] = false,
+        ["go"] = true,
+        ["python"] = false,
+      }
     end
   },
+
+  -- {
+  --   "zbirenbaum/copilot.lua",
+  --   cmd = "Copilot",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require("copilot").setup({
+  --       suggestion = { enabled = false },
+  --       panel = { enabled = false },
+  --     })
+  --   end,
+  -- },
+  --
+  -- {
+  --   "zbirenbaum/copilot-cmp",
+  --   dependencies = { "copilot.lua" },
+  --   config = function()
+  --     require("copilot_cmp").setup()
+  --   end
+  -- },
 
   {
     -- Autocompletion
@@ -96,10 +96,10 @@ return {
             select = true,
           }),
           ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() and has_words_before() then
-              cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-              -- if cmp.visible() then
-              -- cmp.select_next_item()
+            -- if cmp.visible() and has_words_before() then
+            --   cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+            if cmp.visible() then
+              cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
             else
