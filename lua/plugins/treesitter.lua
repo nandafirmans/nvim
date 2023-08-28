@@ -20,6 +20,7 @@ return {
       "jsdoc",
       "json",
       "html",
+      "regex",
       "css",
       "scss",
       "dart",
