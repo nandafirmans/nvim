@@ -38,8 +38,6 @@ return {
       [[                          ]],
       [[                          ]],
       [[                          ]],
-      [[                          ]],
-      [[                          ]],
     }
 
     -- dashboard.section.header.val = {
