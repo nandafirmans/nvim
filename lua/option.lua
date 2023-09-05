@@ -71,3 +71,8 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   group = highlight_group,
   pattern = "*",
 })
+
+-- Neovide
+if vim.g.neovide then
+  vim.o.guifont = "VictorMono NF:h11"
+end
