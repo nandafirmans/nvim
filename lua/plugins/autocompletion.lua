@@ -10,6 +10,7 @@ return {
         ["*"] = false,
         ["javascript"] = true,
         ["typescript"] = true,
+        ["typescriptreact"] = true,
         ["css"] = true,
         ["scss"] = true,
         ["less"] = true,
