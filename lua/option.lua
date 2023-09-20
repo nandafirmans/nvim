@@ -54,7 +54,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme catppuccin-macchiato]])
+vim.cmd([[colorscheme bluloco-dark]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
