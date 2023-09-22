@@ -42,10 +42,10 @@ vim.keymap.set("v", "p", 'P', { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>bn", ":enew<CR>", { desc = "[B]uffer [N]ew" })
 
 -- Move window focus
-vim.keymap.set("", "<C-h>", "<C-w>h")
-vim.keymap.set("", "<C-k>", "<C-w>k")
-vim.keymap.set("", "<C-j>", "<C-w>j")
-vim.keymap.set("", "<C-l>", "<C-w>l")
+-- vim.keymap.set("", "<C-h>", "<C-w>h")
+-- vim.keymap.set("", "<C-k>", "<C-w>k")
+-- vim.keymap.set("", "<C-j>", "<C-w>j")
+-- vim.keymap.set("", "<C-l>", "<C-w>l")
 
 -- Resize window
 vim.keymap.set("n", "<C-w><left>", "<C-w><")

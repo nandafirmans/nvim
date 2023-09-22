@@ -1,4 +1,14 @@
 return {
+  {
+    'christoomey/vim-tmux-navigator',
+    lazy = false,
+    keys = {
+      { "C-h", "<Cmd>TmuxNavigateLeft<CR>",  mode = "n" },
+      { "C-j", "<Cmd>TmuxNavigateDown<CR>",  mode = "n" },
+      { "C-k", "<Cmd>TmuxNavigateUp<CR>",    mode = "n" },
+      { "C-l", "<Cmd>TmuxNavigateRight<CR>", mode = "n" },
+    }
+  },
 
   {
     'ojroques/nvim-bufdel',
