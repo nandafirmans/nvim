@@ -24,9 +24,9 @@ return {
     }
   },
   keys = {
-    { "<C-t>g", "<CMD>lua _LAZYGIT_TOGGLE()<CR>",          mode = "n", desc = "Toggle LazyGit" },
-    { "<C-t>t", "<CMD>lua _TOP_TOGGLE()<CR>",              mode = "n", desc = "Toggle htop" },
-    { "<C-t>n", "<CMD>lua _NODE_INTERACTIVE_TOGGLE()<CR>", mode = "n", desc = "Toggle Node Interactive" },
+    { "<C-t>g", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
+    { "<C-t>t", "<CMD>lua _TOP_TOGGLE()<CR>",     mode = "n", desc = "Toggle htop" },
+    { "<C-t>n", "<CMD>lua _NNN_TOGGLE()<CR>",     mode = "n", desc = "Toggle nnn File Manager" },
   },
   config = function(_, opts)
     require("toggleterm").setup(opts)
@@ -77,12 +77,25 @@ return {
       start_in_insert = true,
     })
 
+    local nnn      = Terminal:new({
+      cmd = "nnn",
+      hidden = true,
+      direction = "float",
+      close_on_exit = true,
+      start_in_insert = true,
+    })
+
+
     function _LAZYGIT_TOGGLE()
       lazygit:toggle()
     end
 
     function _TOP_TOGGLE()
       top:toggle()
+    end
+
+    function _NNN_TOGGLE()
+      nnn:toggle()
     end
   end
 }
