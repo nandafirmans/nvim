@@ -22,6 +22,9 @@ return {
         },
       },
       sections = {
+        lualine_a = {
+          lualine_util.buffers,
+        },
         lualine_b = {
           'branch',
           -- 'diff',
