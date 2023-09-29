@@ -27,10 +27,12 @@ return {
           colorscheme = {
             theme = "dropdown",
             enable_preview = true,
+            initial_mode = "normal",
           },
           buffers = {
             theme = "dropdown",
-            previewer = false,
+            previewer = true,
+            initial_mode = "normal",
             -- path_display = {
             --   shorten = 2,
             --   truncate = 3,
@@ -39,12 +41,13 @@ return {
         },
         extensions = {
           file_browser = {
-            -- theme = "dropdown",
+            theme = "dropdown",
+            initial_mode = "normal",
             hijack_netrw = true,
             previewer = true,
             path_display = {
               truncate = 3
-            }
+            },
           },
         },
       })
