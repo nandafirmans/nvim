@@ -30,13 +30,6 @@ return {
         mode = "n"
       },
       {
-        "<leader>hd",
-        function()
-          require("harpoon.mark").rm_file()
-        end,
-        mode = "n"
-      },
-      {
         "<leader>hx",
         function()
           require("harpoon.mark").clear_all()
