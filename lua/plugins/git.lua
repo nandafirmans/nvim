@@ -7,7 +7,7 @@ return {
     lazy = false,
     keys = {
       {
-        "<leader>b",
+        "<leader>gb",
         "<Cmd>Gitsigns toggle_current_line_blame<CR>",
         mode = "n",
       },
@@ -29,11 +29,11 @@ return {
     "sindrets/diffview.nvim",
     dependencies = "nvim-lua/plenary.nvim",
     keys = {
-      { "<leader>dd",  "<Cmd>DiffviewOpen<CR>",          mode = "n", },
-      { "<leader>dr",  "<Cmd>DiffviewRefresh<CR>",       mode = "n", },
-      { "<leader>dhf", "<Cmd>DiffviewFileHistory %<CR>", mode = "n", },
-      { "<leader>dh",  "<Cmd>DiffviewFileHistory<CR>",   mode = "n", },
-      { "<leader>dc",  "<Cmd>DiffviewClose<CR>",         mode = "n", },
+      { "<leader>dd", "<Cmd>DiffviewOpen<CR>",          mode = "n", },
+      { "<leader>dr", "<Cmd>DiffviewRefresh<CR>",       mode = "n", },
+      { "<leader>df", "<Cmd>DiffviewFileHistory %<CR>", mode = "n", },
+      { "<leader>dh", "<Cmd>DiffviewFileHistory<CR>",   mode = "n", },
+      { "<leader>dc", "<Cmd>DiffviewClose<CR>",         mode = "n", },
     }
   },
 

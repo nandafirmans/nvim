@@ -24,9 +24,9 @@ return {
     }
   },
   keys = {
-    { "<C-t>g", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
-    { "<C-t>t", "<CMD>lua _TOP_TOGGLE()<CR>",     mode = "n", desc = "Toggle htop" },
-    { "<C-t>n", "<CMD>lua _NNN_TOGGLE()<CR>",     mode = "n", desc = "Toggle nnn File Manager" },
+    { "<leader>gg", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
+    { "<C-t>t",     "<CMD>lua _TOP_TOGGLE()<CR>",     mode = "n", desc = "Toggle htop" },
+    { "<C-t>n",     "<CMD>lua _NNN_TOGGLE()<CR>",     mode = "n", desc = "Toggle nnn File Manager" },
   },
   config = function(_, opts)
     require("toggleterm").setup(opts)
