@@ -8,6 +8,7 @@ return {
       vim.g.copilot_no_tab_map = true
       vim.g.copilot_filetypes = {
         ["*"] = false,
+        ["md"] = true,
         ["javascript"] = true,
         ["typescript"] = true,
         ["typescriptreact"] = true,
@@ -20,7 +21,7 @@ return {
         ["c"] = false,
         ["c#"] = false,
         ["c++"] = false,
-        ["go"] = true,
+        ["go"] = false,
         ["python"] = false,
       }
     end
