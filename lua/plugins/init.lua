@@ -154,10 +154,14 @@ return {
   },
 
   -- VimIlluminate
-  { "RRethy/vim-illuminate" },
+  {
+    "RRethy/vim-illuminate",
+    lazy = false,
+  },
 
   {
     "lukas-reineke/indent-blankline.nvim",
+    version = "2.20.8",
     config = function()
       require("indent_blankline").setup({
         char = "┊",
@@ -176,11 +180,15 @@ return {
 
   {
     "folke/todo-comments.nvim",
+    lazy = false,
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("todo-comments").setup {}
     end
   },
 
-  { "tpope/vim-sleuth" }, -- Detect tabstop and shiftwidth automatically
+  {
+    "tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
+    lazy = false,
+  },
 }
