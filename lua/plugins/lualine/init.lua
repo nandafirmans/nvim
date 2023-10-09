@@ -26,7 +26,7 @@ return {
           lualine_util.buffers,
         },
         lualine_b = {
-          'branch',
+          -- 'branch',
           -- 'diff',
           -- 'diagnostics',
           {
@@ -40,6 +40,8 @@ return {
           'fileformat',
           'filetype'
         },
+        lualine_y = { 'progress', 'branch' },
+        lualine_z = { 'mode' }
       },
     })
 

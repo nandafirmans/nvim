@@ -37,6 +37,14 @@ M.buffers = {
   },
 }
 
+M.show_macro_recording = function()
+  local recording_register = vim.fn.reg_recording()
+  if recording_register == "" then
+    return ""
+  else
+    return "Recording @" .. recording_register
+  end
+end
 
 M.show_lualine_buffers = function()
   require("lualine").setup({
@@ -44,10 +52,18 @@ M.show_lualine_buffers = function()
       lualine_a = {
         M.buffers,
       },
+      lualine_b = {
+        {
+          "macro-recording",
+          fmt = M.show_macro_recording,
+        },
+      },
       lualine_c = {
         'diagnostics',
         'diff',
-      }
+      },
+      lualine_y = { 'progress', 'branch' },
+      lualine_z = { 'mode' }
     }
   })
 end
@@ -58,26 +74,26 @@ M.hide_lualine_buffers = function()
       lualine_a = {
         'mode',
       },
+      lualine_b = {
+        'branch',
+        {
+          "macro-recording",
+          fmt = M.show_macro_recording,
+        },
+      },
       lualine_c = {
         {
           'filename',
-          path = 0,
+          path = 1,
           file_status = true
         },
         'diagnostics',
         'diff',
-      }
+      },
+      lualine_y = { 'progress' },
+      lualine_z = { 'location' }
     }
   })
-end
-
-M.show_macro_recording = function()
-  local recording_register = vim.fn.reg_recording()
-  if recording_register == "" then
-    return ""
-  else
-    return "Recording @" .. recording_register
-  end
 end
 
 return M
