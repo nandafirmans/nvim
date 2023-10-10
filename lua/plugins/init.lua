@@ -61,17 +61,18 @@ return {
   },
 
   {
-    'ojroques/nvim-bufdel',
+    'famiu/bufdelete.nvim',
     lazy = false,
     keys = {
-      { "<A-w>", "<Cmd>BufDel<CR>", mode = "n", desc = "Buffer Close" }
+      {
+        "<A-w>",
+        function()
+          require('bufdelete').bufdelete(0, false)
+        end,
+        mode = "n",
+        desc = "Buffer Close"
+      }
     },
-    config = function()
-      require('bufdel').setup({
-        next = 'alternate', -- or 'previous'
-        quit = false,       -- exit vim if last buffer deleted
-      })
-    end
   },
 
   -- AutoSession & SessionLens
