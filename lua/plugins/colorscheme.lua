@@ -15,7 +15,7 @@ return {
   { "nlknguyen/papercolor-theme",       lazy = false,       priority = 1000 },
   { "nonetallt/vim-neon-dark",          lazy = false,       priority = 1000 },
   { "rebelot/kanagawa.nvim",            lazy = false,       priority = 1000 },
-  { "morhetz/gruvbox",                  lazy = false,       priority = 1000 },
+  { "ellisonleao/gruvbox.nvim",         lazy = false,       priority = 1000 },
   { "sainnhe/edge",                     lazy = false,       priority = 1000 },
   { "sainnhe/gruvbox-material",         lazy = false,       priority = 1000 },
   { "luisiacc/gruvbox-baby",            lazy = false,       priority = 1000 },
