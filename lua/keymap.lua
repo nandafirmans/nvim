@@ -27,7 +27,7 @@ vim.keymap.set("n", "<s-tab>", "<Cmd>bprevious<CR>", { desc = "Previous Buffer" 
 vim.keymap.set("n", "<tab>", "<Cmd>bnext<CR>", { desc = "Next Buffer" })
 
 -- Close All buffer except current
-vim.keymap.set("n", "<A-W>", "<Cmd>%bd|e#<CR>", { desc = "Close All Buffer Except Current" })
+vim.keymap.set("n", "<A-W>", "<Cmd>%bd|e#|bd#<CR>", { desc = "Close All Buffer Except Current" })
 
 -- Clear Search
 vim.keymap.set({ "n", "v", "i" }, "<A-c>", "<Cmd>nohlsearch<CR>", { desc = "Clear Search" })
