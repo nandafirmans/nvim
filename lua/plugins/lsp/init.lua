@@ -151,12 +151,12 @@ return {
         mode = "n",
         desc = "Peek Definition"
       },
-      -- {
-      --   "gd",
-      --   "<cmd>Lspsaga goto_definition<CR>",
-      --   mode = "n",
-      --   desc = "[G]o to [D]efinition"
-      -- },
+      {
+        "gd",
+        "<cmd>Lspsaga goto_definition<CR>",
+        mode = "n",
+        desc = "[G]o to [D]efinition"
+      },
       {
         "<leader>sl",
         "<cmd>Lspsaga show_line_diagnostics<CR>",
