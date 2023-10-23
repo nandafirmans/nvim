@@ -116,7 +116,7 @@ M.hide_lualine_buffers = function()
       lualine_c = {
         {
           'filename',
-          path = 1,
+          path = 4,
           file_status = true
         },
         'diagnostics',
