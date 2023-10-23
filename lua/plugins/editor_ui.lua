@@ -111,12 +111,6 @@ return {
         mode = "n",
         desc = "BufferLine Sort By Relative Directory"
       },
-      {
-        "<leader>t",
-        ":lua TOGGLE_TABLINE()<CR>",
-        mode = "n",
-        desc = "Toggle Tabline"
-      }
     },
     opts = {
       options = {
@@ -143,24 +137,6 @@ return {
     },
     config = function(_, opts)
       require("bufferline").setup(opts)
-
-      local lualine_util = require("plugins.lualine.util")
-
-      function TOGGLE_TABLINE()
-        if vim.o.showtabline == 0 then
-          vim.o.showtabline = 2
-          lualine_util.hide_lualine_buffers()
-        else
-          vim.o.showtabline = 0
-          lualine_util.show_lualine_buffers()
-        end
-      end
-
-      vim.api.nvim_create_autocmd("VimEnter", {
-        callback = function()
-          TOGGLE_TABLINE()
-        end,
-      })
     end
   },
 }

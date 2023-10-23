@@ -1,5 +1,14 @@
 return {
   "nvim-lualine/lualine.nvim",
+  lazy = false,
+  keys = {
+    {
+      "<leader>t",
+      ":lua TOGGLE_TABLINE()<CR>",
+      mode = "n",
+      desc = "Toggle Tabline"
+    }
+  },
   config = function()
     local lualine_util = require("plugins.lualine.util")
 
@@ -30,7 +39,7 @@ return {
       },
     })
 
-    lualine_util.hide_lualine_buffers()
     lualine_util.init_recording_event()
+    lualine_util.init_toggle_buffers_and_tab()
   end
 }
