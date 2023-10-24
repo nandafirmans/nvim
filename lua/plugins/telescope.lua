@@ -30,8 +30,8 @@ return {
             initial_mode = "normal",
           },
           buffers = {
-            theme = "dropdown",
-            previewer = true,
+            -- theme = "dropdown",
+            previewer = false,
             initial_mode = "normal",
             -- path_display = {
             --   shorten = 2,
@@ -41,10 +41,10 @@ return {
         },
         extensions = {
           file_browser = {
-            theme = "dropdown",
+            -- theme = "dropdown",
             initial_mode = "normal",
             hijack_netrw = true,
-            previewer = true,
+            previewer = false,
             path_display = {
               truncate = 3
             },
@@ -177,4 +177,54 @@ return {
     "nvim-telescope/telescope-file-browser.nvim",
     dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim", },
   },
+
+  {
+    'ThePrimeagen/harpoon',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    lazy = false,
+    keys = {
+      {
+        "<leader>hh",
+        function()
+          require("harpoon.ui").toggle_quick_menu()
+        end,
+        mode = "n"
+      },
+      {
+        "<leader>ha",
+        function()
+          require("harpoon.mark").add_file()
+        end,
+        mode = "n"
+      },
+      {
+        "<leader>hx",
+        function()
+          require("harpoon.mark").clear_all()
+        end,
+        mode = "n"
+      },
+      {
+        "<leader>hj",
+        function()
+          require("harpoon.ui").nav_next()
+        end,
+        mode = "n"
+      },
+      {
+        "<leader>hk",
+        function()
+          require("harpoon.ui").nav_prev()
+        end,
+        mode = "n"
+      }
+    },
+    config = function()
+      require("harpoon").setup({
+        menu = {
+          width = 120,
+        }
+      })
+    end
+  }
 }
