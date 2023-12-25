@@ -7,20 +7,20 @@ return {
   -- VSCode like picktogram
   { "onsails/lspkind.nvim" },
 
-  {
-    "jmederosalvarado/roslyn.nvim",
-    config = function()
-      local lsp_util = require("plugins.lsp.util")
-      local on_attach = lsp_util.on_attach;
-      local capabilities = lsp_util.capabilities;
-      require("roslyn").setup({
-        dotnet_cmd = "dotnet",
-        roslyn_version = "4.8.0-3.23475.7",
-        on_attach = on_attach,
-        capabilities = capabilities,
-      })
-    end
-  },
+  -- {
+  --   "jmederosalvarado/roslyn.nvim",
+  --   config = function()
+  --     local lsp_util = require("plugins.lsp.util")
+  --     local on_attach = lsp_util.on_attach;
+  --     local capabilities = lsp_util.capabilities;
+  --     require("roslyn").setup({
+  --       dotnet_cmd = "dotnet",
+  --       roslyn_version = "4.8.0-3.23475.7",
+  --       on_attach = on_attach,
+  --       capabilities = capabilities,
+  --     })
+  --   end
+  -- },
 
   {
     -- Automatically install LSPs to stdpath for neovim
@@ -59,14 +59,14 @@ return {
         end,
       })
 
-      -- local pid = vim.fn.getpid()
-      -- local omnisharp_bin = "/home/nandafirmans/.local/share/nvim/mason/bin/omnisharp"
-      -- require("lspconfig").omnisharp.setup({
-      --   handlers = {
-      --     ["textDocument/definition"] = require('omnisharp_extended').handler,
-      --   },
-      --   cmd = { omnisharp_bin, '--languageserver', '--hostPID', tostring(pid) },
-      -- })
+      local pid = vim.fn.getpid()
+      local omnisharp_bin = "C:\\Users\\nanda\\AppData\\Local\\nvim-data\\mason\\bin\\omnisharp.cmd"
+      require("lspconfig").omnisharp.setup({
+        handlers = {
+          ["textDocument/definition"] = require('omnisharp_extended').handler,
+        },
+        cmd = { omnisharp_bin, '--languageserver', '--hostPID', tostring(pid) },
+      })
 
       -- Eslint Fix All
       -- TODO: auto fix all eslint on save
@@ -89,6 +89,7 @@ return {
           null_ls.builtins.formatting.goimports,
           null_ls.builtins.formatting.goimports_reviser,
           null_ls.builtins.formatting.golines,
+          null_ls.builtins.formatting.csharpier
         },
         on_attach = lsp_util.on_attach
       })
