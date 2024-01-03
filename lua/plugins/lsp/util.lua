@@ -4,23 +4,14 @@ local M = {}
 -- Enable the following language servers
 M.servers = {
   -- clangd = {},
+  emmet_ls = {},
   gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},
   csharp_ls = {},
   omnisharp = {},
-  html = {
-    -- filetypes = { "html", "xhtml" },
-    -- init_options = {
-    --   configurationSection = { "html", "css", "javascript" },
-    --   embeddedLanguages = {
-    --     css = true,
-    --     javascript = true,
-    --   },
-    --   provideFormatter = true,
-    -- },
-  },
+  html = {},
 }
 
 local capabilities = vim.lsp.protocol.make_client_capabilities();
