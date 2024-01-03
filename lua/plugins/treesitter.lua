@@ -29,6 +29,7 @@ return {
         "query",
         "css",
         "scss",
+        "styled",
         "dart",
         "php",
         "vimdoc",
