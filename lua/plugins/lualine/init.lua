@@ -16,9 +16,9 @@ return {
       options = {
         theme = "auto",
         icons_enabled = true,
-        section_separators = { left = "", right = "" },
+        -- section_separators = { left = "", right = "" },
         -- component_separators = '|',
-        -- section_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
         component_separators = '',
         disabled_filetypes = {},
         always_divide_middle = true,
@@ -31,7 +31,12 @@ return {
       },
       sections = {
         lualine_x = {
-          require("auto-session.lib").current_session_name,
+          -- require("auto-session.lib").current_session_name,
+          {
+            'filename',
+            path = 1,
+            file_status = true
+          },
           'encoding',
           'fileformat',
           'filetype'
