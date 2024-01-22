@@ -60,7 +60,9 @@ return {
       })
 
       local pid = vim.fn.getpid()
-      local omnisharp_bin = "C:\\Users\\nanda\\AppData\\Local\\nvim-data\\mason\\bin\\omnisharp.cmd"
+      -- local omnisharp_bin = "C:\\Users\\nanda\\AppData\\Local\\nvim-data\\mason\\bin\\omnisharp.cmd"
+      local omnisharp_bin = "/home/nandafirmans/.local/share/nvim/mason/bin/omnisharp";
+
       require("lspconfig").omnisharp.setup({
         handlers = {
           ["textDocument/definition"] = require('omnisharp_extended').handler,
@@ -89,7 +91,7 @@ return {
           null_ls.builtins.formatting.goimports,
           null_ls.builtins.formatting.goimports_reviser,
           null_ls.builtins.formatting.golines,
-          null_ls.builtins.formatting.csharpier
+          -- null_ls.builtins.formatting.csharpier
         },
         on_attach = lsp_util.on_attach
       })

@@ -9,7 +9,7 @@ M.servers = {
   -- pyright = {},
   -- rust_analyzer = {},
   tsserver = {},
-  csharp_ls = {},
+  -- csharp_ls = {},
   omnisharp = {},
   html = {},
 }
