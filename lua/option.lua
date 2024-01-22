@@ -11,7 +11,13 @@ vim.o.history = 5000
 vim.o.hidden = true
 vim.o.swapfile = false
 vim.o.clipboard = "unnamedplus"
-vim.o.guifont = "Victor Mono Nerd Font:h15"
+vim.o.guifont = "Victor Mono Nerd Font:h10"
+
+-- Neovide
+if vim.g.neovide then
+  vim.o.guifont = "MesloLGM Nerd Font Mono:h9"
+  vim.api.nvim_set_keymap('n', '<F11>', ":let g:neovide_fullscreen = !g:neovide_fullscreen<CR>", {})
+end
 
 -- Folding
 vim.o.foldmethod = "indent"
@@ -71,8 +77,3 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   group = highlight_group,
   pattern = "*",
 })
-
--- Neovide
-if vim.g.neovide then
-  vim.o.guifont = "VictorMono NF:h11"
-end
