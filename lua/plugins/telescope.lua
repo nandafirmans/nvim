@@ -108,12 +108,12 @@ return {
         desc =
         "[F]ind [F]iles"
       },
-      {
-        "<leader>fh",
-        function() require("telescope.builtin").help_tags(); end,
-        desc =
-        "[F]ind [H]elp"
-      },
+      -- {
+      --   "<leader>fh",
+      --   function() require("telescope.builtin").help_tags(); end,
+      --   desc =
+      --   "[F]ind [H]elp"
+      -- },
       {
         "<leader>fw",
         function() require("telescope.builtin").grep_string(); end,
@@ -184,37 +184,30 @@ return {
     lazy = false,
     keys = {
       {
-        "<leader>hh",
+        "<leader>fh",
         function()
           require("harpoon.ui").toggle_quick_menu()
         end,
         mode = "n"
       },
       {
-        "<leader>ha",
+        "<leader>aa",
         function()
           require("harpoon.mark").add_file()
         end,
         mode = "n"
       },
       {
-        "<leader>hx",
-        function()
-          require("harpoon.mark").clear_all()
-        end,
-        mode = "n"
-      },
-      {
-        "<leader>hj",
-        function()
-          require("harpoon.ui").nav_next()
-        end,
-        mode = "n"
-      },
-      {
-        "<leader>hk",
+        "<leader>h",
         function()
           require("harpoon.ui").nav_prev()
+        end,
+        mode = "n"
+      },
+      {
+        "<leader>l",
+        function()
+          require("harpoon.ui").nav_next()
         end,
         mode = "n"
       }
