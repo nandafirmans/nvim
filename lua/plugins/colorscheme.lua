@@ -76,9 +76,9 @@ return {
     config = function()
       require('fluoromachine').setup({
         glow = false,
-        theme = 'retrowave',
+        -- theme = 'retrowave',
         -- theme = 'delta',
-        -- theme = 'fluoromachine',
+        theme = 'fluoromachine',
         --transparent = 'full'
       })
     end

@@ -112,6 +112,11 @@ M.hide_lualine_buffers = function()
         },
       },
       lualine_c = {
+        {
+          'filename',
+          path = 4,
+          file_status = true
+        },
         'diagnostics',
         'diff',
       },
@@ -131,10 +136,10 @@ M.init_toggle_buffers_and_tab = function()
   function TOGGLE_TABLINE()
     if vim.o.showtabline == 0 then
       vim.o.showtabline = 2
-      M.hide_lualine_buffers()
+      -- M.hide_lualine_buffers()
     else
       vim.o.showtabline = 0
-      M.show_lualine_buffers()
+      -- M.show_lualine_buffers()
     end
   end
 
