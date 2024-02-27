@@ -92,7 +92,7 @@ return {
         mapping = cmp.mapping.preset.insert({
           ["<C-d>"] = cmp.mapping.scroll_docs(-4),
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<C-n>"] = cmp.mapping.complete(),
+          ["<C-Space>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({
             behavior = cmp.ConfirmBehavior.Replace,
             select = true,
@@ -132,4 +132,6 @@ return {
     "dsznajder/vscode-es7-javascript-react-snippets",
     build = "yarn install --frozen-lockfile && yarn compile",
   },
+
+  { "ernstvanderlinden/vim-coldfusion" },
 }
