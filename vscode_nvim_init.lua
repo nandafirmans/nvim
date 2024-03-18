@@ -59,11 +59,6 @@ vim.o.smartcase = true
 vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
-if not vim.g.vscode then
-  -- Set colorscheme
-  vim.cmd([[colorscheme carbonfox]])
-end
-
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
 
