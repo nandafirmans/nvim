@@ -2,6 +2,7 @@ return {
   {
     -- LSP Configuration & Plugins
     "neovim/nvim-lspconfig",
+    lazy = false,
   },
 
   -- VSCode like picktogram
@@ -243,11 +244,11 @@ return {
         "<cmd>Lspsaga hover_doc<CR>",
         mode = "n",
       },
-      -- {
-      --   "<A-T>",
-      --   "<cmd>Lspsaga term_toggle<CR>",
-      --   mode = { "n", "t" },
-      -- },
+      {
+        "<A-T>",
+        "<cmd>Lspsaga term_toggle<CR>",
+        mode = { "n", "t" },
+      },
     }
   },
 }

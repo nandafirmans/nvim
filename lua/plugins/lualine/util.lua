@@ -130,10 +130,10 @@ end
 function TOGGLE_TABLINE()
   if vim.o.showtabline == 0 then
     vim.o.showtabline = 2
-    -- M.hide_lualine_buffers()
+    M.hide_lualine_buffers()
   else
     vim.o.showtabline = 0
-    -- M.show_lualine_buffers()
+    M.show_lualine_buffers()
   end
 end
 
