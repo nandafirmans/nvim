@@ -28,7 +28,7 @@ return {
     "williamboman/mason.nvim",
     dependencies = {
       "williamboman/mason-lspconfig.nvim",
-      'Hoffs/omnisharp-extended-lsp.nvim',
+      -- 'Hoffs/omnisharp-extended-lsp.nvim',
     },
     config = function()
       require("mason").setup()
@@ -60,22 +60,26 @@ return {
         end,
       })
 
-      local pid = vim.fn.getpid()
-      -- local omnisharp_bin = "C:\\Users\\nanda\\AppData\\Local\\nvim-data\\mason\\bin\\omnisharp.cmd"
-      local omnisharp_bin = "/home/nandafirmans/.local/share/nvim/mason/bin/omnisharp";
-
-      require("lspconfig").omnisharp.setup({
-        handlers = {
-          ["textDocument/definition"] = require('omnisharp_extended').handler,
-        },
-        cmd = { omnisharp_bin, '--languageserver', '--hostPID', tostring(pid) },
-      })
-
       -- Eslint Fix All
       -- TODO: auto fix all eslint on save
       vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
     end
   },
+
+  -- {
+  --   "jmederosalvarado/roslyn.nvim",
+  --   config = function()
+  --     local lsp_util = require("plugins.lsp.util")
+  --     local on_attach = lsp_util.on_attach;
+  --     local capabilities = lsp_util.capabilities;
+  --     require("roslyn").setup({
+  --       dotnet_cmd = "dotnet",
+  --       roslyn_version = "4.9.0-3.23604.10",
+  --       on_attach = on_attach,       -- required
+  --       capabilities = capabilities, -- required
+  --     })
+  --   end
+  -- },
 
   -- null-ls is used for formatters/diagnostics not provided by the language server
   {
@@ -92,7 +96,7 @@ return {
           null_ls.builtins.formatting.goimports,
           null_ls.builtins.formatting.goimports_reviser,
           null_ls.builtins.formatting.golines,
-          -- null_ls.builtins.formatting.csharpier
+          null_ls.builtins.formatting.csharpier
         },
         on_attach = lsp_util.on_attach
       })

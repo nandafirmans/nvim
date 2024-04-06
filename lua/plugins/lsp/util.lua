@@ -10,7 +10,7 @@ M.servers = {
   -- rust_analyzer = {},
   tsserver = {},
   -- csharp_ls = {},
-  omnisharp = {},
+  -- omnisharp = {},
   html = {},
 }
 
