@@ -26,15 +26,90 @@ return {
   },
 
   {
-    "WhiteBlackGoose/gpt4all.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("chatgpt").setup()
-    end,
+    "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "canary",
     dependencies = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim"
+      { "zbirenbaum/copilot.lua" },
+      { "nvim-lua/plenary.nvim" },
+    },
+    keys = {
+      {
+        "<leader>cco",
+        mode = { "v", "n" },
+        function()
+          require("CopilotChat").open()
+        end,
+        desc = "CopilotChat - Open chat",
+      },
+      {
+        "<leader>ccr",
+        mode = { "v", "n" },
+        function()
+          require("CopilotChat").reset()
+        end,
+        desc = "CopilotChat - Reset",
+      },
+      {
+        "<leader>ccq",
+        mode = { "v", "n" },
+        function()
+          local input = vim.fn.input("Quick Chat: ")
+          if input ~= "" then
+            local selection
+            if vim.fn.visualmode() ~= '' then
+              selection = require("CopilotChat.select").visual
+            else
+              selection = require("CopilotChat.select").buffer
+            end
+            require("CopilotChat").ask(input, {
+              selection = selection
+            })
+          end
+        end,
+        desc = "CopilotChat - Quick chat",
+      },
+      {
+        "<leader>cch",
+        mode = { "v", "n" },
+        function()
+          local actions = require("CopilotChat.actions")
+          require("CopilotChat.integrations.telescope").pick(actions.help_actions())
+        end,
+        desc = "CopilotChat - Help actions",
+      },
+      {
+        "<leader>ccp",
+        mode = { "v", "n" },
+        function()
+          local actions = require("CopilotChat.actions")
+          local selection
+          if vim.fn.visualmode() ~= '' then
+            selection = require("CopilotChat.select").visual
+          else
+            selection = require("CopilotChat.select").buffer
+          end
+          require("CopilotChat.integrations.telescope").pick(actions.prompt_actions({
+            selection = selection
+          }))
+        end,
+        desc = "CopilotChat - Prompt actions",
+      },
+    },
+    opts = {
+      -- default window options
+      window = {
+        layout = 'float',       -- 'vertical', 'horizontal', 'float'
+        -- Options below only apply to floating windows
+        relative = 'editor',    -- 'editor', 'win', 'cursor', 'mouse'
+        border = 'single',      -- 'none', single', 'double', 'rounded', 'solid', 'shadow'
+        width = 0.8,            -- fractional width of parent
+        height = 0.6,           -- fractional height of parent
+        row = nil,              -- row position of the window, default is centered
+        col = nil,              -- column position of the window, default is centered
+        title = 'Copilot Chat', -- title of chat window
+        footer = nil,           -- footer of chat window
+        zindex = 1,             -- determines if window is on top or below other floating windows
+      },
     }
   },
 
