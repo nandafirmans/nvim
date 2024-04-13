@@ -77,7 +77,7 @@ return {
           enable = true,
         },
         view = {
-          side = "left",
+          side = "right",
           width = 50,
         },
         actions = {

@@ -6,23 +6,18 @@ return {
     dependencies = { "nvim-lua/plenary.nvim", },
     config = function()
       require("telescope").setup({
-        defaults = {
-          mappings = {
-            i = {
-              ["<C-u>"] = false,
-              ["<C-d>"] = false,
-            },
-          },
-          -- path_display = {
-          --   truncate = 3
-          -- }
-          path_display = function(opts, path)
-            local tail = require("telescope.utils").path_tail(path)
-            local formated_path = require("telescope.utils").transform_path({ path_display = { truncate = 3 } }, path)
-            formated_path = formated_path:gsub("/" .. tail, "")
-            return string.format("%s - %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
-          end,
-        },
+        defaults = vim.tbl_extend(
+          "force",
+          require("telescope.themes").get_ivy(),
+          {
+            path_display = function(opts, path)
+              local tail = require("telescope.utils").path_tail(path)
+              local formated_path = require("telescope.utils").transform_path({ path_display = { truncate = 3 } }, path)
+              formated_path = formated_path:gsub("/" .. tail, "")
+              return string.format("%s - %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
+            end,
+          }
+        ),
         pickers = {
           colorscheme = {
             theme = "dropdown",
@@ -30,21 +25,15 @@ return {
             initial_mode = "normal",
           },
           buffers = {
-            -- theme = "dropdown",
-            previewer = false,
+            previewer = true,
             initial_mode = "normal",
-            -- path_display = {
-            --   shorten = 2,
-            --   truncate = 3,
-            -- }
           },
         },
         extensions = {
           file_browser = {
-            -- theme = "dropdown",
             initial_mode = "normal",
             hijack_netrw = true,
-            previewer = false,
+            previewer = true,
             path_display = {
               truncate = 3
             },
