@@ -13,8 +13,11 @@ return {
             path_display = function(opts, path)
               local tail = require("telescope.utils").path_tail(path)
               local formated_path = require("telescope.utils").transform_path({ path_display = { truncate = 3 } }, path)
-              formated_path = formated_path:gsub("/" .. tail, "")
-              return string.format("%s - %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
+              formated_path = formated_path:gsub(tail, "")
+              if formated_path == "" then
+                formated_path = "/"
+              end
+              return string.format("%s -- %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
             end,
           }
         ),

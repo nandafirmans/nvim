@@ -17,9 +17,6 @@ vim.keymap.set("n", "<A-q>", ":q<CR>")
 -- Force Close Buffer
 vim.keymap.set("n", "<A-q>q", ":q!<CR>")
 
--- Quit neovim
-vim.keymap.set("n", "<leader>qq", ":qa<CR>")
-
 -- Previous Buffer
 vim.keymap.set("n", "<s-tab>", "<Cmd>bprevious<CR>", { desc = "Previous Buffer" })
 
@@ -43,12 +40,6 @@ vim.keymap.set("v", "p", 'P', { noremap = true, silent = true })
 
 -- Buffer New
 vim.keymap.set("n", "<leader>bn", ":enew<CR>", { desc = "[B]uffer [N]ew" })
-
--- Move window focus
--- vim.keymap.set("", "<C-h>", "<C-w>h")
--- vim.keymap.set("", "<C-k>", "<C-w>k")
--- vim.keymap.set("", "<C-j>", "<C-w>j")
--- vim.keymap.set("", "<C-l>", "<C-w>l")
 
 -- Resize window
 vim.keymap.set("n", "<C-w><left>", "<C-w><")
