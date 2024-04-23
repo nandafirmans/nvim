@@ -16,7 +16,7 @@ return {
   { "nonetallt/vim-neon-dark",          lazy = false,         priority = 1000 },
   { "rebelot/kanagawa.nvim",            lazy = false,         priority = 1000 },
   { "morhetz/gruvbox",                  lazy = false,         priority = 1000 },
-  { "ellisonleao/gruvbox.nvim",         name = "gruvboxnvim", lazy = false,   priority = 1000 },
+  { "ellisonleao/gruvbox.nvim",         name = "gruvboxnvim", lazy = false,    priority = 1000 },
   { "sainnhe/edge",                     lazy = false,         priority = 1000 },
   { "sainnhe/gruvbox-material",         lazy = false,         priority = 1000 },
   { "luisiacc/gruvbox-baby",            lazy = false,         priority = 1000 },
@@ -30,11 +30,14 @@ return {
   { 'rmehri01/onenord.nvim',            lazy = false,         priority = 1000 },
   { 'Mofiqul/vscode.nvim',              lazy = false,         priority = 1000 },
   { 'craftzdog/solarized-osaka.nvim',   lazy = false,         priority = 1000 },
+  { "zootedb0t/citruszest.nvim",        lazy = false,         priority = 1000, },
   { 'projekt0n/github-nvim-theme',      lazy = false,         priority = 1000 },
-  { "bluz71/vim-nightfly-colors",       name = "nightfly",    lazy = false,   priority = 1000 },
-  { "bluz71/vim-moonfly-colors",        name = "moonfly",     lazy = false,   priority = 1000 },
-  { 'rose-pine/neovim',                 name = 'rose-pine',   lazy = false,   priority = 1000 },
-  { 'srcery-colors/srcery-vim',         name = 'srcery',      lazy = false,   priority = 1000 },
+  { 'xero/miasma.nvim',                 lazy = false,         priority = 1000 },
+  { 'eldritch-theme/eldritch.nvim',     lazy = false,         priority = 1000 },
+  { "bluz71/vim-nightfly-colors",       name = "nightfly",    lazy = false,    priority = 1000 },
+  { "bluz71/vim-moonfly-colors",        name = "moonfly",     lazy = false,    priority = 1000 },
+  { 'rose-pine/neovim',                 name = 'rose-pine',   lazy = false,    priority = 1000 },
+  { 'srcery-colors/srcery-vim',         name = 'srcery',      lazy = false,    priority = 1000 },
   {
     "loctvl842/monokai-pro.nvim",
     lazy = false,
@@ -84,5 +87,19 @@ return {
         --transparent = 'full'
       })
     end
+  },
+  {
+    "scottmckendry/cyberdream.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("cyberdream").setup({
+        transparent = true,
+        italic_comments = true,
+        hide_fillchars = true,
+        borderless_telescope = true,
+        terminal_colors = true,
+      })
+    end,
   }
 }

@@ -60,7 +60,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme gruvbox]])
+vim.cmd([[colorscheme citruszest]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -77,3 +77,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   group = highlight_group,
   pattern = "*",
 })
+
+-- make background transparent
+-- vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
+-- vim.cmd("highlight NonText guibg=NONE ctermbg=NONE")
