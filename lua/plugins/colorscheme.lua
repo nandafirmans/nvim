@@ -34,6 +34,7 @@ return {
   { 'projekt0n/github-nvim-theme',      lazy = false,         priority = 1000 },
   { 'xero/miasma.nvim',                 lazy = false,         priority = 1000 },
   { 'eldritch-theme/eldritch.nvim',     lazy = false,         priority = 1000 },
+  { 'sainnhe/everforest',               lazy = false,         priority = 1000 },
   { "bluz71/vim-nightfly-colors",       name = "nightfly",    lazy = false,    priority = 1000 },
   { "bluz71/vim-moonfly-colors",        name = "moonfly",     lazy = false,    priority = 1000 },
   { 'rose-pine/neovim',                 name = 'rose-pine',   lazy = false,    priority = 1000 },
