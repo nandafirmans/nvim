@@ -47,6 +47,6 @@ return {
     lualine_util.init_recording_event()
 
     -- NOTE: comments out to show buffers on startup
-    -- lualine_util.init_toggle_buffers_and_tab()
+    lualine_util.init_toggle_buffers_and_tab()
   end
 }

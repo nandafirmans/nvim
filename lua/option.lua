@@ -60,7 +60,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorscheme everforest]])
+vim.cmd([[colorschem  edge]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"

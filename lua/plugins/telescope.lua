@@ -39,6 +39,9 @@ return {
             initial_mode = "normal",
           },
           buffers = {
+            theme = "dropdown",
+            sort_lastused = true,
+            ignore_current_buffer = true,
             previewer = true,
             initial_mode = "normal",
           },

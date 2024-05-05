@@ -145,7 +145,7 @@ M.init_toggle_buffers_and_tab = function()
 
   vim.api.nvim_create_autocmd("VimEnter", {
     callback = function()
-      TOGGLE_TABLINE()
+      -- TOGGLE_TABLINE()
     end,
   })
 end
