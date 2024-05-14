@@ -7,6 +7,14 @@ return {
       -- messages = {
       --   enabled = false,
       -- },
+      lsp = {
+        -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+        override = {
+          ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+          ["vim.lsp.util.stylize_markdown"] = true,
+          ["cmp.entry.get_documentation"] = true,
+        },
+      },
       routes = {
         {
           filter = {
@@ -17,46 +25,49 @@ return {
           opts = { skip = true },
         },
       },
-      cmdline = {
-        format = {
-          cmdline = { icon = ">" },
-          search_down = { icon = "search [v]" },
-          search_up = { icon = "search [^]" },
-          filter = { icon = "filter" },
-          lua = { icon = "lua" },
-          help = { icon = "help" },
-        }
-      },
-      views = {
-        cmdline_popup = {
-          position = {
-            row = 5,
-            col = "50%",
-          },
-          size = {
-            width = 60,
-            height = "auto",
-          },
-        },
-        popupmenu = {
-          relative = "editor",
-          position = {
-            row = 8,
-            col = "50%",
-          },
-          size = {
-            width = 60,
-            height = 10,
-          },
-          border = {
-            style = "rounded",
-            padding = { 0, 1 },
-          },
-          win_options = {
-            winhighlight = { Normal = "Normal", FloatBorder = "DiagnosticInfo" },
-          },
-        },
-      },
+      -- cmdline = {
+      --   format = {
+      --     cmdline = { icon = ">" },
+      --     search_down = { icon = "search [v]" },
+      --     search_up = { icon = "search [^]" },
+      --     filter = { icon = "filter" },
+      --     lua = { icon = "lua" },
+      --     help = { icon = "help" },
+      --   }
+      -- },
+      -- views = {
+      --   cmdline_popup = {
+      --     position = {
+      --       row = 5,
+      --       col = "50%",
+      --     },
+      --     size = {
+      --       width = 60,
+      --       height = "auto",
+      --     },
+      --   },
+      --   popupmenu = {
+      --     relative = "editor",
+      --     position = {
+      --       row = 8,
+      --       col = "50%",
+      --     },
+      --     size = {
+      --       width = 60,
+      --       height = 10,
+      --     },
+      --     border = {
+      --       style = "rounded",
+      --       padding = { 0, 1 },
+      --     },
+      --     win_options = {
+      --       winhighlight = { Normal = "Normal", FloatBorder = "DiagnosticInfo" },
+      --     },
+      --   },
+      -- },
+      presets = {
+        command_palette = true,
+      }
     },
     config = function(_, opts)
       require("noice").setup(opts)
