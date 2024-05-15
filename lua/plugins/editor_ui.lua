@@ -77,7 +77,7 @@ return {
   -- File Explorer
   {
     "nvim-tree/nvim-tree.lua",
-    tag = "nightly", -- optional, updated every week. (see issue #1193)
+    -- tag = "nightly", -- optional, updated every week. (see issue #1193)
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
       { "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n" }
