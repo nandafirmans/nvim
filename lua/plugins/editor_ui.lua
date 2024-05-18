@@ -103,7 +103,8 @@ return {
   -- Tabs & Buffers
   {
     'akinsho/bufferline.nvim',
-    version = "*",
+    -- version = "*",
+    branch = "main",
     lazy = false,
     dependencies = 'nvim-tree/nvim-web-devicons',
     keys = {
