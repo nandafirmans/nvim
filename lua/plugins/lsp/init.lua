@@ -59,26 +59,26 @@ return {
         client.server_capabilities.documentFormattingProvider = false
       end
 
-      -- -- Disable TS Formatting
-      -- require("lspconfig").tsserver.setup({
-      --   capabilities = capabilities,
-      --   on_attach = tsserver_on_attach,
-      -- })
-
-      require("typescript-tools").setup({
+      -- Disable TS Formatting
+      require("lspconfig").tsserver.setup({
+        capabilities = capabilities,
         on_attach = tsserver_on_attach,
-        settings = {
-          separate_diagnostic_server = true,
-          tsserver_plugins = {
-            "@styled/typescript-styled-plugin",
-            "typescript-styled-plugin",
-          },
-          jsx_close_tag = {
-            enable = true,
-            filetypes = { "javascriptreact", "javascript", "typescriptreact", },
-          }
-        }
       })
+
+      -- require("typescript-tools").setup({
+      --   on_attach = tsserver_on_attach,
+      --   settings = {
+      --     separate_diagnostic_server = true,
+      --     tsserver_plugins = {
+      --       "@styled/typescript-styled-plugin",
+      --       "typescript-styled-plugin",
+      --     },
+      --     jsx_close_tag = {
+      --       enable = true,
+      --       filetypes = { "javascriptreact", "javascript", "typescriptreact", },
+      --     }
+      --   }
+      -- })
 
       -- Eslint Fix All
       -- TODO: auto fix all eslint on save

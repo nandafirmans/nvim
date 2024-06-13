@@ -60,7 +60,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorschem ayu-mirage]])
+vim.cmd([[colorschem sonokai]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
