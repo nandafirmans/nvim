@@ -83,11 +83,28 @@ return {
       { "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n" }
     },
     config = function()
+      local window_width = 50
+      local window_height = vim.o.lines - 20
+      local col_pos = math.floor(vim.o.columns / 2 - window_width / 2)
+      -- local col_pos = math.floor(vim.o.columns - window_width - 5)
+      local row_pos = math.floor(vim.o.lines / 2 - window_height / 2 - 1)
+
       require("nvim-tree").setup({
         update_focused_file = {
           enable = true,
         },
         view = {
+          float = {
+            enable = true,
+            open_win_config = {
+              relative = "editor",
+              border = "rounded",
+              width = window_width,
+              height = window_height,
+              col = col_pos,
+              row = row_pos,
+            },
+          },
           side = "left",
           width = 50,
         },

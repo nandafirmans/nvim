@@ -8,21 +8,6 @@ return {
   -- VSCode like picktogram
   { "onsails/lspkind.nvim" },
 
-  -- {
-  --   "jmederosalvarado/roslyn.nvim",
-  --   config = function()
-  --     local lsp_util = require("plugins.lsp.util")
-  --     local on_attach = lsp_util.on_attach;
-  --     local capabilities = lsp_util.capabilities;
-  --     require("roslyn").setup({
-  --       dotnet_cmd = "dotnet",
-  --       roslyn_version = "4.8.0-3.23475.7",
-  --       on_attach = on_attach,
-  --       capabilities = capabilities,
-  --     })
-  --   end
-  -- },
-
   {
     -- Automatically install LSPs to stdpath for neovim
     "williamboman/mason.nvim",
@@ -31,7 +16,6 @@ return {
       "pmizio/typescript-tools.nvim",
       "nvim-lua/plenary.nvim",
       "neovim/nvim-lspconfig"
-      -- 'Hoffs/omnisharp-extended-lsp.nvim',
     },
     config = function()
       require("mason").setup()
@@ -47,6 +31,10 @@ return {
 
       mason_lspconfig.setup_handlers({
         function(server_name)
+          -- if (server_name == "tsserver") then
+          --   return
+          -- end
+
           require("lspconfig")[server_name].setup({
             capabilities = capabilities,
             on_attach = on_attach,
@@ -71,11 +59,10 @@ return {
       --     separate_diagnostic_server = true,
       --     tsserver_plugins = {
       --       "@styled/typescript-styled-plugin",
-      --       "typescript-styled-plugin",
       --     },
       --     jsx_close_tag = {
       --       enable = true,
-      --       filetypes = { "javascriptreact", "javascript", "typescriptreact", },
+      --       filetypes = { "javascriptreact", "javascript", "typescriptreact", "typescript", },
       --     }
       --   }
       -- })
@@ -85,21 +72,6 @@ return {
       vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
     end
   },
-
-  -- {
-  --   "jmederosalvarado/roslyn.nvim",
-  --   config = function()
-  --     local lsp_util = require("plugins.lsp.util")
-  --     local on_attach = lsp_util.on_attach;
-  --     local capabilities = lsp_util.capabilities;
-  --     require("roslyn").setup({
-  --       dotnet_cmd = "dotnet",
-  --       roslyn_version = "4.9.0-3.23604.10",
-  --       on_attach = on_attach,       -- required
-  --       capabilities = capabilities, -- required
-  --     })
-  --   end
-  -- },
 
   -- null-ls is used for formatters/diagnostics not provided by the language server
   {
