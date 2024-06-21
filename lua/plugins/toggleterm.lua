@@ -49,7 +49,7 @@ return {
     local lazygit  = Terminal:new({
       cmd = "lazygit",
       hidden = true,
-      direction = "tab",
+      direction = "float",
       close_on_exit = true,
       hide_numbers = true,
       shade_filetypes = {},
@@ -70,7 +70,7 @@ return {
     })
 
     local top      = Terminal:new({
-      cmd = "gotop",
+      cmd = "btop",
       hidden = true,
       direction = "float",
       close_on_exit = true,
