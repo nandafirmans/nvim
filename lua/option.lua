@@ -60,7 +60,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
-vim.cmd([[colorschem catppuccin-mocha]])
+vim.cmd([[colorschem monokai-pro-spectrum]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"

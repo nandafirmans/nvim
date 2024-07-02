@@ -49,7 +49,7 @@ return {
     lazy = false,
     priority = 1000,
     opts = {
-      -- transparent_mode = true,
+      transparent_mode = false,
     },
   },
   {
