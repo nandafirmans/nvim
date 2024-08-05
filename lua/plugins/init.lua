@@ -147,9 +147,9 @@ return {
   -- Auto close tag
   {
     "windwp/nvim-ts-autotag",
-    -- config = function()
-    --   require("nvim-ts-autotag").setup()
-    -- end
+    config = function()
+      require("nvim-ts-autotag").setup()
+    end
   },
 
   -- Auto pair char

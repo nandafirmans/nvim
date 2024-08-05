@@ -84,9 +84,11 @@ return {
     },
     config = function()
       local window_width = 50
-      local window_height = vim.o.lines - 20
-      local col_pos = math.floor(vim.o.columns / 2 - window_width / 2)
-      -- local col_pos = math.floor(vim.o.columns - window_width - 5)
+      local window_height = vim.o.lines - 5
+      -- local window_height = vim.o.lines
+      -- local col_pos = math.floor(vim.o.columns / 2 - window_width / 2)
+      local col_pos = math.floor(vim.o.columns - window_width - 5)
+      -- local col_pos = 0
       local row_pos = math.floor(vim.o.lines / 2 - window_height / 2 - 1)
 
       require("nvim-tree").setup({
