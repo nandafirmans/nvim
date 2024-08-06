@@ -33,7 +33,6 @@ return {
   { 'eldritch-theme/eldritch.nvim',     lazy = false,       priority = 1000 },
   { 'sainnhe/everforest',               lazy = false,       priority = 1000 },
   { 'tiagovla/tokyodark.nvim',          lazy = false,       priority = 1000 },
-  { "0xstepit/flow.nvim",               lazy = false,       priority = 1000, },
   { "bluz71/vim-nightfly-colors",       name = "nightfly",  lazy = false,    priority = 1000 },
   { "bluz71/vim-moonfly-colors",        name = "moonfly",   lazy = false,    priority = 1000 },
   { 'rose-pine/neovim',                 name = 'rose-pine', lazy = false,    priority = 1000 },
@@ -53,6 +52,19 @@ return {
     opts = {
       transparent_mode = false,
     },
+  },
+  {
+    "0xstepit/flow.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("flow").setup {
+        transparent = false,    -- Set transparent background.
+        fluo_color = "pink",    --  Fluo color: pink, yellow, orange, or green.
+        mode = "normal",        -- Intensity of the palette: normal, bright, desaturate, or dark. Notice that dark is ugly!
+        aggressive_spell = false, -- Display colors for spell check.
+      }
+    end
   },
   {
     "loctvl842/monokai-pro.nvim",

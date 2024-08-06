@@ -4,9 +4,9 @@ return {
     "folke/noice.nvim",
     dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify", },
     opts = {
-      -- messages = {
-      --   enabled = false,
-      -- },
+      messages = {
+        enabled = false,
+      },
       lsp = {
         -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
         override = {
@@ -67,6 +67,7 @@ return {
       -- },
       presets = {
         command_palette = true,
+        -- long_message_to_split = true,
       }
     },
     config = function(_, opts)
