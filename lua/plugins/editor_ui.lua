@@ -5,10 +5,9 @@ return {
     dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify", },
     opts = {
       messages = {
-        enabled = false,
+        enabled = true,
       },
       lsp = {
-        -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
@@ -67,10 +66,16 @@ return {
       -- },
       presets = {
         command_palette = true,
-        -- long_message_to_split = true,
+        long_message_to_split = true,
       }
     },
     config = function(_, opts)
+      local notify = require("notify")
+      notify.setup({
+        stages = "static",
+        timeout = 3000,
+      })
+
       require("noice").setup(opts)
     end
   },
