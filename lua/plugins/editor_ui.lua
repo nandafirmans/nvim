@@ -72,6 +72,7 @@ return {
     config = function(_, opts)
       local notify = require("notify")
       notify.setup({
+        render = "wrapped-compact",
         stages = "static",
         timeout = 3000,
       })
