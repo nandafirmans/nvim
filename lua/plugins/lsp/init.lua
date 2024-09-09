@@ -48,7 +48,7 @@ return {
       end
 
       -- Disable TS Formatting
-      require("lspconfig").tsserver.setup({
+      require("lspconfig").ts_ls.setup({
         capabilities = capabilities,
         on_attach = tsserver_on_attach,
       })

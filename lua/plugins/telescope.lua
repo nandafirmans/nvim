@@ -184,46 +184,4 @@ return {
     dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim", },
   },
 
-  -- {
-  --   'ThePrimeagen/harpoon',
-  --   dependencies = { 'nvim-lua/plenary.nvim' },
-  --   lazy = false,
-  --   keys = {
-  --     {
-  --       "<leader>fh",
-  --       function()
-  --         require("harpoon.ui").toggle_quick_menu()
-  --       end,
-  --       mode = "n"
-  --     },
-  --     {
-  --       "<leader>aa",
-  --       function()
-  --         require("harpoon.mark").add_file()
-  --       end,
-  --       mode = "n"
-  --     },
-  --     {
-  --       "<leader>h",
-  --       function()
-  --         require("harpoon.ui").nav_prev()
-  --       end,
-  --       mode = "n"
-  --     },
-  --     {
-  --       "<leader>l",
-  --       function()
-  --         require("harpoon.ui").nav_next()
-  --       end,
-  --       mode = "n"
-  --     }
-  --   },
-  --   config = function()
-  --     require("harpoon").setup({
-  --       menu = {
-  --         width = 120,
-  --       }
-  --     })
-  --   end
-  -- }
 }

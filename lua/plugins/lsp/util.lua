@@ -8,9 +8,10 @@ M.servers = {
   gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
-  -- csharp_ls = {},
+  ts_ls = {},
+  csharp_ls = {},
   -- omnisharp = {},
+  sqls = {},
   cssls = {},
   html = {},
 }
