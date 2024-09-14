@@ -29,7 +29,7 @@ return {
             if formated_path == "" then
               formated_path = "/"
             end
-            return string.format("%s -- %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
+            return string.format("%s │ %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
           end,
         },
         pickers = {
@@ -39,10 +39,13 @@ return {
             initial_mode = "normal",
           },
           buffers = {
+            layout_config = {
+              width = 0.5,
+            },
             theme = "dropdown",
             sort_lastused = true,
             ignore_current_buffer = true,
-            previewer = true,
+            previewer = false,
             initial_mode = "normal",
           },
         },

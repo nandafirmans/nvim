@@ -114,7 +114,8 @@ M.hide_lualine_buffers = function()
       lualine_c = {
         {
           'filename',
-          path = 4,
+          -- path = 4,
+          path = 0,
           file_status = true
         },
         'diagnostics',
@@ -145,7 +146,7 @@ M.init_toggle_buffers_and_tab = function()
 
   vim.api.nvim_create_autocmd("VimEnter", {
     callback = function()
-      -- TOGGLE_TABLINE()
+      TOGGLE_TABLINE()
     end,
   })
 end

@@ -24,46 +24,6 @@ return {
           opts = { skip = true },
         },
       },
-      -- cmdline = {
-      --   format = {
-      --     cmdline = { icon = ">" },
-      --     search_down = { icon = "search [v]" },
-      --     search_up = { icon = "search [^]" },
-      --     filter = { icon = "filter" },
-      --     lua = { icon = "lua" },
-      --     help = { icon = "help" },
-      --   }
-      -- },
-      -- views = {
-      --   cmdline_popup = {
-      --     position = {
-      --       row = 5,
-      --       col = "50%",
-      --     },
-      --     size = {
-      --       width = 60,
-      --       height = "auto",
-      --     },
-      --   },
-      --   popupmenu = {
-      --     relative = "editor",
-      --     position = {
-      --       row = 8,
-      --       col = "50%",
-      --     },
-      --     size = {
-      --       width = 60,
-      --       height = 10,
-      --     },
-      --     border = {
-      --       style = "rounded",
-      --       padding = { 0, 1 },
-      --     },
-      --     win_options = {
-      --       winhighlight = { Normal = "Normal", FloatBorder = "DiagnosticInfo" },
-      --     },
-      --   },
-      -- },
       presets = {
         command_palette = true,
         long_message_to_split = true,
@@ -90,7 +50,7 @@ return {
       { "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n" }
     },
     config = function()
-      local window_width = 50
+      local window_width = 45
       local window_height = vim.o.lines - 5
       -- local window_height = vim.o.lines
       -- local col_pos = math.floor(vim.o.columns / 2 - window_width / 2)
@@ -107,6 +67,8 @@ return {
             enable = true,
             open_win_config = {
               relative = "editor",
+              -- style = "minimal",
+              -- border = "shadow",
               border = "rounded",
               width = window_width,
               height = window_height,
@@ -114,7 +76,7 @@ return {
               row = row_pos,
             },
           },
-          side = "left",
+          side = "right",
           width = 50,
         },
         actions = {
@@ -205,6 +167,40 @@ return {
     config = function()
       require('spectre').setup({
         is_block_ui_break = true
+      })
+    end
+  },
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    config = function()
+      local highlight = {
+        "DarkGray"
+        -- "RainbowRed",
+        -- "RainbowYellow",
+        -- "RainbowBlue",
+        -- "RainbowOrange",
+        -- "RainbowGreen",
+        -- "RainbowViolet",
+        -- "RainbowCyan",
+      }
+      local hooks = require "ibl.hooks"
+      -- create the highlight groups in the highlight setup hook, so they are reset
+      -- every time the colorscheme changes
+      hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+        vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
+        vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
+        vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
+        vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
+        vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
+        vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
+        vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+        vim.api.nvim_set_hl(0, "DarkGray", { fg = "#444444" })
+      end)
+      require("ibl").setup({
+        indent = { highlight = highlight, char = "│" },
+        -- indent = { highlight = highlight, char = "" },
+        scope = { enabled = false, },
       })
     end
   }

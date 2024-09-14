@@ -141,7 +141,7 @@ return {
     },
     opts = {
       symbol_in_winbar = {
-        enable = false,
+        enable = true,
         hide_keyword = false,
         show_file = true,
         folder_level = 1,
