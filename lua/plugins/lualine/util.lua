@@ -144,11 +144,11 @@ M.init_toggle_buffers_and_tab = function()
 
   M.hide_lualine_buffers()
 
-  vim.api.nvim_create_autocmd("VimEnter", {
-    callback = function()
-      TOGGLE_TABLINE()
-    end,
-  })
+  -- vim.api.nvim_create_autocmd("VimEnter", {
+  --   callback = function()
+  --     TOGGLE_TABLINE()
+  --   end,
+  -- })
 end
 
 

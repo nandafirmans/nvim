@@ -39,7 +39,7 @@ return {
         "vue",
       },
       highlight = { enable = true },
-      autotag = { enable = true },
+      -- autotag = { enable = true },
       indent = { enable = true, disable = { "python" } },
       incremental_selection = {
         enable = true,
