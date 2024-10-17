@@ -49,7 +49,7 @@ return {
     local lazygit  = Terminal:new({
       cmd = "lazygit",
       hidden = true,
-      direction = "float",
+      direction = "tab",
       close_on_exit = true,
       hide_numbers = true,
       shade_filetypes = {},

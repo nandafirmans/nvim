@@ -4,7 +4,7 @@ local M = {}
 -- Enable the following language servers
 M.servers = {
   -- clangd = {},
-  emmet_ls = {},
+  -- emmet_ls = {},
   gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
@@ -34,7 +34,7 @@ M.on_attach = function(_, bufnr)
     vim.keymap.set("n", keys, func, { buffer = bufnr, desc = desc })
   end
 
-  -- nmap("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+  nmap("<leader>RN", vim.lsp.buf.rename, "[R]e[n]ame")
   -- nmap("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
   nmap("gD", vim.lsp.buf.definition, "[G]oto [D]efinition")
   nmap("gI", vim.lsp.buf.implementation, "[G]oto [I]mplementation")
