@@ -47,34 +47,34 @@ return {
         client.server_capabilities.documentFormattingProvider = false
       end
 
-      -- require("lspconfig").ts_ls.setup({
-      --   capabilities = capabilities,
-      --   on_attach = ts_ls_on_attach,
-      --   init_options = {
-      --     plugins = {
-      --       {
-      --         name = "@styled/typescript-styled-plugin",
-      --         location =
-      --         "/Users/nandafirmans/.nvm/versions/node/v20.18.0/lib/node_modules/@styled/typescript-styled-plugin",
-      --         languages = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-      --       },
-      --     },
-      --   },
-      -- })
-
-      require("typescript-tools").setup({
+      require("lspconfig").ts_ls.setup({
+        capabilities = capabilities,
         on_attach = ts_ls_on_attach,
-        settings = {
-          separate_diagnostic_server = true,
-          tsserver_plugins = {
-            "@styled/typescript-styled-plugin",
+        init_options = {
+          plugins = {
+            {
+              name = "@styled/typescript-styled-plugin",
+              location =
+              "/Users/nandafirmans/.nvm/versions/node/v20.18.0/lib/node_modules/@styled/typescript-styled-plugin",
+              languages = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+            },
           },
-          jsx_close_tag = {
-            enable = true,
-            filetypes = { "javascriptreact", "javascript", "typescriptreact", "typescript", },
-          }
-        }
+        },
       })
+
+      -- require("typescript-tools").setup({
+      --   on_attach = ts_ls_on_attach,
+      --   settings = {
+      --     separate_diagnostic_server = true,
+      --     tsserver_plugins = {
+      --       "@styled/typescript-styled-plugin",
+      --     },
+      --     jsx_close_tag = {
+      --       enable = true,
+      --       filetypes = { "javascriptreact", "javascript", "typescriptreact", "typescript", },
+      --     }
+      --   }
+      -- })
 
       -- Eslint Fix All
       -- TODO: auto fix all eslint on save
