@@ -50,8 +50,8 @@ return {
       { "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n" }
     },
     config = function()
-      local window_width = 45
-      local window_height = vim.o.lines - 5
+      local window_width = 43
+      local window_height = vim.o.lines - 8
       -- local window_height = vim.o.lines
       -- local col_pos = math.floor(vim.o.columns / 2 - window_width / 2)
       local col_pos = math.floor(vim.o.columns - window_width - 5)
@@ -77,7 +77,7 @@ return {
             },
           },
           side = "right",
-          width = 50,
+          width = window_width,
         },
         actions = {
           open_file = {
