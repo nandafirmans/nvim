@@ -6,6 +6,7 @@ return {
     },
     config = function()
       local dap, dapui = require("dap"), require("dapui")
+      dapui.setup();
 
       dap.listeners.before.attach.dapui_config = function()
         dapui.open()
@@ -21,10 +22,12 @@ return {
       end
 
       vim.keymap.set("n", "<leader>dt", dap.toggle_breakpoint, {});
-      vim.keymap.set("n", "<leader>dc", dap.continue, {});
+      vim.keymap.set("n", "<leader>d", dap.continue, {});
       vim.keymap.set("n", "<leader>di", dap.step_into, {});
-      vim.keymap.set("n", "<leader>do", dap.step_over, {});
-
+      vim.keymap.set("n", "<leader>dn", dap.step_over, {});
+      vim.keymap.set("n", "<leader>dq", dap.terminate, {});
+      vim.keymap.set("n", "<A-u>", dapui.open, {});
+      vim.keymap.set("n", "<A-U>", dapui.close, {});
 
       dap.adapters.chrome = {
         type = "server",
@@ -68,6 +71,7 @@ return {
         })
       end
 
+
       -- local baseDapConfigJs = {
       --   {
       --     type = "chrome",
@@ -92,6 +96,10 @@ return {
     "Cliffback/netcoredbg-macOS-arm64.nvim",
     dependencies = { "mfussenegger/nvim-dap" },
     config = function()
+      if vim.fn.has("mac") == 0 then
+        return
+      end
+
       require('netcoredbg-macOS-arm64').setup(require('dap'))
     end
   }
