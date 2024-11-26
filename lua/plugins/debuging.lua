@@ -21,13 +21,13 @@ return {
         dapui.close()
       end
 
-      vim.keymap.set("n", "<leader>dt", dap.toggle_breakpoint, {});
-      vim.keymap.set("n", "<leader>d", dap.continue, {});
-      vim.keymap.set("n", "<leader>di", dap.step_into, {});
-      vim.keymap.set("n", "<leader>dn", dap.step_over, {});
-      vim.keymap.set("n", "<leader>dq", dap.terminate, {});
-      vim.keymap.set("n", "<A-u>", dapui.open, {});
-      vim.keymap.set("n", "<A-U>", dapui.close, {});
+      vim.keymap.set("n", "<leader>bt", dap.toggle_breakpoint, {});
+      vim.keymap.set("n", "<leader>bc", dap.continue, {});
+      vim.keymap.set("n", "<leader>bi", dap.step_into, {});
+      vim.keymap.set("n", "<leader>bn", dap.step_over, {});
+      vim.keymap.set("n", "<leader>bq", dap.terminate, {});
+      vim.keymap.set("n", "<A-B>", dapui.open, {});
+      vim.keymap.set("n", "<A-b>", dapui.close, {});
 
       dap.adapters.chrome = {
         type = "server",
