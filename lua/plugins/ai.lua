@@ -95,7 +95,13 @@ return {
       provider = 'copilot'
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-    build = "make",
+    build = (function()
+      if jit.os == "Windows" then
+        return "pwsh -NoProfile Build.ps1"
+      else
+        return "make"
+      end
+    end)(),
     -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
     dependencies = {
       "stevearc/dressing.nvim",
