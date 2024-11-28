@@ -13,7 +13,13 @@ return {
     start_in_insert = true,
     insert_mappings = true,
     persist_size = true,
-    shell = vim.o.shell,
+    shell = (function()
+      if jit.os == "Windows" then
+        return "pwsh.exe"
+      else
+        return vim.o.shell
+      end
+    end)(),
     float_opts = {
       border = "curved",
       winblend = 0,
