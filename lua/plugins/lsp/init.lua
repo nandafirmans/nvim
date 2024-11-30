@@ -43,48 +43,21 @@ return {
         end,
       })
 
-      local ts_ls_on_attach = function(client)
-        client.server_capabilities.documentFormattingProvider = false
-      end
-
       require("lspconfig").ts_ls.setup({
         capabilities = capabilities,
-        on_attach = ts_ls_on_attach,
-        init_options = {
-          plugins = {
-            {
-              name = "@styled/typescript-styled-plugin",
-              location =
-              "/Users/nandafirmans/.nvm/versions/node/v20.18.0/lib/node_modules/@styled/typescript-styled-plugin",
-              languages = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-            },
-          },
-        },
+        on_attach = function(client)
+          client.server_capabilities.documentFormattingProvider = false
+        end
       })
 
-      -- require("typescript-tools").setup({
-      --   on_attach = ts_ls_on_attach,
-      --   settings = {
-      --     separate_diagnostic_server = true,
-      --     tsserver_plugins = {
-      --       "@styled/typescript-styled-plugin",
-      --     },
-      --     jsx_close_tag = {
-      --       enable = true,
-      --       filetypes = { "javascriptreact", "javascript", "typescriptreact", "typescript", },
-      --     }
-      --   }
-      -- })
-
       -- Eslint Fix All
-      -- TODO: auto fix all eslint on save
       vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
     end
   },
 
   -- null-ls is used for formatters/diagnostics not provided by the language server
   {
-    "jose-elias-alvarez/null-ls.nvim",
+    "nvimtools/none-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local lsp_util = require("plugins.lsp.util")
