@@ -93,6 +93,13 @@ return {
   },
   { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
   {
+    'nicholasmata/nvim-dap-cs',
+    dependencies = { 'mfussenegger/nvim-dap' },
+    config = function()
+      require('dap-cs').setup()
+    end
+  },
+  {
     "Cliffback/netcoredbg-macOS-arm64.nvim",
     dependencies = { "mfussenegger/nvim-dap" },
     config = function()
