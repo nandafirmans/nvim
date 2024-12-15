@@ -18,12 +18,18 @@ return {
       "neovim/nvim-lspconfig"
     },
     config = function()
-      require("mason").setup()
+      require("mason").setup({
+        registries = {
+          'github:mason-org/mason-registry',
+          'github:crashdummyy/mason-registry',
+        }
+      })
       local lsp_util = require("plugins.lsp.util")
       local servers = lsp_util.servers;
       local on_attach = lsp_util.on_attach;
       local capabilities = lsp_util.capabilities;
       local mason_lspconfig = require("mason-lspconfig")
+      vim.lsp.inlay_hint.enable = true;
 
       mason_lspconfig.setup({
         ensure_installed = vim.tbl_keys(servers),
@@ -230,4 +236,88 @@ return {
       },
     }
   },
+
+
+  {
+    "seblj/roslyn.nvim",
+    dependencies = {
+      {
+        "jlcrochet/vim-razor",
+        config = function()
+          vim.cmd [[
+            au BufRead,BufNewFile *.cshtml set filetype=razor
+          ]]
+        end
+      },
+      {
+        "tris203/rzls.nvim",
+        config = function()
+          local lsp_util = require("plugins.lsp.util")
+          local capabilities = lsp_util.capabilities;
+          local on_attach = lsp_util.on_attach;
+
+          require('rzls').setup {
+            on_attach = on_attach,
+            capabilities = capabilities,
+          }
+        end,
+      },
+      "rpollard00/cutlass.nvim"
+    },
+    ft = { "razor", "cs" },
+    config = function()
+      local lsp_util = require("plugins.lsp.util")
+      local capabilities = lsp_util.capabilities;
+      local on_attach = lsp_util.on_attach;
+
+      require("roslyn").setup({
+        args = {
+          '--logLevel=Information',
+          '--extensionLogDirectory=' .. vim.fs.dirname(vim.lsp.get_log_path()),
+          '--razorSourceGenerator=' .. vim.fs.joinpath(
+            vim.fn.stdpath 'data' --[[@as string]],
+            'mason',
+            'packages',
+            'roslyn',
+            'libexec',
+            'Microsoft.CodeAnalysis.Razor.Compiler.dll'
+          ),
+          '--razorDesignTimePath=' .. vim.fs.joinpath(
+            vim.fn.stdpath 'data' --[[@as string]],
+            'mason',
+            'packages',
+            'rzls',
+            'libexec',
+            'Targets',
+            'Microsoft.NET.Sdk.Razor.DesignTime.targets'
+          ),
+        },
+        config = {
+          on_attach = on_attach,
+          capabilities = capabilities,
+          handlers = require('rzls.roslyn_handlers'),
+          settings = {
+            ['csharp|inlay_hints'] = {
+              csharp_enable_inlay_hints_for_implicit_object_creation = true,
+              csharp_enable_inlay_hints_for_implicit_variable_types = true,
+
+              csharp_enable_inlay_hints_for_lambda_parameter_types = true,
+              csharp_enable_inlay_hints_for_types = true,
+              dotnet_enable_inlay_hints_for_indexer_parameters = true,
+              dotnet_enable_inlay_hints_for_literal_parameters = true,
+              dotnet_enable_inlay_hints_for_object_creation_parameters = true,
+              dotnet_enable_inlay_hints_for_other_parameters = true,
+              dotnet_enable_inlay_hints_for_parameters = true,
+              dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
+              dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
+              dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
+            },
+            ['csharp|code_lens'] = {
+              dotnet_enable_references_code_lens = true,
+            },
+          },
+        },
+      })
+    end
+  }
 }
