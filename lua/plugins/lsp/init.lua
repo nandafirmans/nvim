@@ -238,16 +238,17 @@ return {
 
 
   {
+    "jlcrochet/vim-razor",
+    config = function()
+      vim.cmd [[
+        au BufRead,BufNewFile *.cshtml set filetype=razor
+      ]]
+    end
+  },
+
+  {
     "seblj/roslyn.nvim",
     dependencies = {
-      {
-        "jlcrochet/vim-razor",
-        config = function()
-          vim.cmd [[
-            au BufRead,BufNewFile *.cshtml set filetype=razor
-          ]]
-        end
-      },
       {
         "tris203/rzls.nvim",
         config = function()
