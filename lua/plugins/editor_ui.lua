@@ -23,6 +23,14 @@ return {
           },
           opts = { skip = true },
         },
+        {
+          filter = {
+            event = "msg_show",
+            kind = "",
+            find = "nil",
+          },
+          opts = { skip = true },
+        },
       },
       presets = {
         command_palette = true,
