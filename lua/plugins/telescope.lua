@@ -7,6 +7,7 @@ return {
     config = function()
       require("telescope").setup({
         defaults = {
+          file_ignore_patterns = { '%__virtual.cs$', '%__virtual.html$' },
           vimgrep_arguments = {
             'rg',
             '--color=never',
