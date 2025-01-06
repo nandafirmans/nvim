@@ -39,7 +39,7 @@ return {
           },
           live_grep = {
             attach_mappings = function(_, map)
-              map("i", "<CR>", function()
+              map("n", "/", function()
                 local action_state = require("telescope.actions.state")
                 local search_text = action_state.get_current_line()
                 if search_text and search_text ~= "" then
