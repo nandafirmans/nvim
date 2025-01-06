@@ -19,7 +19,7 @@ return {
             '--multiline',
             '--multiline-dotall'
           },
-          path_display = function(opts, path)
+          path_display = function(_, path)
             local tail = require("telescope.utils").path_tail(path)
             local formated_path = require("telescope.utils").transform_path({ path_display = { truncate = 3 } }, path)
             formated_path = formated_path:gsub(tail, "")
@@ -28,12 +28,26 @@ return {
             end
             return string.format("%s │ %s", tail, formated_path), { { { 1, #tail }, "Constant" } }
           end,
+          highlight = true,
+          hl_result_eol = true,
         },
         pickers = {
           colorscheme = {
             theme = "dropdown",
             enable_preview = true,
             initial_mode = "normal",
+          },
+          live_grep = {
+            attach_mappings = function(_, map)
+              map("i", "<CR>", function()
+                local action_state = require("telescope.actions.state")
+                local search_text = action_state.get_current_line()
+                if search_text and search_text ~= "" then
+                  vim.cmd([[/]] .. search_text);
+                end
+              end)
+              return true
+            end,
           },
           buffers = {
             layout_config = {
