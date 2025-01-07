@@ -16,13 +16,17 @@ return {
       options = {
         theme = "auto",
         icons_enabled = true,
-        section_separators = { left = "", right = "" },
+        -- section_separators = { left = "", right = "" },
         -- component_separators = '|',
-        -- section_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
         component_separators = '',
-        disabled_filetypes = {},
         always_divide_middle = true,
-        globalstatus = true,
+        -- disabled_filetypes = {},
+        -- globalstatus = true,
+        disabled_filetypes = {
+          statusline = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'NvimTree', 'Trouble', 'qf' },
+          winbar = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'NvimTree', 'Trouble', 'qf' }
+        },
         refresh = {
           statusline = 100,
           tabline = 100,
