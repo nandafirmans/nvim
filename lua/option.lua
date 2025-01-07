@@ -61,7 +61,7 @@ vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
 -- vim.cmd([[colorschem citruszest]])
-vim.cmd([[colorschem gruvbox]])
+vim.cmd([[colorschem ayu-mirage]])
 -- vim.cmd([[colorschem catppuccin]])
 
 -- Set completeopt to have a better completion experience

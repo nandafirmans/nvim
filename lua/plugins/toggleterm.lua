@@ -55,7 +55,7 @@ return {
     local lazygit  = Terminal:new({
       cmd = "lazygit",
       hidden = true,
-      direction = "float",
+      direction = "tab",
       close_on_exit = true,
       start_in_insert = true,
     })
