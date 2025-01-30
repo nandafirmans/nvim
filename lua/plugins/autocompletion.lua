@@ -1,52 +1,4 @@
 return {
-
-  -- {
-  --   "github/copilot.vim",
-  --   lazy = false,
-  --   config = function()
-  --     vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
-  --     vim.g.copilot_no_tab_map = true
-  --     vim.g.copilot_filetypes = {
-  --       ["*"] = false,
-  --       ["md"] = true,
-  --       ["javascript"] = true,
-  --       ["typescript"] = true,
-  --       ["typescriptreact"] = true,
-  --       ["css"] = true,
-  --       ["scss"] = true,
-  --       ["less"] = true,
-  --       ["html"] = true,
-  --       ["lua"] = true,
-  --       ["rust"] = false,
-  --       ["c"] = false,
-  --       ["c#"] = false,
-  --       ["c++"] = false,
-  --       ["go"] = false,
-  --       ["python"] = false,
-  --     }
-  --   end
-  -- },
-
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    config = function()
-      require("copilot").setup({
-        suggestion = { enabled = false },
-        panel = { enabled = false },
-      })
-    end,
-  },
-
-  {
-    "zbirenbaum/copilot-cmp",
-    dependencies = { "copilot.lua" },
-    config = function()
-      require("copilot_cmp").setup()
-    end
-  },
-
   {
     -- Autocompletion
     "hrsh7th/nvim-cmp",
@@ -86,8 +38,11 @@ return {
           format = require('lspkind').cmp_format({
             mode = 'symbol',
             maxwidth = 50,
-            symbol_map = { Copilot = "" }
+            symbol_map = { Copilot = "", minuet = "M", },
           }),
+        },
+        performance = {
+          fetching_timeout = 2000,
         },
         mapping = cmp.mapping.preset.insert({
           ["<C-d>"] = cmp.mapping.scroll_docs(-4),
@@ -119,6 +74,7 @@ return {
           end, { "i", "s" }),
         }),
         sources = {
+          { name = "minuet",   group_index = 2 },
           { name = "copilot",  group_index = 2 },
           { name = "nvim_lsp", group_index = 2 },
           { name = "luasnip",  group_index = 2 },

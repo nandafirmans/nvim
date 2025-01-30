@@ -1,4 +1,52 @@
 return {
+
+  -- {
+  --   "github/copilot.vim",
+  --   lazy = false,
+  --   config = function()
+  --     vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+  --     vim.g.copilot_no_tab_map = true
+  --     vim.g.copilot_filetypes = {
+  --       ["*"] = false,
+  --       ["md"] = true,
+  --       ["javascript"] = true,
+  --       ["typescript"] = true,
+  --       ["typescriptreact"] = true,
+  --       ["css"] = true,
+  --       ["scss"] = true,
+  --       ["less"] = true,
+  --       ["html"] = true,
+  --       ["lua"] = true,
+  --       ["rust"] = false,
+  --       ["c"] = false,
+  --       ["c#"] = false,
+  --       ["c++"] = false,
+  --       ["go"] = false,
+  --       ["python"] = false,
+  --     }
+  --   end
+  -- },
+
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      })
+    end,
+  },
+
+  {
+    "zbirenbaum/copilot-cmp",
+    dependencies = { "copilot.lua" },
+    config = function()
+      require("copilot_cmp").setup()
+    end
+  },
+
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     -- branch = "canary",
@@ -86,13 +134,23 @@ return {
       },
     }
   },
+
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
     lazy = false,
     version = false, -- set this if you want to always pull the latest change
     opts = {
-      provider = 'copilot'
+      provider = 'copilot',
+      -- provider = "ollama",
+      -- vendors = {
+      --   ollama = {
+      --     __inherited_from = "openai",
+      --     api_key_name = "",
+      --     model = "deepseek-coder-v2:latest",
+      --     endpoint = "http://127.0.0.1:11434/v1",
+      --   },
+      -- },
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = (function()
@@ -138,4 +196,29 @@ return {
       },
     },
   },
+
+  -- {
+  --   'milanglacier/minuet-ai.nvim',
+  --   config = function()
+  --     require('minuet').setup {
+  --       provider = 'openai_fim_compatible',
+  --       n_completions = 1, -- recommend for local model for resource saving
+  --       -- I recommend you start with a small context window firstly, and gradually
+  --       -- increase it based on your local computing power.
+  --       context_window = 512,
+  --       provider_options = {
+  --         openai_fim_compatible = {
+  --           api_key = 'TERM',
+  --           name = 'Ollama',
+  --           end_point = 'http://localhost:11434/v1/completions',
+  --           model = "deepseek-coder:6.7b",
+  --           optional = {
+  --             max_tokens = 256,
+  --             top_p = 0.9,
+  --           },
+  --         },
+  --       },
+  --     }
+  --   end,
+  -- },
 }
