@@ -3,7 +3,16 @@ return {
   {
     "nvim-telescope/telescope.nvim",
     branch = "0.1.x",
-    dependencies = { "nvim-lua/plenary.nvim", },
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      {
+        "isak102/telescope-git-file-history.nvim",
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+          "tpope/vim-fugitive"
+        }
+      }
+    },
     config = function()
       require("telescope").setup({
         defaults = {
@@ -76,6 +85,7 @@ return {
       require("telescope").load_extension("file_browser")
       require("telescope").load_extension("flutter")
       require("telescope").load_extension("session-lens")
+      require("telescope").load_extension("git_file_history")
     end,
     keys = {
       {
@@ -128,12 +138,12 @@ return {
         desc =
         "[F]ind [F]iles"
       },
-      -- {
-      --   "<leader>fh",
-      --   function() require("telescope.builtin").help_tags(); end,
-      --   desc =
-      --   "[F]ind [H]elp"
-      -- },
+      {
+        "<leader>fh",
+        function() require("telescope").extensions.git_file_history.git_file_history(); end,
+        desc =
+        "[F]ind [H]elp"
+      },
       {
         "<leader>fw",
         function() require("telescope.builtin").grep_string(); end,
