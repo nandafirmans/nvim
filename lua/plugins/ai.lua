@@ -1,32 +1,5 @@
 return {
 
-  -- {
-  --   "github/copilot.vim",
-  --   lazy = false,
-  --   config = function()
-  --     vim.api.nvim_set_keymap("i", "<A-j>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
-  --     vim.g.copilot_no_tab_map = true
-  --     vim.g.copilot_filetypes = {
-  --       ["*"] = false,
-  --       ["md"] = true,
-  --       ["javascript"] = true,
-  --       ["typescript"] = true,
-  --       ["typescriptreact"] = true,
-  --       ["css"] = true,
-  --       ["scss"] = true,
-  --       ["less"] = true,
-  --       ["html"] = true,
-  --       ["lua"] = true,
-  --       ["rust"] = false,
-  --       ["c"] = false,
-  --       ["c#"] = false,
-  --       ["c++"] = false,
-  --       ["go"] = false,
-  --       ["python"] = false,
-  --     }
-  --   end
-  -- },
-
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
@@ -49,10 +22,10 @@ return {
 
   {
     "CopilotC-Nvim/CopilotChat.nvim",
-    -- branch = "canary",
     dependencies = {
       { "zbirenbaum/copilot.lua" },
       { "nvim-lua/plenary.nvim" },
+      
     },
     keys = {
       {
@@ -91,6 +64,16 @@ return {
         desc = "CopilotChat - Quick chat",
       },
       {
+        "<leader>ccc",
+        mode = { "n" },
+        function()
+          local input = vim.fn.input("Chat: ")
+          require("CopilotChat").ask(input, {
+            context = { 'buffer', 'files', 'registers:+' }
+          })
+        end
+      },
+      {
         "<leader>cch",
         mode = { "v", "n" },
         function()
@@ -117,71 +100,81 @@ return {
         desc = "CopilotChat - Prompt actions",
       },
     },
-    opts = {
-      -- default window options
-      window = {
-        layout = 'float',       -- 'vertical', 'horizontal', 'float'
-        -- Options below only apply to floating windows
-        relative = 'editor',    -- 'editor', 'win', 'cursor', 'mouse'
-        border = 'single',      -- 'none', single', 'double', 'rounded', 'solid', 'shadow'
-        width = 0.8,            -- fractional width of parent
-        height = 0.6,           -- fractional height of parent
-        row = nil,              -- row position of the window, default is centered
-        col = nil,              -- column position of the window, default is centered
-        title = 'Copilot Chat', -- title of chat window
-        -- footer = nil,           -- footer of chat window
-        zindex = 1,             -- determines if window is on top or below other floating windows
-      },
-    }
+    config = function()
+      require("CopilotChat").setup({
+        model = "claude-3.5-sonnet",
+        window = {
+          layout = 'vertical',
+          width = 0.3,
+          height = 0.8,
+          relative = 'editor',
+          border = 'single',
+          row = nil,
+          col = nil,
+          title = 'Copilot Chat',
+          footer = nil,
+          zindex = 1,
+        },
+      })
+      vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = 'copilot-*',
+        callback = function()
+          vim.opt_local.relativenumber = true
+
+          -- C-p to print last response
+          vim.keymap.set('n', '<C-p>', function()
+            print(require("CopilotChat").response())
+          end, { buffer = true, remap = true })
+        end
+      })
+    end,
   },
 
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
     lazy = false,
-    version = false, -- set this if you want to always pull the latest change
     opts = {
-      -- provider = 'copilot',
-      provider = "ollama",
-      vendors = {
-        ollama = {
-          __inherited_from = "openai",
-          api_key_name = "",
-          ask = "",
-          endpoint = "http://127.0.0.1:11434/api",
-          model = "qwen2.5-coder:7b",
-          parse_curl_args = function(opts, code_opts)
-            return {
-              url = opts.endpoint .. "/chat",
-              headers = {
-                ["Accept"] = "application/json",
-                ["Content-Type"] = "application/json",
-              },
-              body = {
-                model = opts.model,
-                options = {
-                  num_ctx = 16384,
-                },
-                messages = require("avante.providers").copilot.parse_messages(code_opts), -- you can make your own message, but this is very advanced
-                stream = true,
-              },
-            }
-          end,
-          parse_stream_data = function(data, handler_opts)
-            local json_data = vim.fn.json_decode(data)
-            if json_data and json_data.done then
-              handler_opts.on_complete(nil) -- Properly terminate the stream
-              return
-            end
-            if json_data and json_data.message and json_data.message.content then
-              local content = json_data.message.content
-              handler_opts.on_chunk(content)
-            end
-          end,
-        },
-      },
+      provider = 'copilot',
+      -- provider = "ollama",
+      -- vendors = {
+      --   ollama = {
+      --     __inherited_from = "openai",
+      --     api_key_name = "",
+      --     ask = "",
+      --     endpoint = "http://127.0.0.1:11434/api",
+      --     model = "qwen2.5-coder:7b",
+      --     parse_curl_args = function(opts, code_opts)
+      --       return {
+      --         url = opts.endpoint .. "/chat",
+      --         headers = {
+      --           ["Accept"] = "application/json",
+      --           ["Content-Type"] = "application/json",
+      --         },
+      --         body = {
+      --           model = opts.model,
+      --           options = {
+      --             num_ctx = 16384,
+      --           },
+      --           messages = require("avante.providers").copilot.parse_messages(code_opts), -- you can make your own message, but this is very advanced
+      --           stream = true,
+      --         },
+      --       }
+      --     end,
+      --     parse_stream_data = function(data, handler_opts)
+      --       local json_data = vim.fn.json_decode(data)
+      --       if json_data and json_data.done then
+      --         handler_opts.on_complete(nil) -- Properly terminate the stream
+      --         return
+      --       end
+      --       if json_data and json_data.message and json_data.message.content then
+      --         local content = json_data.message.content
+      --         handler_opts.on_chunk(content)
+      --       end
+      --     end,
+      --   },
+      -- },
     },
-    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = (function()
       if jit.os == "Windows" then
         return "pwsh -NoProfile Build.ps1"
@@ -189,20 +182,16 @@ return {
         return "make"
       end
     end)(),
-    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
     dependencies = {
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      --- The below dependencies are optional,
-      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      "zbirenbaum/copilot.lua",      -- for providers='copilot'
+      "nvim-tree/nvim-web-devicons",
+      "zbirenbaum/copilot.lua",
       {
-        -- support for image pasting
         "HakonHarnes/img-clip.nvim",
         event = "VeryLazy",
         opts = {
-          -- recommended settings
           default = {
             embed_image_as_base64 = false,
             prompt_for_file_name = false,
@@ -215,39 +204,14 @@ return {
         },
       },
       {
-        -- Make sure to set this up properly if you have lazy=true
         'MeanderingProgrammer/render-markdown.nvim',
         lazy = true,
         opts = {
-          file_types = { "markdown", "Avante" },
+          file_types = { "markdown", "Avante", 'copilot-chat' },
         },
         ft = { "markdown", "Avante" },
       },
     },
   },
 
-  -- {
-  --   'milanglacier/minuet-ai.nvim',
-  --   config = function()
-  --     require('minuet').setup {
-  --       provider = 'openai_fim_compatible',
-  --       n_completions = 1, -- recommend for local model for resource saving
-  --       -- I recommend you start with a small context window firstly, and gradually
-  --       -- increase it based on your local computing power.
-  --       context_window = 512,
-  --       provider_options = {
-  --         openai_fim_compatible = {
-  --           api_key = 'TERM',
-  --           name = 'Ollama',
-  --           end_point = 'http://localhost:11434/v1/completions',
-  --           model = "deepseek-coder:6.7b",
-  --           optional = {
-  --             max_tokens = 256,
-  --             top_p = 0.9,
-  --           },
-  --         },
-  --       },
-  --     }
-  --   end,
-  -- },
 }

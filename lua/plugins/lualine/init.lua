@@ -24,8 +24,8 @@ return {
         -- disabled_filetypes = {},
         -- globalstatus = true,
         disabled_filetypes = {
-          statusline = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'NvimTree', 'Trouble', 'qf' },
-          winbar = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'NvimTree', 'Trouble', 'qf' }
+          statusline = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'NvimTree', 'Trouble', 'qf', 'copilot-chat', 'Avante', 'AvanteSelectedFiles', 'AvanteInput' },
+          winbar = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'NvimTree', 'Trouble', 'qf', }
         },
         refresh = {
           statusline = 100,
