@@ -11,6 +11,9 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- Save File
 vim.keymap.set({ "n", "v", "i" }, "<C-s>", "<Cmd>w!<CR>")
 
+-- Save all files
+vim.keymap.set({ "n", "v", "i" }, "<A-s>", "<Cmd>wa<CR>")
+
 -- Close Buffer
 vim.keymap.set("n", "<A-q>", ":q<CR>")
 

@@ -25,7 +25,6 @@ return {
     dependencies = {
       { "zbirenbaum/copilot.lua" },
       { "nvim-lua/plenary.nvim" },
-      
     },
     keys = {
       {
