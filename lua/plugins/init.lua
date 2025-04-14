@@ -94,14 +94,17 @@ return {
     keys = {
       { "<leader>zz", "<Cmd>ZenMode<CR>", mode = "n", desc = "[Z]en [M]ode" }
     },
-    config = function()
-      require("zen-mode").setup({
-        window = {
-          backdrop = 0.8,
-          width = 0.58,
+    opts = {
+      window = {
+        backdrop = 0.8,
+        width = 0.58,
+      },
+      plugins = {
+        options = {
+          laststatus = 3,
         }
-      })
-    end
+      },
+    },
   },
 
   -- VimIlluminate
