@@ -58,12 +58,9 @@ return {
       { "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n" }
     },
     config = function()
-      local window_width = 60
+      local window_width = 50
       local window_height = vim.o.lines - 8
-      -- local window_height = vim.o.lines
-      -- local col_pos = math.floor(vim.o.columns / 2 - window_width / 2)
       local col_pos = math.floor(vim.o.columns - window_width - 5)
-      -- local col_pos = 0
       local row_pos = math.floor(vim.o.lines / 2 - window_height / 2 - 1)
 
       require("nvim-tree").setup({
@@ -72,7 +69,7 @@ return {
         },
         view = {
           float = {
-            enable = true,
+            enable = false,
             open_win_config = {
               relative = "editor",
               -- style = "minimal",
@@ -89,7 +86,8 @@ return {
         },
         actions = {
           open_file = {
-            resize_window = true
+            resize_window = true,
+            quit_on_open = true,
           }
         }
       })
@@ -99,7 +97,6 @@ return {
   -- Tabs & Buffers
   {
     'akinsho/bufferline.nvim',
-    -- version = "*",
     branch = "main",
     lazy = false,
     dependencies = 'nvim-tree/nvim-web-devicons',
