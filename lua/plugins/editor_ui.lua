@@ -175,6 +175,7 @@ return {
       })
     end
   },
+
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
@@ -193,13 +194,13 @@ return {
       -- create the highlight groups in the highlight setup hook, so they are reset
       -- every time the colorscheme changes
       hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-        vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
-        vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
-        vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
-        vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
-        vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
-        vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
-        vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+        -- vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
+        -- vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
+        -- vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
+        -- vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
+        -- vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
+        -- vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
+        -- vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
         vim.api.nvim_set_hl(0, "DarkGray", { fg = "#444444" })
       end)
       require("ibl").setup({
@@ -207,6 +208,33 @@ return {
         -- indent = { highlight = highlight, char = "" },
         scope = { enabled = false, },
       })
+    end
+  },
+
+  {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local harpoon = require("harpoon")
+
+      harpoon:setup()
+
+      vim.keymap.set("n", "<A-a>", function() harpoon:list():add() end)
+      vim.keymap.set("n", "<A-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+
+      vim.keymap.set("n", "<leader>1", function() harpoon:list():select(1) end)
+      vim.keymap.set("n", "<leader>2", function() harpoon:list():select(2) end)
+      vim.keymap.set("n", "<leader>3", function() harpoon:list():select(3) end)
+      vim.keymap.set("n", "<leader>4", function() harpoon:list():select(4) end)
+      vim.keymap.set("n", "<leader>5", function() harpoon:list():select(5) end)
+      vim.keymap.set("n", "<leader>6", function() harpoon:list():select(6) end)
+      vim.keymap.set("n", "<leader>7", function() harpoon:list():select(7) end)
+      vim.keymap.set("n", "<leader>8", function() harpoon:list():select(8) end)
+      vim.keymap.set("n", "<leader>9", function() harpoon:list():select(9) end)
+
+      vim.keymap.set("n", "<A-f>", function() harpoon:list():prev() end, { desc = "Harpoon: Previous", noremap = true })
+      vim.keymap.set("n", "<A-g>", function() harpoon:list():next() end, { desc = "Harpoon: Next", noremap = true })
     end
   }
 }
