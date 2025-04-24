@@ -104,14 +104,14 @@ M.hide_lualine_buffers = function()
       lualine_a = {
         'mode',
       },
-      lualine_b = {
+      lualine_c = {
         'branch',
         {
           "macro-recording",
           fmt = M.show_macro_recording,
         },
       },
-      lualine_c = {
+      lualine_b = {
         {
           'filename',
           -- path = 4,

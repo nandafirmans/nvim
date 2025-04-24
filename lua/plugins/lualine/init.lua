@@ -40,7 +40,7 @@ return {
           --   path = 4,
           --   file_status = true
           -- },
-          require("auto-session.lib").current_session_name,
+          -- require("auto-session.lib").current_session_name,
           'encoding',
           'fileformat',
           'filetype'
