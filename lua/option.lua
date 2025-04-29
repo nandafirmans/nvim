@@ -63,9 +63,9 @@ vim.wo.signcolumn = "yes"
 -- Set colorscheme
 -- vim.cmd([[colorschem citruszest]])
 -- vim.cmd([[colorschem ayu-mirage]])
--- vim.cmd([[colorschem catppuccin]])
+-- vim.cmd([[colorschem catppgruvboxuccin]])
 -- vim.cmd([[colorschem bluloco]])
-vim.cmd([[colorschem gruvbox]])
+vim.cmd([[colorschem eldritch]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
