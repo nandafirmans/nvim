@@ -36,9 +36,9 @@ return {
 
       mason_lspconfig.setup_handlers({
         function(server_name)
-          if (server_name == "ts_ls") then
-            return
-          end
+          -- if (server_name == "ts_ls") then
+          --   return
+          -- end
 
           require("lspconfig")[server_name].setup({
             capabilities = capabilities,
@@ -48,12 +48,12 @@ return {
         end,
       })
 
-      require("lspconfig").ts_ls.setup({
-        capabilities = capabilities,
-        on_attach = function(client)
-          client.server_capabilities.documentFormattingProvider = false
-        end
-      })
+      -- require("lspconfig").ts_ls.setup({
+      --   capabilities = capabilities,
+      --   on_attach = function(client)
+      --     client.server_capabilities.documentFormattingProvider = false
+      --   end
+      -- })
 
       -- Eslint Fix All
       vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
