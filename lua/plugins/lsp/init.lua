@@ -8,11 +8,13 @@ return {
   -- VSCode like picktogram
   { "onsails/lspkind.nvim" },
 
+  { "mason-org/mason-lspconfig.nvim", version = "^1.0.0" },
   {
     -- Automatically install LSPs to stdpath for neovim
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
+    version = "^1.0.0",
     dependencies = {
-      "williamboman/mason-lspconfig.nvim",
+      "mason-org/mason-lspconfig.nvim",
       "pmizio/typescript-tools.nvim",
       "nvim-lua/plenary.nvim",
       "neovim/nvim-lspconfig"
@@ -36,9 +38,9 @@ return {
 
       mason_lspconfig.setup_handlers({
         function(server_name)
-          -- if (server_name == "ts_ls") then
-          --   return
-          -- end
+          if (server_name == "ts_ls") then
+            return
+          end
 
           require("lspconfig")[server_name].setup({
             capabilities = capabilities,
@@ -48,12 +50,12 @@ return {
         end,
       })
 
-      -- require("lspconfig").ts_ls.setup({
-      --   capabilities = capabilities,
-      --   on_attach = function(client)
-      --     client.server_capabilities.documentFormattingProvider = false
-      --   end
-      -- })
+      require("lspconfig").ts_ls.setup({
+        capabilities = capabilities,
+        on_attach = function(client)
+          client.server_capabilities.documentFormattingProvider = false
+        end
+      })
 
       -- Eslint Fix All
       vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
