@@ -18,8 +18,13 @@ return {
         {
           filter = {
             event = "msg_show",
-            kind = "",
-            find = "written",
+            any = {
+              { find = "written" },
+              { find = "bufdelete" },
+              { find = "SERVER_REQUEST_HANDLER_ERROR" },
+              { find = "CursorMoved" },
+              { find = "ModeChanged" }
+            },
           },
           opts = { skip = true },
         },
@@ -233,7 +238,8 @@ return {
       vim.keymap.set("n", "<leader>8", function() harpoon:list():select(8) end)
       vim.keymap.set("n", "<leader>9", function() harpoon:list():select(9) end)
 
-      vim.keymap.set("n", "<leader>h", function() harpoon:list():prev() end, { desc = "Harpoon: Previous", noremap = true })
+      vim.keymap.set("n", "<leader>h", function() harpoon:list():prev() end,
+        { desc = "Harpoon: Previous", noremap = true })
       vim.keymap.set("n", "<leader>l", function() harpoon:list():next() end, { desc = "Harpoon: Next", noremap = true })
     end
   }
