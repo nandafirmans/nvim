@@ -12,7 +12,8 @@ vim.o.hidden = true
 vim.o.swapfile = false
 vim.o.clipboard = "unnamedplus"
 vim.o.guifont = "Victor Mono Nerd Font:h10"
-vim.o.laststatus = 3
+vim.o.laststatus = 0
+-- vim.o.laststatus = 3
 
 -- Neovide
 if vim.g.neovide then

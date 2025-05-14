@@ -78,7 +78,7 @@ local buffers = {
 
 M.show_lualine_buffers = function()
   require("lualine").setup({
-    sections = {
+    winbar = {
       lualine_a = {
         buffers,
       },
@@ -100,9 +100,21 @@ end
 
 M.hide_lualine_buffers = function()
   require("lualine").setup({
-    sections = {
+    winbar = {
+      -- lualine_a = {
+      --   'mode',
+      -- },
       lualine_a = {
-        'mode',
+        {
+          'filename',
+          path = 4,
+          -- path = 0,
+          file_status = true
+        },
+      },
+      lualine_b = {
+        'diagnostics',
+        'diff',
       },
       lualine_c = {
         'branch',
@@ -110,16 +122,6 @@ M.hide_lualine_buffers = function()
           "macro-recording",
           fmt = M.show_macro_recording,
         },
-      },
-      lualine_b = {
-        {
-          'filename',
-          -- path = 4,
-          path = 0,
-          file_status = true
-        },
-        'diagnostics',
-        'diff',
       },
       lualine_y = { 'progress' },
       lualine_z = { 'location' }
