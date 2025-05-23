@@ -107,8 +107,8 @@ M.hide_lualine_buffers = function()
       lualine_a = {
         {
           'filename',
-          path = 4,
-          -- path = 0,
+          -- path = 4,
+          path = 0,
           file_status = true
         },
       },
@@ -117,14 +117,16 @@ M.hide_lualine_buffers = function()
         'diff',
       },
       lualine_c = {
-        'branch',
+        -- 'branch',
         {
           "macro-recording",
           fmt = M.show_macro_recording,
         },
       },
-      lualine_y = { 'progress' },
-      lualine_z = { 'location' }
+      lualine_y = { 'progress', 'location' },
+      lualine_z = {
+        'branch'
+      }
     }
   })
 end
