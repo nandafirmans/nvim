@@ -137,10 +137,11 @@ return {
         respect_root = false,
         color_mode = true,
       },
+      peek_definition = {
+        width = 0.9,
+        height = 0.9,
+      },
     },
-    config = function(_, opts)
-      require("lspsaga").setup(opts)
-    end,
     keys = {
       {
         "gh",
