@@ -123,10 +123,8 @@ M.hide_lualine_buffers = function()
           fmt = M.show_macro_recording,
         },
       },
-      lualine_y = { 'progress', 'location' },
-      lualine_z = {
-        'branch'
-      }
+      lualine_y = { 'location' },
+      lualine_z = { 'branch' }
     }
   })
 end
