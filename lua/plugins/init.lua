@@ -99,11 +99,6 @@ return {
         backdrop = 0.8,
         width = 0.58,
       },
-      plugins = {
-        options = {
-          laststatus = 3,
-        }
-      },
     },
   },
 
