@@ -17,7 +17,7 @@ return {
         theme = "auto",
         icons_enabled = true,
         section_separators = { left = "", right = "" },
-        component_separators = '•',
+        component_separators = '',
         always_divide_middle = true,
         -- disabled_filetypes = {},
         -- globalstatus = true,
@@ -43,7 +43,13 @@ return {
       inactive_winbar = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = { 'filename' },
+        lualine_c = {
+          {
+            'filename',
+            path = 4,
+            file_status = true
+          }
+        },
         lualine_x = {},
         lualine_y = {},
         lualine_z = {}
