@@ -137,8 +137,8 @@ return {
         respect_root = false,
         color_mode = true,
       },
-      peek_definition = {
-        width = 0.9,
+      definition = {
+        width = 0.8,
         height = 0.9,
       },
     },
