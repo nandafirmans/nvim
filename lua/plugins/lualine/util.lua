@@ -124,7 +124,8 @@ M.hide_lualine_buffers = function()
         },
       },
       lualine_y = { 'location' },
-      lualine_z = { 'branch' }
+      -- lualine_z = { 'branch' }
+      lualine_z = { 'mode' }
     }
   })
 end
