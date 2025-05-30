@@ -69,7 +69,7 @@ return {
     })
 
     local nnn      = Terminal:new({
-      cmd = "nnn",
+      cmd = "yazi",
       hidden = true,
       direction = "float",
       close_on_exit = true,
