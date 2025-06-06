@@ -99,6 +99,7 @@ return {
         backdrop = 0.8,
         width = 0.58,
       },
+      laststatus = 0
     },
   },
 
