@@ -12,8 +12,9 @@ vim.o.hidden = true
 vim.o.swapfile = false
 vim.o.clipboard = "unnamedplus"
 vim.o.guifont = "Victor Mono Nerd Font:h10"
-vim.o.laststatus = 0
 -- vim.o.laststatus = 3
+vim.o.laststatus = 0
+vim.o.statusline = "%{repeat('─',winwidth('.'))}"
 
 -- Neovide
 if vim.g.neovide then
@@ -62,11 +63,11 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
 -- Set colorscheme
--- vim.cmd([[colorschem citruszest]])
+vim.cmd([[colorschem citruszest]])
 -- vim.cmd([[colorschem ayu-mirage]])
 -- vim.cmd([[colorschem catppgruvboxuccin]])
 -- vim.cmd([[colorschem bluloco]])
-vim.cmd([[colorschem tokyonight-night]])
+-- vim.cmd([[colorschem tokyonight-night]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
