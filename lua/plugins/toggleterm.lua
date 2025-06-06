@@ -31,8 +31,8 @@ return {
   },
   keys = {
     { "<leader>gg", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
-    { "<C-t>t",     "<CMD>lua _TOP_TOGGLE()<CR>",     mode = "n", desc = "Toggle htop" },
-    { "<C-t>n",     "<CMD>lua _NNN_TOGGLE()<CR>",     mode = "n", desc = "Toggle nnn File Manager" },
+    { "<C-t>t",     "<CMD>lua _TOP_TOGGLE()<CR>",     mode = "n", desc = "Toggle Btop" },
+    { "<C-t>y",     "<CMD>lua _YAZI_TOGGLE()<CR>",    mode = "n", desc = "Toggle Yazi File Manager" },
   },
   config = function(_, opts)
     require("toggleterm").setup(opts)
@@ -55,7 +55,7 @@ return {
     local lazygit  = Terminal:new({
       cmd = "lazygit",
       hidden = true,
-      direction = "tab",
+      direction = "float",
       close_on_exit = true,
       start_in_insert = true,
     })
@@ -68,7 +68,7 @@ return {
       start_in_insert = true,
     })
 
-    local nnn      = Terminal:new({
+    local yazi     = Terminal:new({
       cmd = "yazi",
       hidden = true,
       direction = "float",
@@ -85,8 +85,8 @@ return {
       top:toggle()
     end
 
-    function _NNN_TOGGLE()
-      nnn:toggle()
+    function _YAZI_TOGGLE()
+      yazi:toggle()
     end
   end
 }
