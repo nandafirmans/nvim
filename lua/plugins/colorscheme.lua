@@ -1,5 +1,4 @@
 return {
-  { "navarasu/onedark.nvim",            lazy = false,       priority = 1000 },
   { "dracula/vim",                      lazy = false,       priority = 1000 },
   { "catppuccin/nvim",                  lazy = false,       priority = 1000 },
   { "sainnhe/sonokai",                  lazy = false,       priority = 1000 },
@@ -38,6 +37,18 @@ return {
   { "bluz71/vim-moonfly-colors",        name = "moonfly",   lazy = false,    priority = 1000 },
   { 'rose-pine/neovim',                 name = 'rose-pine', lazy = false,    priority = 1000 },
   { 'srcery-colors/srcery-vim',         name = 'srcery',    lazy = false,    priority = 1000 },
+  {
+    "navarasu/onedark.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      style = "darker",     -- Options: 'darker', 'warmer', 'cooler', 'deep', 'warm', 'light'
+      transparent = true,   -- Enable transparent background
+      term_colors = true,   -- Enable terminal colors
+      ending_tildes = true, -- Show ending tildes
+      highlights = {},      -- Override default highlights
+    }
+  },
   {
     "folke/tokyonight.nvim",
     lazy = false,
