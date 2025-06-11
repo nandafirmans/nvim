@@ -43,7 +43,7 @@ return {
     priority = 1000,
     opts = {
       style = "darker",     -- Options: 'darker', 'warmer', 'cooler', 'deep', 'warm', 'light'
-      transparent = true,   -- Enable transparent background
+      transparent = false,  -- Enable transparent background
       term_colors = true,   -- Enable terminal colors
       ending_tildes = true, -- Show ending tildes
       highlights = {},      -- Override default highlights
@@ -132,14 +132,5 @@ return {
     "scottmckendry/cyberdream.nvim",
     lazy = false,
     priority = 1000,
-    config = function()
-      require("cyberdream").setup({
-        transparent = true,
-        italic_comments = true,
-        hide_fillchars = true,
-        borderless_telescope = true,
-        terminal_colors = true,
-      })
-    end,
   }
 }
