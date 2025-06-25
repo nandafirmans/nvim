@@ -10,6 +10,19 @@ return {
 
   { "mason-org/mason-lspconfig.nvim", version = "^1.0.0" },
   {
+    "nvim-java/nvim-java",
+    config = function()
+      local lsp_util = require("plugins.lsp.util")
+      local on_attach = lsp_util.on_attach;
+      local capabilities = lsp_util.capabilities;
+      require("java").setup()
+      require("lspconfig").jdtls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
+    end
+  },
+  {
     -- Automatically install LSPs to stdpath for neovim
     "mason-org/mason.nvim",
     version = "^1.0.0",
@@ -17,7 +30,7 @@ return {
       "mason-org/mason-lspconfig.nvim",
       "pmizio/typescript-tools.nvim",
       "nvim-lua/plenary.nvim",
-      "neovim/nvim-lspconfig"
+      "neovim/nvim-lspconfig",
     },
     config = function()
       require("mason").setup({
