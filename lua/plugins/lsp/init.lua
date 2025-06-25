@@ -13,12 +13,10 @@ return {
     "nvim-java/nvim-java",
     config = function()
       local lsp_util = require("plugins.lsp.util")
-      local on_attach = lsp_util.on_attach;
-      local capabilities = lsp_util.capabilities;
       require("java").setup()
       require("lspconfig").jdtls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+        capabilities = lsp_util.capabilities,
+        on_attach = lsp_util.on_attach,
       })
     end
   },
