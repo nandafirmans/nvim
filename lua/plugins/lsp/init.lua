@@ -15,7 +15,12 @@ return {
     priority = 1000,
     config = function()
       require('tiny-inline-diagnostic').setup({
-        preset = "powerline"
+        preset = "powerline",
+        options = {
+          severity = {
+            vim.diagnostic.severity.ERROR,
+          },
+        }
       })
       vim.diagnostic.config({
         virtual_text = false,
