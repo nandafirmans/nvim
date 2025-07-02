@@ -10,6 +10,20 @@ return {
 
   { "mason-org/mason-lspconfig.nvim", version = "^1.0.0" },
   {
+    "rachartier/tiny-inline-diagnostic.nvim",
+    event = "VeryLazy",
+    priority = 1000,
+    config = function()
+      require('tiny-inline-diagnostic').setup({
+        preset = "powerline"
+      })
+      vim.diagnostic.config({
+        virtual_text = false,
+        severity_sort = true,
+      })
+    end,
+  },
+  {
     "nvim-java/nvim-java",
     config = function()
       local lsp_util = require("plugins.lsp.util")
@@ -140,6 +154,7 @@ return {
       "nvim-treesitter/nvim-treesitter",
     },
     opts = {
+      diagnostic_only_current = true,
       symbol_in_winbar = {
         enable = false,
         hide_keyword = false,
