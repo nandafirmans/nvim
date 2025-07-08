@@ -1,32 +1,10 @@
 return {
   {
-    -- LSP Configuration & Plugins
     "neovim/nvim-lspconfig",
     lazy = false,
   },
-
-  -- VSCode like picktogram
   { "onsails/lspkind.nvim" },
-
   { "mason-org/mason-lspconfig.nvim", version = "^1.0.0" },
-  {
-    "rachartier/tiny-inline-diagnostic.nvim",
-    event = "VeryLazy",
-    priority = 1000,
-    config = function()
-      require('tiny-inline-diagnostic').setup({
-        preset = "powerline",
-        options = {
-          severity = {
-            vim.diagnostic.severity.ERROR,
-          },
-        }
-      })
-      vim.diagnostic.config({
-        virtual_text = false,
-      })
-    end,
-  },
   {
     "nvim-java/nvim-java",
     config = function()
@@ -39,7 +17,6 @@ return {
     end
   },
   {
-    -- Automatically install LSPs to stdpath for neovim
     "mason-org/mason.nvim",
     version = "^1.0.0",
     dependencies = {
@@ -86,12 +63,9 @@ return {
         end
       })
 
-      -- Eslint Fix All
       vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
     end
   },
-
-  -- null-ls is used for formatters/diagnostics not provided by the language server
   {
     "nvimtools/none-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -112,16 +86,12 @@ return {
       })
     end
   },
-
   {
-    -- Additional lua configuration, makes nvim stuff amazing
     "folke/neodev.nvim",
     config = function()
       require("neodev").setup()
     end
   },
-
-  -- LSP File Operations
   {
     "antosha417/nvim-lsp-file-operations",
     dependencies = {
@@ -132,9 +102,6 @@ return {
       require("lsp-file-operations").setup()
     end
   },
-
-
-  -- Flutter
   {
     'akinsho/flutter-tools.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
@@ -148,7 +115,6 @@ return {
       })
     end
   },
-
   {
     "glepnir/lspsaga.nvim",
     lazy = false,

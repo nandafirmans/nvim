@@ -88,3 +88,14 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 -- make background transparent
 -- vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
 -- vim.cmd("highlight NonText guibg=NONE ctermbg=NONE")
+
+vim.diagnostic.config({
+  virtual_text = {
+    severity = { min = vim.diagnostic.severity.WARN },
+    source = "if_many",
+    spacing = 4,
+  },
+  signs = true,
+  update_in_insert = false,
+  severity_sort = true,
+})
