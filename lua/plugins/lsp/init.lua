@@ -234,8 +234,6 @@ return {
       },
     }
   },
-
-
   {
     "jlcrochet/vim-razor",
     config = function()
@@ -244,7 +242,6 @@ return {
       ]]
     end
   },
-
   {
     "seblyng/roslyn.nvim",
     dependencies = {
