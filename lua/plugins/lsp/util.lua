@@ -1,16 +1,9 @@
 local M = {}
 
-
--- Enable the following language servers
 M.servers = {
-  -- clangd = {},
   emmet_ls = {},
   gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
   ts_ls = {},
-  -- csharp_ls = {},
-  -- omnisharp = {},
   sqls = {},
   cssls = {},
   html = {},
