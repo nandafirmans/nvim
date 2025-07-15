@@ -33,6 +33,7 @@ return {
     { "<leader>gg", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
     { "<C-t>t",     "<CMD>lua _TOP_TOGGLE()<CR>",     mode = "n", desc = "Toggle Btop" },
     { "<C-t>y",     "<CMD>lua _YAZI_TOGGLE()<CR>",    mode = "n", desc = "Toggle Yazi File Manager" },
+    { "<C-t>g",     "<CMD>lua _GEMINI_TOGGLE()<CR>",  mode = "n", desc = "Toggle Gemini" },
   },
   config = function(_, opts)
     require("toggleterm").setup(opts)
@@ -76,6 +77,14 @@ return {
       start_in_insert = true,
     })
 
+    local gemini   = Terminal:new({
+      cmd = "gemini",
+      hidden = true,
+      direction = "float",
+      close_on_exit = true,
+      start_in_insert = true,
+    })
+
 
     function _LAZYGIT_TOGGLE()
       lazygit:toggle()
@@ -87,6 +96,10 @@ return {
 
     function _YAZI_TOGGLE()
       yazi:toggle()
+    end
+
+    function _GEMINI_TOGGLE()
+      gemini:toggle()
     end
   end
 }
