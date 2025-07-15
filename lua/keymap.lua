@@ -15,7 +15,7 @@ vim.keymap.set({ "n", "v", "i" }, "<C-s>", "<Cmd>w!<CR>")
 vim.keymap.set({ "n", "v", "i" }, "<A-s>", "<Cmd>wa<CR>")
 
 -- Close Buffer
-vim.keymap.set("n", "<A-q>", ":q<CR>")
+vim.keymap.set("n", "<leader>q", ":q<CR>")
 
 -- Force Close Buffer
 vim.keymap.set("n", "<A-q>q", ":q!<CR>")
@@ -57,8 +57,3 @@ vim.keymap.set("n", "<A-T>w", ":tabclose<CR>")
 vim.keymap.set("n", "<A-T>n", ":tabnew<CR>")
 vim.keymap.set("n", "<A-T>l", ":tabs<CR>", { desc = "Tab List" })
 
--- Diagnostic keymaps
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float)
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
