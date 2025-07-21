@@ -18,7 +18,7 @@ vim.keymap.set({ "n", "v", "i" }, "<A-s>", "<Cmd>wa<CR>")
 vim.keymap.set("n", "<leader>q", ":q<CR>")
 
 -- Force Close Buffer
-vim.keymap.set("n", "<A-q>q", ":q!<CR>")
+vim.keymap.set("n", "<leader>Q", ":q!<CR>")
 
 -- Previous Buffer
 vim.keymap.set("n", "<s-tab>", "<Cmd>bprevious<CR>", { desc = "Previous Buffer" })
