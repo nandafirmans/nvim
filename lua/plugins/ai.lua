@@ -22,6 +22,7 @@ return {
 
   {
     "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "main",
     dependencies = {
       { "zbirenbaum/copilot.lua" },
       { "nvim-lua/plenary.nvim" },
@@ -101,7 +102,7 @@ return {
     },
     config = function()
       require("CopilotChat").setup({
-        model = "claude-3.5-sonnet",
+        model = "claude-sonnet-4",
         window = {
           layout = 'vertical',
           width = 0.3,
