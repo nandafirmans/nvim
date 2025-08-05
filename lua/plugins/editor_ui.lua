@@ -65,8 +65,8 @@ return {
     },
     config = function()
       local window_width = 50
-      local window_height = vim.o.lines - 8
-      local col_pos = math.floor(vim.o.columns - window_width - 5)
+      local window_height = vim.o.lines - 2;
+      local col_pos = math.floor(vim.o.columns - window_width - 2)
       local row_pos = math.floor(vim.o.lines / 2 - window_height / 2 - 1)
 
       require("nvim-tree").setup({
@@ -75,7 +75,7 @@ return {
         },
         view = {
           float = {
-            enable = false,
+            enable = true,
             open_win_config = {
               relative = "editor",
               -- style = "minimal",
