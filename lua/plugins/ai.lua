@@ -136,6 +136,12 @@ return {
     lazy = false,
     opts = {
       provider = 'copilot',
+      auto_suggestions_provider = "copilot",
+      providers = {
+        copilot = {
+          model = "claude-sonnet-4",
+        },
+      },
       -- provider = "ollama",
       -- vendors = {
       --   ollama = {
