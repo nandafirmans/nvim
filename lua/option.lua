@@ -62,11 +62,7 @@ vim.o.smartcase = true
 vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
--- Set colorscheme
--- vim.cmd([[colorschem ayu-mirage]])
--- vim.cmd([[colorschem catppgruvboxuccin]])
-vim.cmd([[colorschem bluloco]])
--- vim.cmd([[colorschem tokyonight-night]])
+vim.cmd([[colorschem kanagawa]])
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
