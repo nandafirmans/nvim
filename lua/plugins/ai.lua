@@ -191,6 +191,19 @@ return {
   {
     'NickvanDyke/opencode.nvim',
     dependencies = { 'folke/snacks.nvim', },
+    opts = {
+      terminal = {
+        auto_insert = true,
+        auto_close = true,
+        win = {
+          position = "float",
+          enter = true,
+        },
+        env = {
+          OPENCODE_THEME = "system",
+        },
+      },
+    },
     keys = {
       { '<leader>ot', function() require('opencode').toggle() end,                           desc = 'Toggle embedded opencode', },
       { '<leader>oa', function() require('opencode').ask('@cursor: ') end,                   desc = 'Ask opencode',                 mode = 'n', },
