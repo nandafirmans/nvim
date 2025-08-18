@@ -179,44 +179,6 @@ return {
           model = "claude-sonnet-4",
         },
       },
-      -- provider = "ollama",
-      -- vendors = {
-      --   ollama = {
-      --     __inherited_from = "openai",
-      --     api_key_name = "",
-      --     ask = "",
-      --     endpoint = "http://127.0.0.1:11434/api",
-      --     model = "qwen2.5-coder:7b",
-      --     parse_curl_args = function(opts, code_opts)
-      --       return {
-      --         url = opts.endpoint .. "/chat",
-      --         headers = {
-      --           ["Accept"] = "application/json",
-      --           ["Content-Type"] = "application/json",
-      --         },
-      --         body = {
-      --           model = opts.model,
-      --           options = {
-      --             num_ctx = 16384,
-      --           },
-      --           messages = require("avante.providers").copilot.parse_messages(code_opts), -- you can make your own message, but this is very advanced
-      --           stream = true,
-      --         },
-      --       }
-      --     end,
-      --     parse_stream_data = function(data, handler_opts)
-      --       local json_data = vim.fn.json_decode(data)
-      --       if json_data and json_data.done then
-      --         handler_opts.on_complete(nil) -- Properly terminate the stream
-      --         return
-      --       end
-      --       if json_data and json_data.message and json_data.message.content then
-      --         local content = json_data.message.content
-      --         handler_opts.on_chunk(content)
-      --       end
-      --     end,
-      --   },
-      -- },
     },
     build = (function()
       if jit.os == "Windows" then
@@ -226,5 +188,18 @@ return {
       end
     end)(),
   },
-
+  {
+    'NickvanDyke/opencode.nvim',
+    dependencies = { 'folke/snacks.nvim', },
+    keys = {
+      { '<leader>ot', function() require('opencode').toggle() end,                           desc = 'Toggle embedded opencode', },
+      { '<leader>oa', function() require('opencode').ask('@cursor: ') end,                   desc = 'Ask opencode',                 mode = 'n', },
+      { '<leader>oa', function() require('opencode').ask('@selection: ') end,                desc = 'Ask opencode about selection', mode = 'v', },
+      { '<leader>op', function() require('opencode').select_prompt() end,                    desc = 'Select prompt',                mode = { 'n', 'v', }, },
+      { '<leader>on', function() require('opencode').command('session_new') end,             desc = 'New session', },
+      { '<leader>oy', function() require('opencode').command('messages_copy') end,           desc = 'Copy last message', },
+      { '<S-C-u>',    function() require('opencode').command('messages_half_page_up') end,   desc = 'Scroll messages up', },
+      { '<S-C-d>',    function() require('opencode').command('messages_half_page_down') end, desc = 'Scroll messages down', },
+    },
+  }
 }
