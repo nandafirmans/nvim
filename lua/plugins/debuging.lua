@@ -24,7 +24,7 @@ return {
       vim.keymap.set("n", "<leader>bt", dap.toggle_breakpoint, {});
       vim.keymap.set("n", "<leader>bc", dap.continue, {});
       vim.keymap.set("n", "<leader>bi", dap.step_into, {});
-      vim.keymap.set("n", "<leader>bn", dap.step_over, {});
+      vim.keymap.set("n", "<leader>bo", dap.step_over, {});
       vim.keymap.set("n", "<leader>bq", dap.terminate, {});
       vim.keymap.set("n", "<A-B>", dapui.open, {});
       vim.keymap.set("n", "<A-b>", dapui.close, {});
