@@ -259,6 +259,7 @@ return {
           }
         end,
       },
+      "j-hui/fidget.nvim",
     },
     ft = { "razor", "cs" },
     config = function()
@@ -279,7 +280,7 @@ return {
       }
 
       require("roslyn").setup({
-        broad_search = true,
+        broad_search = false,
         filewatching = "auto",
       })
 
@@ -299,7 +300,6 @@ return {
           ["csharp|inlay_hints"] = {
             csharp_enable_inlay_hints_for_implicit_object_creation = true,
             csharp_enable_inlay_hints_for_implicit_variable_types = true,
-
             csharp_enable_inlay_hints_for_lambda_parameter_types = true,
             csharp_enable_inlay_hints_for_types = true,
             dotnet_enable_inlay_hints_for_indexer_parameters = true,
@@ -317,6 +317,43 @@ return {
         },
       })
       vim.lsp.enable("roslyn")
+
+      local handles = {}
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "RoslynRestoreProgress",
+        callback = function(ev)
+          local token = ev.data.params[1]
+          local handle = handles[token]
+          if handle then
+            handle:report({
+              title = ev.data.params[2].state,
+              message = ev.data.params[2].message,
+            })
+          else
+            handles[token] = require("fidget.progress").handle.create({
+              title = ev.data.params[2].state,
+              message = ev.data.params[2].message,
+              lsp_client = {
+                name = "roslyn",
+              },
+            })
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "RoslynRestoreResult",
+        callback = function(ev)
+          local handle = handles[ev.data.token]
+          handles[ev.data.token] = nil
+
+          if handle then
+            handle.message = ev.data.err and ev.data.err.message or "Restore completed"
+            handle:finish()
+          end
+        end,
+      })
     end,
     init = function()
       vim.filetype.add {

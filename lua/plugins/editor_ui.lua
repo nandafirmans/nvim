@@ -20,20 +20,13 @@ return {
             event = "msg_show",
             kind = "",
             any = {
+              { find = "nil" },
               { find = "written" },
               { find = "bufdelete" },
               { find = "SERVER_REQUEST_HANDLER_ERROR" },
               { find = "CursorMoved" },
               { find = "ModeChanged" }
             },
-          },
-          opts = { skip = true },
-        },
-        {
-          filter = {
-            event = "msg_show",
-            kind = "",
-            find = "nil",
           },
           opts = { skip = true },
         },
