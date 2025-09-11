@@ -26,17 +26,28 @@ return {
   { 'rmehri01/onenord.nvim',            lazy = false,       priority = 1000 },
   { 'Mofiqul/vscode.nvim',              lazy = false,       priority = 1000 },
   { 'craftzdog/solarized-osaka.nvim',   lazy = false,       priority = 1000 },
-  { "zootedb0t/citruszest.nvim",        lazy = false,       priority = 1000, },
   { 'projekt0n/github-nvim-theme',      lazy = false,       priority = 1000 },
   { 'xero/miasma.nvim',                 lazy = false,       priority = 1000 },
   { 'eldritch-theme/eldritch.nvim',     lazy = false,       priority = 1000 },
   { 'sainnhe/everforest',               lazy = false,       priority = 1000 },
   { 'tiagovla/tokyodark.nvim',          lazy = false,       priority = 1000 },
   { 'marko-cerovac/material.nvim',      lazy = false,       priority = 1000 },
-  { "bluz71/vim-nightfly-colors",       name = "nightfly",  lazy = false,    priority = 1000 },
-  { "bluz71/vim-moonfly-colors",        name = "moonfly",   lazy = false,    priority = 1000 },
-  { 'rose-pine/neovim',                 name = 'rose-pine', lazy = false,    priority = 1000 },
-  { 'srcery-colors/srcery-vim',         name = 'srcery',    lazy = false,    priority = 1000 },
+  { "bluz71/vim-nightfly-colors",       name = "nightfly",  lazy = false,   priority = 1000 },
+  { "bluz71/vim-moonfly-colors",        name = "moonfly",   lazy = false,   priority = 1000 },
+  { 'rose-pine/neovim',                 name = 'rose-pine', lazy = false,   priority = 1000 },
+  { 'srcery-colors/srcery-vim',         name = 'srcery',    lazy = false,   priority = 1000 },
+  {
+    "zootedb0t/citruszest.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      option = {
+        transparent = true,
+        bold = false,
+        italics = true,
+      }
+    },
+  },
   {
     "navarasu/onedark.nvim",
     lazy = false,
