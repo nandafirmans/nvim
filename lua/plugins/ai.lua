@@ -130,6 +130,51 @@ return {
     end,
   },
   {
+    "folke/sidekick.nvim",
+    opts = {
+      cli = {
+        mux = {
+          enabled = true,
+          backend = "tmux",
+        },
+      },
+      nes = {
+        enabled = false,
+      }
+    },
+    keys = {
+      {
+        "<leader>as",
+        function() require("sidekick.cli").select({ filter = { installed = true } }) end,
+        desc = "Select CLI",
+      },
+      {
+        "<leader>at",
+        function() require("sidekick.cli").send({ msg = "{this}", filter = { installed = true } }) end,
+        mode = { "x", "n" },
+        desc = "Send This",
+      },
+      {
+        "<leader>av",
+        function() require("sidekick.cli").send({ msg = "{selection}", filter = { installed = true } }) end,
+        mode = { "x" },
+        desc = "Send Visual Selection",
+      },
+      {
+        "<leader>ap",
+        function() require("sidekick.cli").prompt() end,
+        mode = { "n", "x" },
+        desc = "Sidekick Select Prompt",
+      },
+      {
+        "<leader>ax",
+        function() require("sidekick.cli").toggle({ name = "copilot", focus = true }) end,
+        mode = { "n", "x", "t" },
+        desc = "Sidekick Toggle Opencode",
+      },
+    },
+  },
+  {
     "yetone/avante.nvim",
     event = "VeryLazy",
     lazy = false,

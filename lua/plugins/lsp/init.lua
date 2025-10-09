@@ -81,7 +81,8 @@ return {
           null_ls.builtins.formatting.goimports,
           null_ls.builtins.formatting.goimports_reviser,
           null_ls.builtins.formatting.golines,
-          null_ls.builtins.formatting.csharpier
+          null_ls.builtins.formatting.csharpier, 
+          null_ls.builtins.formatting.xmllint,
         },
         on_attach = lsp_util.on_attach
       })
