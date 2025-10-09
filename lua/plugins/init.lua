@@ -32,16 +32,18 @@ return {
     keys = {
       {
         "<leader>sd",
-        "<Cmd>Autosession delete<CR>",
+        "<Cmd>AutoSession deletePicker<CR>",
         mode = "n",
         desc = "[S]ession [D]elete"
       },
-      { "<leader>ss", function() require("auto-session.session-lens").search_session() end, mode = "n" }
+      {
+        "<leader>ss",
+        "<Cmd>AutoSession search<CR>",
+        mode = "n"
+      }
     },
     config = function()
       vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
-
-
       local function close_alpha_if_open()
         vim.cmd([[
           if &ft == 'alpha'

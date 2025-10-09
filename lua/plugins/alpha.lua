@@ -72,7 +72,7 @@ return {
       dashboard.button("c", "󰋚  Recent Files ", ":Telescope oldfiles<CR>"),
       dashboard.button("t", "󰊄  Find Text   ", ":Telescope live_grep<CR>"),
       dashboard.button("f", "󰍉  Find File   ", ":Telescope find_files<CR>"),
-      dashboard.button("r", "󰙰  Restore session ", ":Autosession search<CR>"),
+      dashboard.button("r", "󰙰  Restore session ", ":AutoSession search<CR>"),
       dashboard.button("q", "󰅚  Quit        ", ":qa<CR>"),
     }
     local handle = io.popen('fortune')
