@@ -62,9 +62,7 @@ vim.o.smartcase = true
 vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
-vim.cmd("let g:gruvbox_transparent_bg = 1")
-vim.cmd("autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE")
-vim.cmd("colorschem gruvbox")
+vim.cmd("colorschem eldritch")
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"

@@ -28,7 +28,6 @@ return {
   { 'craftzdog/solarized-osaka.nvim',   lazy = false,       priority = 1000 },
   { 'projekt0n/github-nvim-theme',      lazy = false,       priority = 1000 },
   { 'xero/miasma.nvim',                 lazy = false,       priority = 1000 },
-  { 'eldritch-theme/eldritch.nvim',     lazy = false,       priority = 1000 },
   { 'sainnhe/everforest',               lazy = false,       priority = 1000 },
   { 'tiagovla/tokyodark.nvim',          lazy = false,       priority = 1000 },
   { 'marko-cerovac/material.nvim',      lazy = false,       priority = 1000 },
@@ -47,6 +46,14 @@ return {
         italics = true,
       }
     },
+  },
+  {
+    'eldritch-theme/eldritch.nvim',
+    lazy = false,
+    priority = 1000,
+    opts = {
+      transparent = true
+    }
   },
   {
     "navarasu/onedark.nvim",
