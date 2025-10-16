@@ -10,9 +10,8 @@ return {
     config = function()
       local lsp_util = require("plugins.lsp.util")
       require("java").setup()
-      require("lspconfig").jdtls.setup({
+      vim.lsp.config("jdtls", {
         capabilities = lsp_util.capabilities,
-        on_attach = lsp_util.on_attach,
       })
     end
   },
@@ -33,38 +32,38 @@ return {
         }
       })
       local lsp_util = require("plugins.lsp.util")
-      local servers = lsp_util.servers;
-      local on_attach = lsp_util.on_attach;
-      local capabilities = lsp_util.capabilities;
       local mason_lspconfig = require("mason-lspconfig")
 
       mason_lspconfig.setup({
-        ensure_installed = vim.tbl_keys(servers),
+        ensure_installed = vim.tbl_keys(lsp_util.servers),
         automatic_installation = true,
       })
 
-      mason_lspconfig.setup_handlers({
-        function(server_name)
-          if (server_name == "ts_ls") then
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if not client then
             return
           end
 
-          require("lspconfig")[server_name].setup({
-            capabilities = capabilities,
-            on_attach = on_attach,
-            settings = servers[server_name],
+          if (client.name == "ts_ls") then
+            client.server_capabilities.documentFormattingProvider = false
+            vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>");
+          end
+
+          lsp_util.on_attach(client, args.buf)
+        end,
+      });
+
+      mason_lspconfig.setup_handlers({
+        function(server_name)
+          vim.lsp.config(server_name, {
+            capabilities = lsp_util.capabilities,
+            settings = lsp_util.servers[server_name],
           })
+          vim.lsp.enable(server_name)
         end,
       })
-
-      require("lspconfig").ts_ls.setup({
-        capabilities = capabilities,
-        on_attach = function(client)
-          client.server_capabilities.documentFormattingProvider = false
-        end
-      })
-
-      vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
     end
   },
   {
@@ -81,7 +80,7 @@ return {
           null_ls.builtins.formatting.goimports,
           null_ls.builtins.formatting.goimports_reviser,
           null_ls.builtins.formatting.golines,
-          null_ls.builtins.formatting.csharpier, 
+          null_ls.builtins.formatting.csharpier,
           null_ls.builtins.formatting.xmllint,
         },
         on_attach = lsp_util.on_attach
@@ -286,7 +285,7 @@ return {
       })
 
       vim.lsp.config("roslyn", {
-        on_attach = on_attach,
+        -- on_attach = on_attach,
         capabilities = capabilities,
         -- cmd = cmd,
         -- handlers = require("rzls.roslyn_handlers"),
