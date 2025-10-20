@@ -66,6 +66,12 @@ return {
 		end,
 	},
 	{
+		"esmuellert/nvim-eslint",
+		config = function()
+			require("nvim-eslint").setup({})
+		end,
+	},
+	{
 		"stevearc/conform.nvim",
 		opts = {
 			formatters_by_ft = {
