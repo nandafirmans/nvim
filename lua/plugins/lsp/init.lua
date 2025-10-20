@@ -48,7 +48,6 @@ return {
 
 					if client.name == "ts_ls" then
 						client.server_capabilities.documentFormattingProvider = false
-						vim.keymap.set("n", "<leader>efa", "<Cmd>EslintFixAll<CR>")
 					end
 
 					lsp_util.on_attach(client, args.buf)
@@ -71,9 +70,9 @@ return {
 		opts = {
 			formatters_by_ft = {
 				lua = { "stylua" },
-				javascript = { "prettierd", "prettier", stop_after_first = true },
-				typescript = { "prettierd", "prettier", stop_after_first = true },
-				typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+				javascript = { "prettierd", "eslint_d", stop_after_first = false },
+				typescript = { "prettierd", "eslint_d", stop_after_first = false },
+				typescriptreact = { "prettierd", "eslint_d", stop_after_first = false },
 				css = { "prettierd", "prettier", stop_after_first = true },
 				html = { "prettierd", "prettier", stop_after_first = true },
 				cshtml = { "superhtml" },
@@ -87,27 +86,6 @@ return {
 			},
 		},
 	},
-	-- {
-	--   "nvimtools/none-ls.nvim",
-	--   dependencies = { "nvim-lua/plenary.nvim" },
-	--   config = function()
-	--     local lsp_util = require("plugins.lsp.util")
-	--     local null_ls = require("null-ls")
-	--     null_ls.setup({
-	--       sources = {
-	--         null_ls.builtins.formatting.prettier,
-	--         null_ls.builtins.formatting.sqlfluff,
-	--         null_ls.builtins.formatting.gofmt,
-	--         null_ls.builtins.formatting.goimports,
-	--         null_ls.builtins.formatting.goimports_reviser,
-	--         null_ls.builtins.formatting.golines,
-	--         null_ls.builtins.formatting.csharpier,
-	--         null_ls.builtins.formatting.xmllint,
-	--       },
-	--       on_attach = lsp_util.on_attach
-	--     })
-	--   end
-	-- },
 	{
 		"folke/neodev.nvim",
 		config = function()
