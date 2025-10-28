@@ -68,7 +68,9 @@ return {
 	{
 		"esmuellert/nvim-eslint",
 		config = function()
-			require("nvim-eslint").setup({})
+			require("nvim-eslint").setup({
+				capabilities = require("plugins.lsp.util").capabilities,
+			})
 		end,
 	},
 	{
@@ -76,10 +78,12 @@ return {
 		opts = {
 			formatters_by_ft = {
 				lua = { "stylua" },
-				javascript = { "prettierd", "eslint_d", stop_after_first = false },
-				typescript = { "prettierd", "eslint_d", stop_after_first = false },
-				typescriptreact = { "prettierd", "eslint_d", stop_after_first = false },
+				javascript = { "prettierd", "eslint_d", stop_after_first = true },
+				typescript = { "prettierd", "eslint_d", stop_after_first = true },
+				typescriptreact = { "prettierd", "eslint_d", stop_after_first = true },
 				css = { "prettierd", "prettier", stop_after_first = true },
+				less = { "prettierd", "prettier", stop_after_first = true },
+				scss = { "prettierd", "prettier", stop_after_first = true },
 				html = { "prettierd", "prettier", stop_after_first = true },
 				cshtml = { "superhtml" },
 				razor = { "superhtml" },
