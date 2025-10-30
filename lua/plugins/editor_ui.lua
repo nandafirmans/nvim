@@ -179,7 +179,6 @@ return {
 		main = "ibl",
 		config = function()
 			local highlight = {
-				-- "DarkGray"
 				"RainbowRed",
 				"RainbowYellow",
 				"RainbowBlue",
@@ -199,13 +198,29 @@ return {
 				vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
 				vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
 				vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
-				-- vim.api.nvim_set_hl(0, "DarkGray", { fg = "#444444" })
 			end)
+
+			-- highlight = {
+			-- 	"CursorColumn",
+			-- 	"Whitespace",
+			-- }
+
 			require("ibl").setup({
-				indent = { highlight = highlight, char = "│" },
-				-- indent = { highlight = highlight, char = "" },
-				scope = { enabled = false },
+				-- indent = {
+				-- 	highlight = highlight,
+				-- 	char = "│",
+				-- },
+				-- whitespace = {
+				-- 	highlight = highlight,
+				-- 	remove_blankline_trail = false,
+				-- },
+				scope = {
+					highlight = highlight,
+					-- enabled = false
+				},
 			})
+
+			hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
 		end,
 	},
 
