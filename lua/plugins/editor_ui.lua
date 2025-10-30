@@ -206,16 +206,18 @@ return {
 			-- }
 
 			require("ibl").setup({
-				-- indent = {
-				-- 	highlight = highlight,
-				-- 	char = "│",
-				-- },
+				indent = {
+					-- 	highlight = highlight,
+					char = "│",
+				},
 				-- whitespace = {
 				-- 	highlight = highlight,
 				-- 	remove_blankline_trail = false,
 				-- },
 				scope = {
 					highlight = highlight,
+					show_start = false,
+					show_end = false,
 					-- enabled = false
 				},
 			})
