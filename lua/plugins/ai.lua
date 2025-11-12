@@ -141,14 +141,14 @@ return {
 		},
 		keys = {
 			{
-				"<leader>as",
+				"<leader>oo",
 				function()
 					require("sidekick.cli").select({ filter = { installed = true } })
 				end,
 				desc = "Select CLI",
 			},
 			{
-				"<leader>at",
+				"<leader>ot",
 				function()
 					require("sidekick.cli").send({ msg = "{this}", filter = { installed = true } })
 				end,
@@ -156,7 +156,7 @@ return {
 				desc = "Send This",
 			},
 			{
-				"<leader>av",
+				"<leader>ov",
 				function()
 					require("sidekick.cli").send({ msg = "{selection}", filter = { installed = true } })
 				end,
@@ -164,7 +164,7 @@ return {
 				desc = "Send Visual Selection",
 			},
 			{
-				"<leader>ap",
+				"<leader>op",
 				function()
 					require("sidekick.cli").prompt()
 				end,
@@ -172,12 +172,12 @@ return {
 				desc = "Sidekick Select Prompt",
 			},
 			{
-				"<leader>ax",
+				"<leader>oc",
 				function()
 					require("sidekick.cli").toggle({ name = "copilot", focus = true })
 				end,
 				mode = { "n", "x" },
-				desc = "Sidekick Toggle Opencode",
+				desc = "Sidekick Toggle Copilot",
 			},
 		},
 	},
@@ -228,7 +228,7 @@ return {
 			auto_suggestions_provider = "copilot",
 			providers = {
 				copilot = {
-					model = "claude-sonnet-4",
+					model = "claude-sonnet-4.5",
 				},
 			},
 		},

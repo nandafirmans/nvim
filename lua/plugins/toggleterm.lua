@@ -32,7 +32,6 @@ return {
 	keys = {
 		{ "<leader>gg", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
 		{ "<leader>yy", "<CMD>lua _YAZI_TOGGLE()<CR>", mode = "n", desc = "Toggle Yazi File Manager" },
-		{ "<leader>oo", "<CMD>lua _OPENCODE_TOGGLE()<CR>", mode = "n", desc = "Toggle Gemini" },
 		{ "<leader>tt", "<CMD>lua _TOP_TOGGLE()<CR>", mode = "n", desc = "Toggle Btop" },
 	},
 	config = function(_, opts)
@@ -77,14 +76,6 @@ return {
 			start_in_insert = true,
 		})
 
-		local opencode = Terminal:new({
-			cmd = "opencode",
-			hidden = true,
-			direction = "float",
-			close_on_exit = true,
-			start_in_insert = true,
-		})
-
 		function _LAZYGIT_TOGGLE()
 			lazygit:toggle()
 		end
@@ -95,10 +86,6 @@ return {
 
 		function _YAZI_TOGGLE()
 			yazi:toggle()
-		end
-
-		function _OPENCODE_TOGGLE()
-			opencode:toggle()
 		end
 	end,
 }
