@@ -76,6 +76,9 @@ return {
 	{
 		"stevearc/conform.nvim",
 		opts = {
+			lang_to_ext = {
+				c_sharp = "cs",
+			},
 			formatters_by_ft = {
 				lua = { "stylua" },
 				javascript = { "prettierd", "eslint_d", stop_after_first = true },
@@ -217,11 +220,11 @@ return {
 				end,
 				mode = "n",
 			},
-			{
-				"<leader>o",
-				"<cmd>Lspsaga outline<CR>",
-				mode = "n",
-			},
+			-- {
+			-- 	"<leader>o",
+			-- 	"<cmd>Lspsaga outline<CR>",
+			-- 	mode = "n",
+			-- },
 			{
 				"<Leader>ci",
 				"<cmd>Lspsaga incoming_calls<CR>",
