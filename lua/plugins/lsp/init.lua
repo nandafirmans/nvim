@@ -66,13 +66,32 @@ return {
 		end,
 	},
 	{
-		"esmuellert/nvim-eslint",
+		"mfussenegger/nvim-lint",
 		config = function()
-			require("nvim-eslint").setup({
-				capabilities = require("plugins.lsp.util").capabilities,
+			require("nvim-lint").setup({
+				linters_by_ft = {
+					javascript = { "eslint_d" },
+					typescript = { "eslint_d" },
+					javascriptreact = { "eslint_d" },
+					typescriptreact = { "eslint_d" },
+				},
+			})
+			vim.api.nvim_create_autocmd("BufWritePost", {
+				pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
+				callback = function()
+					require("nvim-lint").try_lint()
+				end,
 			})
 		end,
 	},
+	-- {
+	-- 	"esmuellert/nvim-eslint",
+	-- 	config = function()
+	-- 		require("nvim-eslint").setup({
+	-- 			capabilities = require("plugins.lsp.util").capabilities,
+	-- 		})
+	-- 	end,
+	-- },
 	{
 		"stevearc/conform.nvim",
 		opts = {
@@ -96,6 +115,13 @@ return {
 				go = { "gofmt", "goimports", "goimports_reviser", "golines" },
 				cs = { "csharpier" },
 				xml = { "xmllint" },
+			},
+			format_on_save = {
+				timeout_ms = 500,
+				lsp_format = "first",
+				filter = function(client)
+					return client.name == "eslint"
+				end,
 			},
 		},
 	},
