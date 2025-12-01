@@ -68,30 +68,20 @@ return {
 	{
 		"mfussenegger/nvim-lint",
 		config = function()
-			require("nvim-lint").setup({
-				linters_by_ft = {
-					javascript = { "eslint_d" },
-					typescript = { "eslint_d" },
-					javascriptreact = { "eslint_d" },
-					typescriptreact = { "eslint_d" },
-				},
-			})
+			require("lint").linters_by_ft = {
+				javascript = { "eslint_d" },
+				typescript = { "eslint_d" },
+				javascriptreact = { "eslint_d" },
+				typescriptreact = { "eslint_d" },
+			}
 			vim.api.nvim_create_autocmd("BufWritePost", {
 				pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
 				callback = function()
-					require("nvim-lint").try_lint()
+					require("lint").try_lint()
 				end,
 			})
 		end,
 	},
-	-- {
-	-- 	"esmuellert/nvim-eslint",
-	-- 	config = function()
-	-- 		require("nvim-eslint").setup({
-	-- 			capabilities = require("plugins.lsp.util").capabilities,
-	-- 		})
-	-- 	end,
-	-- },
 	{
 		"stevearc/conform.nvim",
 		opts = {
