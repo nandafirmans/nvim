@@ -5,16 +5,16 @@ return {
 	},
 	{ "onsails/lspkind.nvim" },
 	{ "mason-org/mason-lspconfig.nvim", version = "^1.0.0" },
-	{
-		"nvim-java/nvim-java",
-		config = function()
-			local lsp_util = require("plugins.lsp.util")
-			require("java").setup()
-			vim.lsp.config("jdtls", {
-				capabilities = lsp_util.capabilities,
-			})
-		end,
-	},
+	-- {
+	-- 	"nvim-java/nvim-java",
+	-- 	config = function()
+	-- 		local lsp_util = require("plugins.lsp.util")
+	-- 		require("java").setup()
+	-- 		vim.lsp.config("jdtls", {
+	-- 			capabilities = lsp_util.capabilities,
+	-- 		})
+	-- 	end,
+	-- },
 	{
 		"mason-org/mason.nvim",
 		version = "^1.0.0",
