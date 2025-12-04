@@ -278,4 +278,21 @@ return {
 			end, { desc = "Harpoon: Next", noremap = true })
 		end,
 	},
+	{
+		"nvim-mini/mini.animate",
+		version = "*",
+		config = function()
+			local animate = require("mini.animate")
+
+			animate.setup({
+				cursor = {
+					enable = false,
+				},
+				scroll = {
+					enable = true,
+					timing = animate.gen_timing.linear({ duration = 50, unit = "total" }),
+				},
+			})
+		end,
+	},
 }
