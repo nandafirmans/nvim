@@ -18,8 +18,8 @@ vim.o.statusline = "%{repeat('─',winwidth('.'))}"
 
 -- Neovide
 if vim.g.neovide then
-  vim.o.guifont = "MesloLGM Nerd Font Mono:h9"
-  vim.api.nvim_set_keymap('n', '<F11>', ":let g:neovide_fullscreen = !g:neovide_fullscreen<CR>", {})
+	vim.o.guifont = "MesloLGM Nerd Font Mono:h9"
+	vim.api.nvim_set_keymap("n", "<F11>", ":let g:neovide_fullscreen = !g:neovide_fullscreen<CR>", {})
 end
 
 -- Folding
@@ -62,7 +62,7 @@ vim.o.smartcase = true
 vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
-vim.cmd("colorschem tokyodark")
+vim.cmd("colorschem tokyonight")
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
@@ -73,11 +73,11 @@ vim.o.cmdheight = 0
 -- NOTE: Highlight on yank
 local highlight_group = vim.api.nvim_create_augroup("YankHighlight", { clear = true })
 vim.api.nvim_create_autocmd("TextYankPost", {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = "*",
+	callback = function()
+		vim.highlight.on_yank()
+	end,
+	group = highlight_group,
+	pattern = "*",
 })
 
 -- make background transparent
@@ -85,12 +85,12 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 -- vim.cmd("highlight NonText guibg=NONE ctermbg=NONE")
 
 vim.diagnostic.config({
-  virtual_text = {
-    severity = { min = vim.diagnostic.severity.WARN },
-    source = "if_many",
-    spacing = 4,
-  },
-  signs = true,
-  update_in_insert = false,
-  severity_sort = true,
+	virtual_text = {
+		severity = { min = vim.diagnostic.severity.WARN },
+		source = "if_many",
+		spacing = 4,
+	},
+	signs = true,
+	update_in_insert = false,
+	severity_sort = true,
 })
