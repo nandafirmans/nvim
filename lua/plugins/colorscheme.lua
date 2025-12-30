@@ -48,7 +48,7 @@ return {
 		priority = 1000,
 		opts = {
 			option = {
-				transparent = false,
+				transparent = true,
 				bold = false,
 				italics = true,
 			},
