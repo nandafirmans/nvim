@@ -62,7 +62,7 @@ vim.o.smartcase = true
 vim.o.updatetime = 250
 vim.wo.signcolumn = "yes"
 
-vim.cmd("colorschem ayu-dark")
+vim.cmd("colorschem carbonfox")
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = "menuone,noselect"
