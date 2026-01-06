@@ -33,6 +33,7 @@ return {
 		{ "<leader>gg", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
 		{ "<leader>yy", "<CMD>lua _YAZI_TOGGLE()<CR>", mode = "n", desc = "Toggle Yazi File Manager" },
 		{ "<leader>tt", "<CMD>lua _TOP_TOGGLE()<CR>", mode = "n", desc = "Toggle Btop" },
+		{ "<leader>jj", "<CMD>lua _TJOURNAL_TOGGLE()<CR>", mode = "n", desc = "Toggle Tjournal" },
 	},
 	config = function(_, opts)
 		require("toggleterm").setup(opts)
@@ -52,6 +53,7 @@ return {
 		vim.cmd("autocmd! TermOpen term://* lua set_terminal_keymaps()")
 
 		local Terminal = require("toggleterm.terminal").Terminal
+
 		local lazygit = Terminal:new({
 			cmd = "lazygit",
 			hidden = true,
@@ -59,6 +61,9 @@ return {
 			close_on_exit = true,
 			start_in_insert = true,
 		})
+		function _LAZYGIT_TOGGLE()
+			lazygit:toggle()
+		end
 
 		local top = Terminal:new({
 			cmd = "btop",
@@ -67,6 +72,9 @@ return {
 			close_on_exit = true,
 			start_in_insert = true,
 		})
+		function _TOP_TOGGLE()
+			top:toggle()
+		end
 
 		local yazi = Terminal:new({
 			cmd = "yazi",
@@ -75,17 +83,19 @@ return {
 			close_on_exit = true,
 			start_in_insert = true,
 		})
-
-		function _LAZYGIT_TOGGLE()
-			lazygit:toggle()
-		end
-
-		function _TOP_TOGGLE()
-			top:toggle()
-		end
-
 		function _YAZI_TOGGLE()
 			yazi:toggle()
+		end
+
+		local tjournal = Terminal:new({
+			cmd = "tjournal",
+			hidden = true,
+			direction = "float",
+			close_on_exit = true,
+			start_in_insert = true,
+		})
+		function _TJOURNAL_TOGGLE()
+			tjournal:toggle()
 		end
 	end,
 }
