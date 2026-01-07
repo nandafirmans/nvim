@@ -153,19 +153,19 @@ return {
 		dependencies = "nvim-lua/plenary.nvim",
 		keys = {
 			{
-				"<leader>f",
+				"<leader>F",
 				'<CMD>lua require("spectre").toggle()<CR>',
 				mode = "n",
 				desc = "Toggle Spectre",
 			},
 			{
-				"<leader>f",
+				"<leader>F",
 				'<ESC><CMD>lua require("spectre").open_visual()<CR>',
 				mode = "v",
 				desc = "Search Selected Text",
 			},
 			{
-				"<leader>ff",
+				"<leader>FF",
 				'<CMD>lua require("spectre").open_file_search({select_word=true})<CR>',
 				mode = "n",
 				desc = "Search on current file",

@@ -86,16 +86,5 @@ return {
 		function _YAZI_TOGGLE()
 			yazi:toggle()
 		end
-
-		local tjournal = Terminal:new({
-			cmd = "tjournal",
-			hidden = true,
-			direction = "float",
-			close_on_exit = true,
-			start_in_insert = true,
-		})
-		function _TJOURNAL_TOGGLE()
-			tjournal:toggle()
-		end
 	end,
 }
