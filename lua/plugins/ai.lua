@@ -40,22 +40,31 @@ return {
 			{
 				"<leader>oo",
 				function()
-					require("sidekick.cli").select({ filter = { installed = true } })
+					require("sidekick.cli").toggle({ name = "opencode", focus = true })
 				end,
+				mode = { "n" },
 				desc = "Select CLI",
 			},
 			{
-				"<leader>ot",
+				"<leader>O",
 				function()
-					require("sidekick.cli").send({ msg = "{this}", filter = { installed = true } })
+					require("sidekick.cli").send({
+						msg = "{file}",
+						name = "opencode",
+						filter = { installed = true },
+					})
 				end,
 				mode = { "x", "n" },
 				desc = "Send This",
 			},
 			{
-				"<leader>ov",
+				"<leader>oo",
 				function()
-					require("sidekick.cli").send({ msg = "{selection}", filter = { installed = true } })
+					require("sidekick.cli").send({
+						msg = "{selection}",
+						name = "opencode",
+						filter = { installed = true },
+					})
 				end,
 				mode = { "x" },
 				desc = "Send Visual Selection",
