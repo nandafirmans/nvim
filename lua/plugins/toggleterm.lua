@@ -33,7 +33,7 @@ return {
 		{ "<leader>gg", "<CMD>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
 		{ "<leader>yy", "<CMD>lua _YAZI_TOGGLE()<CR>", mode = "n", desc = "Toggle Yazi File Manager" },
 		{ "<leader>tt", "<CMD>lua _TOP_TOGGLE()<CR>", mode = "n", desc = "Toggle Btop" },
-		{ "<leader>jj", "<CMD>lua _TJOURNAL_TOGGLE()<CR>", mode = "n", desc = "Toggle Tjournal" },
+		{ "<leader>ee", "<CMD>lua _EKPHOS_TOGGLE()<CR>", mode = "n", desc = "Toggle Ekphos" },
 	},
 	config = function(_, opts)
 		require("toggleterm").setup(opts)
@@ -85,6 +85,17 @@ return {
 		})
 		function _YAZI_TOGGLE()
 			yazi:toggle()
+		end
+
+		local ekphos = Terminal:new({
+			cmd = "ekphos",
+			hidden = true,
+			direction = "float",
+			close_on_exit = true,
+			start_in_insert = false,
+		})
+		function _EKPHOS_TOGGLE()
+			ekphos:toggle()
 		end
 	end,
 }
