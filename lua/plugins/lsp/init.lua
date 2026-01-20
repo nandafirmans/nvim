@@ -97,14 +97,25 @@ return {
 				less = { "prettierd", "prettier", stop_after_first = true },
 				scss = { "prettierd", "prettier", stop_after_first = true },
 				html = { "prettierd", "prettier", stop_after_first = true },
-				cshtml = { "superhtml" },
-				razor = { "superhtml" },
 				json = { "prettierd", "prettier", stop_after_first = true },
 				markdown = { "prettierd", "prettier", stop_after_first = true },
 				sql = { "sqlfluff" },
 				go = { "gofmt", "goimports", "goimports_reviser", "golines" },
-				cs = { "csharpier" },
+				cshtml = { "superhtml" },
+				razor = { "superhtml" },
+				cs = { "csharpier_extend" },
+				csproj = { "csharpier_extend" },
 				xml = { "xmllint" },
+			},
+			formatters = {
+				csharpier_extend = {
+					command = "csharpier",
+					args = {
+						"format",
+						"--write-stdout",
+					},
+					to_stdin = true,
+				},
 			},
 			format_on_save = {
 				timeout_ms = 500,
@@ -281,88 +292,8 @@ return {
 
 	{
 		"seblyng/roslyn.nvim",
-		dependencies = {
-			-- {
-			--   "tris203/rzls.nvim",
-			--   config = function()
-			--     local lsp_util = require("plugins.lsp.util")
-			--     local capabilities = lsp_util.capabilities;
-			--     local on_attach = lsp_util.on_attach;
-			--
-			--     require('rzls').setup {
-			--       on_attach = on_attach,
-			--       capabilities = capabilities,
-			--     }
-			--
-			--     -- vim.lsp.config("rzls", {
-			--     --   capabilities = capabilities,
-			--     -- })
-			--     -- vim.lsp.enable("rzls")
-			--   end,
-			-- },
-			"j-hui/fidget.nvim",
-		},
-		ft = { "razor", "cs" },
+		dependencies = { "j-hui/fidget.nvim" },
 		config = function()
-			local lsp_util = require("plugins.lsp.util")
-			local capabilities = lsp_util.capabilities
-
-			-- local rzls_path = vim.fn.expand("$MASON/packages/rzls/libexec")
-			-- local cmd = {
-			--   "roslyn",
-			--   "--stdio",
-			--   "--logLevel=Information",
-			--   "--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
-			--   "--razorSourceGenerator=" .. vim.fs.joinpath(rzls_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll"),
-			--   "--razorDesignTimePath=" .. vim.fs.joinpath(rzls_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets"),
-			--   "--extension",
-			--   vim.fs.joinpath(rzls_path, "RazorExtension", "Microsoft.VisualStudioCode.RazorExtension.dll"),
-			-- }
-
-			require("roslyn").setup({
-				broad_search = false,
-				filewatching = "auto",
-			})
-
-			vim.lsp.config("roslyn", {
-				capabilities = capabilities,
-				-- cmd = cmd,
-				-- handlers = require("rzls.roslyn_handlers"),
-				settings = {
-					["csharp|background_analysis"] = {
-						dotnet_analyzer_diagnostics_scope = "fullSolution",
-						dotnet_compiler_diagnostics_scope = "fullSolution",
-					},
-					["csharp|inlay_hints"] = {
-						csharp_enable_inlay_hints_for_implicit_object_creation = true,
-						csharp_enable_inlay_hints_for_implicit_variable_types = true,
-						csharp_enable_inlay_hints_for_lambda_parameter_types = true,
-						csharp_enable_inlay_hints_for_types = true,
-						dotnet_enable_inlay_hints_for_indexer_parameters = true,
-						dotnet_enable_inlay_hints_for_literal_parameters = true,
-						dotnet_enable_inlay_hints_for_object_creation_parameters = true,
-						dotnet_enable_inlay_hints_for_other_parameters = true,
-						dotnet_enable_inlay_hints_for_parameters = true,
-						dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
-						dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
-						dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
-					},
-					["csharp|symbol_search"] = {
-						dotnet_search_reference_assemblies = true,
-					},
-					["csharp|completion"] = {
-						dotnet_show_name_completion_suggestions = true,
-						dotnet_show_completion_items_from_unimported_namespaces = true,
-						dotnet_provide_regex_completions = true,
-					},
-					["csharp|code_lens"] = {
-						dotnet_enable_references_code_lens = true,
-					},
-				},
-			})
-
-			vim.lsp.enable("roslyn")
-
 			local handles = {}
 
 			vim.api.nvim_create_autocmd("User", {
@@ -399,14 +330,23 @@ return {
 					end
 				end,
 			})
-		end,
-		init = function()
-			-- vim.filetype.add {
-			--   extension = {
-			--     razor = 'razor',
-			--     cshtml = 'razor',
-			--   },
-			-- }
+
+			vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+				pattern = "*.cs",
+				callback = function(args)
+					local clients = vim.lsp.get_clients({ name = "roslyn" })
+					if not clients or #clients == 0 then
+						return
+					end
+
+					local client = clients[1]
+					local buffers = vim.lsp.get_buffers_by_client_id(client.id)
+					for _, buf in ipairs(buffers) do
+						local params = { textDocument = vim.lsp.util.make_text_document_params(buf) }
+						client:request("textDocument/diagnostic", params, nil, buf)
+					end
+				end,
+			})
 		end,
 	},
 	{
