@@ -92,7 +92,7 @@ return {
 			hidden = true,
 			direction = "float",
 			close_on_exit = true,
-			start_in_insert = false,
+			start_in_insert = true,
 		})
 		function _EKPHOS_TOGGLE()
 			ekphos:toggle()
