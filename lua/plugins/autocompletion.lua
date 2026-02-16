@@ -5,12 +5,11 @@ return {
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-path",
-			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-buffer",
-			-- Snippet
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
 			"rafamadriz/friendly-snippets",
+			"onsails/lspkind.nvim",
 		},
 		config = function()
 			local has_words_before = function()
@@ -48,16 +47,21 @@ return {
 				formatting = {
 					fields = { "kind", "abbr", "menu" },
 					format = function(entry, vim_item)
-						local kind = lspkind.cmp_format({
-							mode = "symbol_text",
-							maxwidth = 50,
-							symbol_map = { Copilot = "", minuet = "M" },
-						})(entry, vim_item)
-						local strings = vim.split(kind.kind, "%s", { trimempty = true })
-						kind.kind = " " .. (strings[1] or "") .. " "
-						kind.menu = "    (" .. (strings[2] or "") .. ")"
+						local kind_name = vim_item.kind or ""
 
-						return kind
+						-- Get the icon from lspkind
+						local icon = lspkind.symbolic(kind_name, { mode = "symbol" }) or ""
+
+						-- Custom symbol map for specific sources
+						local source_name = entry.source.name
+						if source_name == "copilot" then
+							icon = ""
+						end
+
+						vim_item.kind = " " .. icon .. " "
+						vim_item.menu = "    (" .. kind_name .. ")"
+
+						return vim_item
 					end,
 				},
 				performance = {
