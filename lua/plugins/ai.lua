@@ -133,7 +133,8 @@ return {
 			auto_suggestions_provider = "copilot",
 			providers = {
 				copilot = {
-					model = "claude-opus-4.5",
+					-- model = "claude-opus-4.5",
+					model = "gpt-5-mini",
 				},
 			},
 		},
