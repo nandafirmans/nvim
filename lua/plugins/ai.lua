@@ -40,7 +40,7 @@ return {
 			{
 				"<leader>oo",
 				function()
-					require("sidekick.cli").toggle({ name = "opencode", focus = true })
+					require("sidekick.cli").toggle({ focus = true })
 				end,
 				mode = { "n" },
 				desc = "Select CLI",
@@ -50,7 +50,6 @@ return {
 				function()
 					require("sidekick.cli").send({
 						msg = "{file}",
-						name = "opencode",
 						filter = { installed = true },
 					})
 				end,
@@ -62,7 +61,6 @@ return {
 				function()
 					require("sidekick.cli").send({
 						msg = "{selection}",
-						name = "opencode",
 						filter = { installed = true },
 					})
 				end,
@@ -133,8 +131,8 @@ return {
 			auto_suggestions_provider = "copilot",
 			providers = {
 				copilot = {
-					-- model = "claude-opus-4.5",
-					model = "gpt-5-mini",
+					model = "claude-opus-4.6",
+					-- model = "gpt-5-mini",
 				},
 			},
 		},
