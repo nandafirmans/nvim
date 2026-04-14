@@ -33,7 +33,8 @@ return {
 		keys = {
 			{ "<leader>dd", "<Cmd>DiffviewOpen<CR>", mode = "n" },
 			{ "<leader>dr", "<Cmd>DiffviewRefresh<CR>", mode = "n" },
-			{ "<leader>df", "<Cmd>DiffviewFileHistory % --first-parent<CR>", mode = "n" },
+			{ "<leader>df", "<Cmd>DiffviewFileHistory %<CR>", mode = "n" },
+			{ "<leader>dF", "<Cmd>DiffviewFileHistory % --first-parent<CR>", mode = "n" },
 			{ "<leader>dh", "<Cmd>DiffviewFileHistory --first-parent<CR>", mode = "n" },
 			{ "<leader>dc", "<Cmd>DiffviewClose<CR>", mode = "n" },
 		},
