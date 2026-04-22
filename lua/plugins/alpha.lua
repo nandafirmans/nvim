@@ -1,89 +1,67 @@
 return {
-  'goolord/alpha-nvim',
-  lazy = false,
-  event = "VimEnter",
-  dependencies = { 'nvim-tree/nvim-web-devicons' },
-  config = function()
-    local alpha = require 'alpha'
-    local dashboard = require 'alpha.themes.dashboard'
-    -- dashboard.section.header.val = {
-    --   [[                               __                ]],
-    --   [[  ___     ___    ___   __  __ /\_\    ___ ___    ]],
-    --   [[ / _ `\  / __`\ / __`\/\ \/\ \\/\ \  / __` __`\  ]],
-    --   [[/\ \/\ \/\  __//\ \_\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
-    --   [[\ \_\ \_\ \____\ \____/\ \___/  \ \_\ \_\ \_\ \_\]],
-    --   [[ \/_/\/_/\/____/\/___/  \/__/    \/_/\/_/\/_/\/_/]],
-    -- }
-    --
-    --
-    -- dashboard.section.header.val = {
-    --   [[                          ]],
-    --   [[                          ]],
-    --   [[                          ]],
-    --   [[       .          .       ]],
-    --   [[     ';;,.        ::'     ]],
-    --   [[   ,:::;,,        :ccc,   ]],
-    --   [[  ,::c::,,,,.     :cccc,  ]],
-    --   [[  ,cccc:;;;;;.    cllll,  ]],
-    --   [[  ,cccc;.;;;;;,   cllll;  ]],
-    --   [[  :cccc; .;;;;;;. coooo;  ]],
-    --   [[  ;llll;   ,:::::'loooo;  ]],
-    --   [[  ;llll:    ':::::loooo:  ]],
-    --   [[  :oooo:     .::::llodd:  ]],
-    --   [[  .;ooo:       ;cclooo:.  ]],
-    --   [[    .;oc        'coo;.    ]],
-    --   [[      .'         .,.      ]],
-    --   [[                          ]],
-    --   [[                          ]],
-    --   [[                          ]],
-    --   [[                          ]],
-    --   [[                          ]],
-    -- }
+	"goolord/alpha-nvim",
+	lazy = false,
+	event = "VimEnter",
+	dependencies = { "nvim-tree/nvim-web-devicons" },
+	config = function()
+		local alpha = require("alpha")
+		local dashboard = require("alpha.themes.dashboard")
 
-    dashboard.section.header.val = {
-      [[                                                    ]],
-      [[                                                    ]],
-      [[                                                    ]],
-      [[                                                    ]],
-      [[                                                    ]],
-      -- [[            ⣴⣶⣤⡤⠦⣤⣀⣤⠆     ⣈⣭⣿⣶⣿⣦⣼⣆                  ]],
-      -- [[             ⠉⠻⢿⣿⠿⣿⣿⣶⣦⠤⠄⡠⢾⣿⣿⡿⠋⠉⠉⠻⣿⣿⡛⣦               ]],
-      -- [[                   ⠈⢿⣿⣟⠦ ⣾⣿⣿⣷    ⠻⠿⢿⣿⣧⣄             ]],
-      -- [[                    ⣸⣿⣿⢧ ⢻⠻⣿⣿⣷⣄⣀⠄⠢⣀⡀⠈⠙⠿⠄            ]],
-      -- [[                   ⢠⣿⣿⣿⠈    ⣻⣿⣿⣿⣿⣿⣿⣿⣛⣳⣤⣀⣀           ]],
-      -- [[            ⢠⣧⣶⣥⡤⢄ ⣸⣿⣿⠘  ⢀⣴⣿⣿⡿⠛⣿⣿⣧⠈⢿⠿⠟⠛⠻⠿⠄          ]],
-      -- [[           ⣰⣿⣿⠛⠻⣿⣿⡦⢹⣿⣷   ⢊⣿⣿⡏  ⢸⣿⣿⡇ ⢀⣠⣄⣾⠄           ]],
-      -- [[          ⣠⣿⠿⠛ ⢀⣿⣿⣷⠘⢿⣿⣦⡀ ⢸⢿⣿⣿⣄ ⣸⣿⣿⡇⣪⣿⡿⠿⣿⣷⡄          ]],
-      -- [[          ⠙⠃   ⣼⣿⡟  ⠈⠻⣿⣿⣦⣌⡇⠻⣿⣿⣷⣿⣿⣿ ⣿⣿⡇ ⠛⠻⢷⣄         ]],
-      -- [[               ⢻⣿⣿⣄   ⠈⠻⣿⣿⣿⣷⣿⣿⣿⣿⣿⡟ ⠫⢿⣿⡆             ]],
-      -- [[                ⠻⣿⣿⣿⣿⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡟⢀⣀⣤⣾⡿⠃             ]],
-      -- [[                                                    ]],
-      [[ ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗ ]],
-      [[ ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║ ]],
-      [[ ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║ ]],
-      [[ ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║ ]],
-      [[ ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║ ]],
-      [[ ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝ ]],
-      [[                                                    ]],
-    }
+		local function read_fortune()
+			if vim.fn.executable("fortune") ~= 1 then
+				return ""
+			end
 
-    dashboard.section.buttons.val = {
-      dashboard.button("e", "󱪝  New File    ", ":enew<CR>"),
-      dashboard.button("c", "󰋚  Recent Files ", ":Telescope oldfiles<CR>"),
-      dashboard.button("t", "󰊄  Find Text   ", ":Telescope live_grep<CR>"),
-      dashboard.button("f", "󰍉  Find File   ", ":Telescope find_files<CR>"),
-      dashboard.button("r", "󰙰  Restore session ", ":AutoSession search<CR>"),
-      dashboard.button("q", "󰅚  Quit        ", ":qa<CR>"),
-    }
-    local handle = io.popen('fortune')
-    local fortune = handle:read("*a")
-    handle:close()
-    dashboard.section.footer.val = fortune
+			local handle = io.popen("fortune")
+			if not handle then
+				return ""
+			end
 
-    dashboard.config.opts.noautocmd = true
+			local fortune = handle:read("*a") or ""
+			handle:close()
+			return fortune
+		end
 
-    -- vim.cmd [[autocmd User AlphaReady echo 'ready']]
+		dashboard.section.header.val = {
+			[[                                                    ]],
+			[[                                                    ]],
+			[[                                                    ]],
+			[[                                                    ]],
+			[[                                                    ]],
+			-- [[            ⣴⣶⣤⡤⠦⣤⣀⣤⠆     ⣈⣭⣿⣶⣿⣦⣼⣆                  ]],
+			-- [[             ⠉⠻⢿⣿⠿⣿⣿⣶⣦⠤⠄⡠⢾⣿⣿⡿⠋⠉⠉⠻⣿⣿⡛⣦               ]],
+			-- [[                   ⠈⢿⣿⣟⠦ ⣾⣿⣿⣷    ⠻⠿⢿⣿⣧⣄             ]],
+			-- [[                    ⣸⣿⣿⢧ ⢻⠻⣿⣿⣷⣄⣀⠄⠢⣀⡀⠈⠙⠿⠄            ]],
+			-- [[                   ⢠⣿⣿⣿⠈    ⣻⣿⣿⣿⣿⣿⣿⣿⣛⣳⣤⣀⣀           ]],
+			-- [[            ⢠⣧⣶⣥⡤⢄ ⣸⣿⣿⠘  ⢀⣴⣿⣿⡿⠛⣿⣿⣧⠈⢿⠿⠟⠛⠻⠿⠄          ]],
+			-- [[           ⣰⣿⣿⠛⠻⣿⣿⡦⢹⣿⣷   ⢊⣿⣿⡏  ⢸⣿⣿⡇ ⢀⣠⣄⣾⠄           ]],
+			-- [[          ⣠⣿⠿⠛ ⢀⣿⣿⣷⠘⢿⣿⣦⡀ ⢸⢿⣿⣿⣄ ⣸⣿⣿⡇⣪⣿⡿⠿⣿⣷⡄          ]],
+			-- [[          ⠙⠃   ⣼⣿⡟  ⠈⠻⣿⣿⣦⣌⡇⠻⣿⣿⣷⣿⣿⣿ ⣿⣿⡇ ⠛⠻⢷⣄         ]],
+			-- [[               ⢻⣿⣿⣄   ⠈⠻⣿⣿⣿⣷⣿⣿⣿⣿⣿⡟ ⠫⢿⣿⡆             ]],
+			-- [[                ⠻⣿⣿⣿⣿⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡟⢀⣀⣤⣾⡿⠃             ]],
+			-- [[                                                    ]],
+			[[ ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗ ]],
+			[[ ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║ ]],
+			[[ ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║ ]],
+			[[ ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║ ]],
+			[[ ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║ ]],
+			[[ ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝ ]],
+			[[                                                    ]],
+		}
 
-    alpha.setup(dashboard.config)
-  end
+		dashboard.section.buttons.val = {
+			dashboard.button("e", "󱪝  New File    ", ":enew<CR>"),
+			dashboard.button("c", "󰋚  Recent Files ", ":Telescope oldfiles<CR>"),
+			dashboard.button("t", "󰊄  Find Text   ", ":Telescope live_grep<CR>"),
+			dashboard.button("f", "󰍉  Find File   ", ":Telescope find_files<CR>"),
+			dashboard.button("r", "󰙰  Restore session ", ":AutoSession search<CR>"),
+			dashboard.button("q", "󰅚  Quit        ", ":qa<CR>"),
+		}
+
+		dashboard.section.footer.val = read_fortune()
+
+		dashboard.config.opts.noautocmd = true
+
+		alpha.setup(dashboard.config)
+	end,
 }

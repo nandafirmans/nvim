@@ -1,5 +1,4 @@
 return {
-	-- { "tree-sitter/tree-sitter-razor" },
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = function()
@@ -103,7 +102,4 @@ return {
 			require("nvim-treesitter.configs").setup(opts)
 		end,
 	},
-	-- {
-	--   "nvim-treesitter/nvim-treesitter-context"
-	-- },
 }
