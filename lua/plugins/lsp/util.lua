@@ -53,11 +53,15 @@ M.configs = {
 				root = vim.fs.root(name, vtsls_fallback_markers)
 			end
 
+			if not root and name ~= "" then
+				root = vim.fs.dirname(name)
+			end
+
 			if root then
 				on_dir(root)
 			end
 		end,
-		single_file_support = false,
+		single_file_support = true,
 	},
 }
 

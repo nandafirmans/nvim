@@ -84,8 +84,37 @@ return {
 			vim.keymap.set("n", "gd", smart_definition, { desc = "Smart Go to Definition" })
 		end,
 		keys = {
-			{ "<leader>ca", "<Cmd>Lspsaga code_action<CR>", mode = { "n", "v" }, desc = "[C]ode [A]ction" },
-			{ "<leader>rn", "<Cmd>Lspsaga rename<CR>", mode = "n", desc = "[R]e[N]ame" },
+			{
+				"<leader>ca",
+				function()
+					local ok = pcall(vim.cmd, "Lspsaga code_action")
+
+					if not ok then
+						vim.lsp.buf.code_action()
+					end
+				end,
+				mode = { "n", "v" },
+				desc = "[C]ode [A]ction",
+			},
+			{
+				"<leader>rn",
+				function()
+					local current_name = vim.fn.expand("<cword>")
+
+					vim.ui.input({
+						prompt = "Rename to: ",
+						default = current_name,
+					}, function(input)
+						if not input or input == "" or input == current_name then
+							return
+						end
+
+						vim.lsp.buf.rename(input)
+					end)
+				end,
+				mode = "n",
+				desc = "[R]e[N]ame",
+			},
 			{ "gp", "<Cmd>Lspsaga peek_definition<CR>", mode = "n", desc = "Peek Definition" },
 			{ "<leader>sl", "<Cmd>Lspsaga show_line_diagnostics<CR>", mode = "n", desc = "Show Line Diagnostics" },
 			{ "<leader>sc", "<Cmd>Lspsaga show_cursor_diagnostics<CR>", mode = "n", desc = "Show Cursor Diagnostics" },
@@ -114,6 +143,9 @@ return {
 			{ "<A-T>", "<Cmd>Lspsaga term_toggle<CR>", mode = { "n", "t" }, desc = "Toggle Lspsaga Terminal" },
 		},
 		opts = {
+			code_action = {
+				only_in_cursor = false,
+			},
 			finder = {
 				default = "def+ref",
 				methods = {
