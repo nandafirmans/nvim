@@ -1,100 +1,92 @@
+local function get_reference_client(bufnr)
+	for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+		if client:supports_method("textDocument/references") then
+			return client
+		end
+	end
+end
+
+local function smart_definition()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local filetype = vim.bo[bufnr].filetype
+
+	if vim.tbl_contains({ "javascript", "javascriptreact", "typescript", "typescriptreact" }, filetype) then
+		local ok, vtsls = pcall(require, "vtsls")
+
+		if ok and vtsls.commands and vtsls.commands.goto_source_definition then
+			vtsls.commands.goto_source_definition(0, function() end, function()
+				vim.lsp.buf.definition()
+			end)
+			return
+		end
+	end
+
+	vim.lsp.buf.definition()
+end
+
+local function fallback_text_references()
+	local symbol = vim.fn.expand("<cword>")
+
+	if symbol == nil or symbol == "" then
+		return
+	end
+
+	Snacks.picker.grep_word()
+end
+
+local function smart_finder()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local file_path = vim.api.nvim_buf_get_name(bufnr)
+	local reference_client = get_reference_client(bufnr)
+
+	if file_path:match("/node_modules/") or file_path:match("%.d%.ts$") or not reference_client then
+		fallback_text_references()
+		return
+	end
+
+	local params = vim.lsp.util.make_position_params(0, reference_client.offset_encoding)
+	params.context = { includeDeclaration = true }
+
+	vim.lsp.buf_request_all(bufnr, "textDocument/references", params, function(results)
+		local has_references = false
+
+		for _, result in pairs(results) do
+			if result.result and not vim.tbl_isempty(result.result) then
+				has_references = true
+				break
+			end
+		end
+
+		if has_references then
+			Snacks.picker.lsp_references()
+			return
+		end
+
+		fallback_text_references()
+	end)
+end
+
 return {
 	{
-		"glepnir/lspsaga.nvim",
-		branch = "main",
-		lazy = false,
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-			"nvim-treesitter/nvim-treesitter",
-		},
-		config = function(_, opts)
-			local function get_reference_client(bufnr)
-				for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-					if client:supports_method("textDocument/references") then
-						return client
-					end
-				end
-			end
-
-			local function smart_definition()
-				local bufnr = vim.api.nvim_get_current_buf()
-				local filetype = vim.bo[bufnr].filetype
-
-				if vim.tbl_contains({ "javascript", "javascriptreact", "typescript", "typescriptreact" }, filetype) then
-					local ok, vtsls = pcall(require, "vtsls")
-
-					if ok and vtsls.commands and vtsls.commands.goto_source_definition then
-						vtsls.commands.goto_source_definition(0, function() end, function()
-							vim.cmd("Lspsaga goto_definition")
-						end)
-						return
-					end
-				end
-
-				vim.cmd("Lspsaga goto_definition")
-			end
-
-			local function fallback_text_references()
-				local symbol = vim.fn.expand("<cword>")
-
-				if symbol == nil or symbol == "" then
-					return
-				end
-
-				require("telescope.builtin").grep_string({
-					search = symbol,
-					only_sort_text = true,
-				})
-			end
-
-			local function smart_finder()
-				local bufnr = vim.api.nvim_get_current_buf()
-				local file_path = vim.api.nvim_buf_get_name(bufnr)
-				local reference_client = get_reference_client(bufnr)
-
-				if file_path:match("/node_modules/") or file_path:match("%.d%.ts$") or not reference_client then
-					fallback_text_references()
-					return
-				end
-
-				local params = vim.lsp.util.make_position_params(0, reference_client.offset_encoding)
-				params.context = { includeDeclaration = true }
-
-				vim.lsp.buf_request_all(bufnr, "textDocument/references", params, function(results)
-					local has_references = false
-
-					for _, result in pairs(results) do
-						if result.result and not vim.tbl_isempty(result.result) then
-							has_references = true
-							break
-						end
-					end
-
-					if has_references then
-						vim.cmd("Lspsaga finder")
-						return
-					end
-
-					fallback_text_references()
-				end)
-			end
-
-			require("lspsaga").setup(opts)
-			vim.keymap.set("n", "gh", smart_finder, { desc = "Smart LSP Finder" })
-			vim.keymap.set("n", "gd", smart_definition, { desc = "Smart Go to Definition" })
-		end,
+		"neovim/nvim-lspconfig",
 		keys = {
+			{ "gh", smart_finder, mode = "n", desc = "Smart LSP Finder" },
+			{ "gd", smart_definition, mode = "n", desc = "Smart Go to Definition" },
 			{
 				"<leader>ca",
 				function()
-					local ok = pcall(vim.cmd, "Lspsaga code_action")
-
-					if not ok then
-						vim.lsp.buf.code_action()
-					end
+					vim.lsp.buf.code_action()
 				end,
 				mode = { "n", "v" },
 				desc = "[C]ode [A]ction",
+			},
+			{
+				"gp",
+				function()
+					require("goto-preview").goto_preview_definition()
+				end,
+				mode = "n",
+				desc = "Peek Definition",
 			},
 			{
 				"<leader>rn",
@@ -115,16 +107,50 @@ return {
 				mode = "n",
 				desc = "[R]e[N]ame",
 			},
-			{ "gp", "<Cmd>Lspsaga peek_definition<CR>", mode = "n", desc = "Peek Definition" },
-			{ "<leader>sl", "<Cmd>Lspsaga show_line_diagnostics<CR>", mode = "n", desc = "Show Line Diagnostics" },
-			{ "<leader>sc", "<Cmd>Lspsaga show_cursor_diagnostics<CR>", mode = "n", desc = "Show Cursor Diagnostics" },
-			{ "<leader>sb", "<Cmd>Lspsaga show_buf_diagnostics<CR>", mode = "n", desc = "Show Buffer Diagnostics" },
-			{ "[e", "<Cmd>Lspsaga diagnostic_jump_prev<CR>", mode = "n", desc = "Previous Diagnostic" },
-			{ "]e", "<Cmd>Lspsaga diagnostic_jump_next<CR>", mode = "n", desc = "Next Diagnostic" },
+			{
+				"<leader>sl",
+				function()
+					vim.diagnostic.open_float()
+				end,
+				mode = "n",
+				desc = "Show Line Diagnostics",
+			},
+			{
+				"<leader>sc",
+				function()
+					vim.diagnostic.open_float()
+				end,
+				mode = "n",
+				desc = "Show Cursor Diagnostics",
+			},
+			{
+				"<leader>sb",
+				function()
+					Snacks.picker.diagnostics_buffer()
+				end,
+				mode = "n",
+				desc = "Show Buffer Diagnostics",
+			},
+			{
+				"[e",
+				function()
+					vim.diagnostic.jump({ count = -1, float = true })
+				end,
+				mode = "n",
+				desc = "Previous Diagnostic",
+			},
+			{
+				"]e",
+				function()
+					vim.diagnostic.jump({ count = 1, float = true })
+				end,
+				mode = "n",
+				desc = "Next Diagnostic",
+			},
 			{
 				"[E",
 				function()
-					require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
+					vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR, float = true })
 				end,
 				mode = "n",
 				desc = "Previous Error",
@@ -132,40 +158,55 @@ return {
 			{
 				"]E",
 				function()
-					require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
+					vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR, float = true })
 				end,
 				mode = "n",
 				desc = "Next Error",
 			},
-			{ "<Leader>ci", "<Cmd>Lspsaga incoming_calls<CR>", mode = "n", desc = "Incoming Calls" },
-			{ "<Leader>co", "<Cmd>Lspsaga outgoing_calls<CR>", mode = "n", desc = "Outgoing Calls" },
-			{ "K", "<Cmd>Lspsaga hover_doc<CR>", mode = "n", desc = "Hover Documentation" },
-			{ "<A-T>", "<Cmd>Lspsaga term_toggle<CR>", mode = { "n", "t" }, desc = "Toggle Lspsaga Terminal" },
+			{
+				"<Leader>ci",
+				function()
+					Snacks.picker.lsp_incoming_calls()
+				end,
+				mode = "n",
+				desc = "Incoming Calls",
+			},
+			{
+				"<Leader>co",
+				function()
+					Snacks.picker.lsp_outgoing_calls()
+				end,
+				mode = "n",
+				desc = "Outgoing Calls",
+			},
+			{
+				"K",
+				function()
+					vim.lsp.buf.hover()
+				end,
+				mode = "n",
+				desc = "Hover Documentation",
+			},
 		},
+	},
+	{
+		"rmagatti/goto-preview",
+		dependencies = {
+			"rmagatti/logger.nvim",
+		},
+		event = "BufEnter",
 		opts = {
-			code_action = {
-				only_in_cursor = false,
+			default_mappings = false,
+			references = {
+				provider = "snacks",
 			},
-			finder = {
-				default = "def+ref",
-				methods = {
-					tyd = "textDocument/typeDefinition",
-				},
-			},
-			diagnostic_only_current = true,
-			symbol_in_winbar = {
-				enable = false,
-				hide_keyword = false,
-				show_file = true,
-				folder_level = 1,
-				respect_root = false,
-				color_mode = true,
-			},
-			definition = {
-				width = 0.8,
-				height = 0.9,
-			},
+			focus_on_open = true,
+			dismiss_on_move = false,
+			stack_floating_preview_windows = true,
 		},
+		config = function(_, opts)
+			require("goto-preview").setup(opts)
+		end,
 	},
 	{
 		"folke/trouble.nvim",

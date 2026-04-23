@@ -5,4 +5,5 @@ return {
 	{ import = "plugins.ui.navigation" },
 	{ import = "plugins.ui.notifications" },
 	{ import = "plugins.ui.search_replace" },
+	{ import = "plugins.ui.snacks" },
 }

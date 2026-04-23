@@ -16,6 +16,10 @@ return {
 		config = function()
 			require("telescope").setup({
 				defaults = {
+					layout_config = {
+						prompt_position = "top",
+					},
+					sorting_strategy = "ascending",
 					mappings = {
 						n = {
 							["l"] = require("telescope.actions").cycle_history_next,
