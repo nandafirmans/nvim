@@ -152,13 +152,14 @@ return {
 				end,
 				desc = "[ ] Resume Last Find",
 			},
-			{
-				"<leader>ff",
-				function()
-					require("telescope.builtin").find_files()
-				end,
-				desc = "[F]ind [F]iles",
-			},
+			-- Replaced by fff.nvim.
+			-- {
+			-- 	"<leader>ff",
+			-- 	function()
+			-- 		require("telescope.builtin").find_files()
+			-- 	end,
+			-- 	desc = "[F]ind [F]iles",
+			-- },
 			{
 				"<leader>fh",
 				function()
@@ -173,13 +174,14 @@ return {
 				end,
 				desc = "[F]ind current [W]ord",
 			},
-			{
-				"<leader>fg",
-				function()
-					require("telescope.builtin").live_grep()
-				end,
-				desc = "[F]ind by [G]rep",
-			},
+			-- Replaced by fff.nvim.
+			-- {
+			-- 	"<leader>fg",
+			-- 	function()
+			-- 		require("telescope.builtin").live_grep()
+			-- 	end,
+			-- 	desc = "[F]ind by [G]rep",
+			-- },
 			{
 				"<leader>fd",
 				function()
