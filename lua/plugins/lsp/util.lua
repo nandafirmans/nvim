@@ -1,13 +1,17 @@
 local M = {}
 
 M.servers = {
-	emmet_ls = {},
+	emmet_ls = {
+		filetypes = { "html", "css", "razor" },
+	},
 	lua_ls = {},
 	gopls = {},
 	ts_ls = {},
 	sqls = {},
 	cssls = {},
-	html = {},
+	html = {
+		filetypes = { "html", "razor" },
+	},
 }
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -18,6 +22,7 @@ M.on_attach = function(_, bufnr)
 		require("conform").format({
 			bufnr = bufnr,
 			async = true,
+			-- lsp_format = "fallback",
 		})
 	end, {
 		buffer = bufnr,
