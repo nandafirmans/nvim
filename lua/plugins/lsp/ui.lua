@@ -7,12 +7,86 @@ return {
 			"nvim-tree/nvim-web-devicons",
 			"nvim-treesitter/nvim-treesitter",
 		},
+		config = function(_, opts)
+			local function get_reference_client(bufnr)
+				for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+					if client:supports_method("textDocument/references") then
+						return client
+					end
+				end
+			end
+
+			local function smart_definition()
+				local bufnr = vim.api.nvim_get_current_buf()
+				local filetype = vim.bo[bufnr].filetype
+
+				if vim.tbl_contains({ "javascript", "javascriptreact", "typescript", "typescriptreact" }, filetype) then
+					local ok, vtsls = pcall(require, "vtsls")
+
+					if ok and vtsls.commands and vtsls.commands.goto_source_definition then
+						vtsls.commands.goto_source_definition(0, function() end, function()
+							vim.cmd("Lspsaga goto_definition")
+						end)
+						return
+					end
+				end
+
+				vim.cmd("Lspsaga goto_definition")
+			end
+
+			local function fallback_text_references()
+				local symbol = vim.fn.expand("<cword>")
+
+				if symbol == nil or symbol == "" then
+					return
+				end
+
+				require("telescope.builtin").grep_string({
+					search = symbol,
+					only_sort_text = true,
+				})
+			end
+
+			local function smart_finder()
+				local bufnr = vim.api.nvim_get_current_buf()
+				local file_path = vim.api.nvim_buf_get_name(bufnr)
+				local reference_client = get_reference_client(bufnr)
+
+				if file_path:match("/node_modules/") or file_path:match("%.d%.ts$") or not reference_client then
+					fallback_text_references()
+					return
+				end
+
+				local params = vim.lsp.util.make_position_params(0, reference_client.offset_encoding)
+				params.context = { includeDeclaration = true }
+
+				vim.lsp.buf_request_all(bufnr, "textDocument/references", params, function(results)
+					local has_references = false
+
+					for _, result in pairs(results) do
+						if result.result and not vim.tbl_isempty(result.result) then
+							has_references = true
+							break
+						end
+					end
+
+					if has_references then
+						vim.cmd("Lspsaga finder")
+						return
+					end
+
+					fallback_text_references()
+				end)
+			end
+
+			require("lspsaga").setup(opts)
+			vim.keymap.set("n", "gh", smart_finder, { desc = "Smart LSP Finder" })
+			vim.keymap.set("n", "gd", smart_definition, { desc = "Smart Go to Definition" })
+		end,
 		keys = {
-			{ "gh", "<Cmd>Lspsaga finder<CR>", mode = "n", desc = "LSP Finder" },
 			{ "<leader>ca", "<Cmd>Lspsaga code_action<CR>", mode = { "n", "v" }, desc = "[C]ode [A]ction" },
 			{ "<leader>rn", "<Cmd>Lspsaga rename<CR>", mode = "n", desc = "[R]e[N]ame" },
 			{ "gp", "<Cmd>Lspsaga peek_definition<CR>", mode = "n", desc = "Peek Definition" },
-			{ "gd", "<Cmd>Lspsaga goto_definition<CR>", mode = "n", desc = "[G]o to [D]efinition" },
 			{ "<leader>sl", "<Cmd>Lspsaga show_line_diagnostics<CR>", mode = "n", desc = "Show Line Diagnostics" },
 			{ "<leader>sc", "<Cmd>Lspsaga show_cursor_diagnostics<CR>", mode = "n", desc = "Show Cursor Diagnostics" },
 			{ "<leader>sb", "<Cmd>Lspsaga show_buf_diagnostics<CR>", mode = "n", desc = "Show Buffer Diagnostics" },
@@ -40,6 +114,12 @@ return {
 			{ "<A-T>", "<Cmd>Lspsaga term_toggle<CR>", mode = { "n", "t" }, desc = "Toggle Lspsaga Terminal" },
 		},
 		opts = {
+			finder = {
+				default = "def+ref",
+				methods = {
+					tyd = "textDocument/typeDefinition",
+				},
+			},
 			diagnostic_only_current = true,
 			symbol_in_winbar = {
 				enable = false,

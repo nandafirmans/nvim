@@ -122,7 +122,12 @@ return {
 			{
 				"gr",
 				function()
-					require("telescope.builtin").lsp_references()
+					vim.lsp.buf.references(nil, {
+						on_list = function(options)
+							vim.fn.setqflist({}, " ", options)
+							vim.cmd.copen()
+						end,
+					})
 				end,
 				desc = "[ ] LSP References",
 			},
