@@ -16,12 +16,10 @@ return {
 	{
 		"jlcrochet/vim-razor",
 		config = function()
-			vim.cmd([[au BufRead,BufNewFile *.cshtml set filetype=razor]])
-
 			vim.filetype.add({
 				extension = {
-					razor = "html",
-					cshtml = "html",
+					razor = "razor",
+					cshtml = "razor",
 				},
 			})
 		end,

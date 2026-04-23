@@ -11,7 +11,11 @@ local vtsls_fallback_markers = {
 }
 
 M.servers = {
-	emmet_ls = {},
+	emmet_ls = {
+		emmet_ls = {
+			filetypes = { "html", "css", "razor" },
+		},
+	},
 	lua_ls = {},
 	gopls = {},
 	vtsls = {
@@ -37,7 +41,9 @@ M.servers = {
 	},
 	sqls = {},
 	cssls = {},
-	html = {},
+	html = {
+		filetypes = { "html", "razor" },
+	},
 }
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
