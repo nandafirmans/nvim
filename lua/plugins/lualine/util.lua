@@ -1,158 +1,136 @@
 local M = {}
+local uv = vim.uv or vim.loop
 
 M.show_macro_recording = function()
-  local recording_register = vim.fn.reg_recording()
-  if recording_register == "" then
-    return ""
-  else
-    return "Recording @" .. recording_register
-  end
-end
+	local recording_register = vim.fn.reg_recording()
 
-M.init_recording_event = function()
-  local lualine = require("lualine")
+	if recording_register == "" then
+		return ""
+	end
 
-  vim.api.nvim_create_autocmd("RecordingEnter", {
-    callback = function()
-      lualine.refresh({
-        place = { "statusline" },
-      })
-    end,
-  })
-
-  vim.api.nvim_create_autocmd("RecordingLeave", {
-    callback = function()
-      -- This is going to seem really weird!
-      -- Instead of just calling refresh we need to wait a moment because of the nature of
-      -- `vim.fn.reg_recording`. If we tell lualine to refresh right now it actually will
-      -- still show a recording occuring because `vim.fn.reg_recording` hasn't emptied yet.
-      -- So what we need to do is wait a tiny amount of time (in this instance 50 ms) to
-      -- ensure `vim.fn.reg_recording` is purged before asking lualine to refresh.
-      local timer = vim.loop.new_timer()
-      if (timer ~= nil) then
-        timer:start(
-          50,
-          0,
-          vim.schedule_wrap(function()
-            lualine.refresh({
-              place = { "statusline" },
-            })
-          end)
-        )
-      end
-    end,
-  })
+	return "Recording @" .. recording_register
 end
 
 local buffers = {
-  "buffers",
-  show_filename_only = true,
-  hide_filename_extension = false,
-  show_modified_status = true,
-
-  -- mode = 2,
-  -- max_length = vim.o.columns * 2 / 3,
-  max_length = vim.o.columns * 1 / 2,
-
-  filetype_names = {
-    TelescopePrompt = "Telescope",
-    dashboard = "Dashboard",
-    packer = "Packer",
-    fzf = "FZF",
-    alpha = "Alpha",
-    NvimTree = "NvimTree"
-  },
-  buffers_color = {
-    inactive = "lualine_c_normal",
-    active = "lualine_a_normal",
-    -- inactive = "lualine_a_inactive",
-    -- active = "lualine_a_insert",
-    -- active = "lualine_c_active",
-  },
-  symbols = {
-    modified = " ●",
-    alternate_file = "",
-    directory = "",
-  },
+	"buffers",
+	show_filename_only = true,
+	hide_filename_extension = false,
+	show_modified_status = true,
+	max_length = vim.o.columns / 2,
+	filetype_names = {
+		TelescopePrompt = "Telescope",
+		dashboard = "Dashboard",
+		packer = "Packer",
+		fzf = "FZF",
+		alpha = "Alpha",
+		NvimTree = "NvimTree",
+	},
+	buffers_color = {
+		inactive = "lualine_c_normal",
+		active = "lualine_a_normal",
+	},
+	symbols = {
+		modified = " ●",
+		alternate_file = "",
+		directory = "",
+	},
 }
 
+local function refresh_statusline()
+	require("lualine").refresh({
+		place = { "statusline" },
+	})
+end
+
+local function macro_recording_component()
+	return {
+		"macro-recording",
+		fmt = M.show_macro_recording,
+	}
+end
+
+M.init_recording_event = function()
+	vim.api.nvim_create_autocmd("RecordingEnter", {
+		callback = refresh_statusline,
+	})
+
+	vim.api.nvim_create_autocmd("RecordingLeave", {
+		callback = function()
+			local timer = uv.new_timer()
+
+			if timer then
+				timer:start(
+					50,
+					0,
+					vim.schedule_wrap(function()
+						refresh_statusline()
+						timer:stop()
+						timer:close()
+					end)
+				)
+			end
+		end,
+	})
+end
+
 M.show_lualine_buffers = function()
-  require("lualine").setup({
-    winbar = {
-      lualine_a = {
-        buffers,
-      },
-      lualine_b = {
-        {
-          "macro-recording",
-          fmt = M.show_macro_recording,
-        },
-      },
-      lualine_c = {
-        'diagnostics',
-        'diff',
-      },
-      lualine_y = { 'progress', 'branch' },
-      lualine_z = { 'mode' }
-    }
-  })
+	require("lualine").setup({
+		winbar = {
+			lualine_a = {
+				buffers,
+			},
+			lualine_b = {
+				macro_recording_component(),
+			},
+			lualine_c = {
+				"diagnostics",
+				"diff",
+			},
+			lualine_y = { "progress", "branch" },
+			lualine_z = { "mode" },
+		},
+	})
 end
 
 M.hide_lualine_buffers = function()
-  require("lualine").setup({
-    winbar = {
-      -- lualine_a = {
-      --   'mode',
-      -- },
-      lualine_a = {
-        {
-          'filename',
-          -- path = 4,
-          path = 0,
-          file_status = true
-        },
-      },
-      lualine_b = {
-        'diagnostics',
-        'diff',
-      },
-      lualine_c = {
-        -- 'branch',
-        {
-          "macro-recording",
-          fmt = M.show_macro_recording,
-        },
-      },
-      lualine_y = { 'location' },
-      -- lualine_z = { 'branch' }
-      lualine_z = { 'mode' }
-    }
-  })
+	require("lualine").setup({
+		winbar = {
+			lualine_a = {
+				{
+					"filename",
+					path = 0,
+					file_status = true,
+				},
+			},
+			lualine_b = {
+				"diagnostics",
+				"diff",
+			},
+			lualine_c = {
+				macro_recording_component(),
+			},
+			lualine_y = { "location" },
+			lualine_z = { "mode" },
+		},
+	})
 end
 
-
-function TOGGLE_TABLINE()
-  if vim.o.showtabline == 0 then
-    vim.o.showtabline = 2
-    -- M.hide_lualine_buffers()
-  else
-    vim.o.showtabline = 0
-    -- M.show_lualine_buffers()
-  end
+M.toggle_tabline = function()
+	if vim.o.showtabline == 0 then
+		vim.o.showtabline = 2
+	else
+		vim.o.showtabline = 0
+	end
 end
 
 M.init_toggle_buffers_and_tab = function()
-  -- NOTE: uncomment to show buffers on startup
-  -- M.show_lualine_buffers()
+	M.hide_lualine_buffers()
 
-  M.hide_lualine_buffers()
-
-  vim.api.nvim_create_autocmd("VimEnter", {
-    callback = function()
-      TOGGLE_TABLINE()
-    end,
-  })
+	vim.api.nvim_create_autocmd("VimEnter", {
+		callback = function()
+			M.toggle_tabline()
+		end,
+	})
 end
-
 
 return M
