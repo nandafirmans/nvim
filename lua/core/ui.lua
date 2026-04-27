@@ -1,7 +1,7 @@
 local M = {}
 
 function M.setup()
-  vim.cmd.colorscheme("monokai-pro-spectrum")
+	vim.cmd.colorscheme("bluloco")
 end
 
 return M
