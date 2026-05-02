@@ -1,105 +1,130 @@
+local parsers = {
+	"bash",
+	"c",
+	"c_sharp",
+	"dockerfile",
+	"go",
+	"gomod",
+	"lua",
+	"python",
+	"rust",
+	"typescript",
+	"tsx",
+	"javascript",
+	"jsdoc",
+	"json",
+	"html",
+	"embedded_template",
+	"regex",
+	"query",
+	"css",
+	"scss",
+	"styled",
+	"dart",
+	"php",
+	"vimdoc",
+	"markdown",
+	"markdown_inline",
+	"vim",
+	"vue",
+}
+
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		build = function()
-			pcall(require("nvim-treesitter.install").update({ with_sync = true }))
-		end,
-		branch = "master",
+		branch = "main",
+		lazy = false,
+		build = ":TSUpdate",
 		dependencies = {
-			"nvim-treesitter/nvim-treesitter-textobjects",
+			"neovim-treesitter/treesitter-parser-registry",
 		},
-		opts = {
-			ensure_installed = {
-				"bash",
-				"c",
-				"c_sharp",
-				"dockerfile",
-				"go",
-				"gomod",
-				"lua",
-				"python",
-				"rust",
-				"typescript",
-				"tsx",
-				"javascript",
-				"jsdoc",
-				"json",
-				"html",
-				"lua",
-				"embedded_template",
-				"regex",
-				"query",
-				"css",
-				"scss",
-				"styled",
-				"dart",
-				"php",
-				"vimdoc",
-				"query",
-				"markdown",
-				"markdown_inline",
-				"vim",
-				"vue",
-			},
-			highlight = { enable = true },
-			-- autotag = { enable = true },
-			indent = { enable = true, disable = { "python" } },
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "<c-space>",
-					node_incremental = "<c-space>",
-					scope_incremental = "<c-s>",
-					node_decremental = "<c-backspace>",
-				},
-			},
-			textobjects = {
+		config = function()
+			require("nvim-treesitter").setup()
+
+			vim.api.nvim_create_user_command("TSInstallConfigured", function()
+				require("nvim-treesitter").install(parsers)
+			end, { desc = "Install configured Tree-sitter parsers" })
+
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true }),
+				callback = function(args)
+					pcall(vim.treesitter.start, args.buf)
+
+					if vim.bo[args.buf].filetype ~= "python" then
+						vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+					end
+				end,
+			})
+		end,
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+		branch = "main",
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		config = function()
+			require("nvim-treesitter-textobjects").setup({
 				select = {
-					enable = true,
-					lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-					keymaps = {
-						-- You can use the capture groups defined in textobjects.scm
-						["aa"] = "@parameter.outer",
-						["ia"] = "@parameter.inner",
-						["af"] = "@function.outer",
-						["if"] = "@function.inner",
-						["ac"] = "@class.outer",
-						["ic"] = "@class.inner",
-					},
+					lookahead = true,
 				},
 				move = {
-					enable = true,
-					set_jumps = true, -- whether to set jumps in the jumplist
-					goto_next_start = {
-						["]m"] = "@function.outer",
-						["]]"] = "@class.outer",
-					},
-					goto_next_end = {
-						["]M"] = "@function.outer",
-						["]["] = "@class.outer",
-					},
-					goto_previous_start = {
-						["[m"] = "@function.outer",
-						["[["] = "@class.outer",
-					},
-					goto_previous_end = {
-						["[M"] = "@function.outer",
-						["[]"] = "@class.outer",
-					},
+					set_jumps = true,
 				},
-				swap = {
-					enable = true,
-					swap_next = {
-						["<leader>a"] = "@parameter.inner",
-					},
-					swap_previous = {
-						["<leader>A"] = "@parameter.inner",
-					},
-				},
-			},
-		},
-		config = function(_, opts)
-			require("nvim-treesitter.configs").setup(opts)
+			})
+
+			local select = require("nvim-treesitter-textobjects.select")
+			local move = require("nvim-treesitter-textobjects.move")
+			local swap = require("nvim-treesitter-textobjects.swap")
+
+			vim.keymap.set({ "x", "o" }, "aa", function()
+				select.select_textobject("@parameter.outer", "textobjects")
+			end, { desc = "Select outer parameter" })
+			vim.keymap.set({ "x", "o" }, "ia", function()
+				select.select_textobject("@parameter.inner", "textobjects")
+			end, { desc = "Select inner parameter" })
+			vim.keymap.set({ "x", "o" }, "af", function()
+				select.select_textobject("@function.outer", "textobjects")
+			end, { desc = "Select outer function" })
+			vim.keymap.set({ "x", "o" }, "if", function()
+				select.select_textobject("@function.inner", "textobjects")
+			end, { desc = "Select inner function" })
+			vim.keymap.set({ "x", "o" }, "ac", function()
+				select.select_textobject("@class.outer", "textobjects")
+			end, { desc = "Select outer class" })
+			vim.keymap.set({ "x", "o" }, "ic", function()
+				select.select_textobject("@class.inner", "textobjects")
+			end, { desc = "Select inner class" })
+
+			vim.keymap.set({ "n", "x", "o" }, "]m", function()
+				move.goto_next_start("@function.outer", "textobjects")
+			end, { desc = "Next function start" })
+			vim.keymap.set({ "n", "x", "o" }, "]]", function()
+				move.goto_next_start("@class.outer", "textobjects")
+			end, { desc = "Next class start" })
+			vim.keymap.set({ "n", "x", "o" }, "]M", function()
+				move.goto_next_end("@function.outer", "textobjects")
+			end, { desc = "Next function end" })
+			vim.keymap.set({ "n", "x", "o" }, "][", function()
+				move.goto_next_end("@class.outer", "textobjects")
+			end, { desc = "Next class end" })
+			vim.keymap.set({ "n", "x", "o" }, "[m", function()
+				move.goto_previous_start("@function.outer", "textobjects")
+			end, { desc = "Previous function start" })
+			vim.keymap.set({ "n", "x", "o" }, "[[", function()
+				move.goto_previous_start("@class.outer", "textobjects")
+			end, { desc = "Previous class start" })
+			vim.keymap.set({ "n", "x", "o" }, "[M", function()
+				move.goto_previous_end("@function.outer", "textobjects")
+			end, { desc = "Previous function end" })
+			vim.keymap.set({ "n", "x", "o" }, "[]", function()
+				move.goto_previous_end("@class.outer", "textobjects")
+			end, { desc = "Previous class end" })
+
+			vim.keymap.set("n", "<leader>a", function()
+				swap.swap_next("@parameter.inner")
+			end, { desc = "Swap next parameter" })
+			vim.keymap.set("n", "<leader>A", function()
+				swap.swap_previous("@parameter.inner")
+			end, { desc = "Swap previous parameter" })
 		end,
 	},
 }
