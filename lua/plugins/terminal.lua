@@ -59,6 +59,16 @@ return {
 			})
 		end
 
+		local function create_tab_terminal(command)
+			return Terminal:new({
+				cmd = command,
+				hidden = true,
+				direction = "tab",
+				close_on_exit = true,
+				start_in_insert = true,
+			})
+		end
+
 		local function define_toggle(name, terminal)
 			_G[name] = function()
 				terminal:toggle()
@@ -73,7 +83,7 @@ return {
 			callback = set_terminal_keymaps,
 		})
 
-		define_toggle("_LAZYGIT_TOGGLE", create_floating_terminal("lazygit"))
+		define_toggle("_LAZYGIT_TOGGLE", create_tab_terminal("lazygit"))
 		define_toggle("_TOP_TOGGLE", create_floating_terminal("btop"))
 		define_toggle("_YAZI_TOGGLE", create_floating_terminal("yazi"))
 		define_toggle("_EKPHOS_TOGGLE", create_floating_terminal("ekphos"))

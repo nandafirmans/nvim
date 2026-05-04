@@ -40,7 +40,7 @@ return {
 		opts = {
 			cli = {
 				mux = {
-					enabled = true,
+					enabled = false,
 					backend = "tmux",
 				},
 			},
