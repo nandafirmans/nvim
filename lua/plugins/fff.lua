@@ -1,7 +1,6 @@
 return {
 	{
 		"dmtrKovalenko/fff.nvim",
-		enabled = false, -- Disabled: native libfff_nvim.so is crashing Nvim on startup.
 		build = function()
 			require("fff.download").download_or_build_binary()
 		end,
@@ -12,14 +11,14 @@ return {
 				function()
 					require("fff").find_files()
 				end,
-				desc = "[F]ind [F]iles",
+				desc = "[F]ind [F]iles (fff.nvim)",
 			},
 			{
 				"<leader>fg",
 				function()
 					require("fff").live_grep()
 				end,
-				desc = "[F]ind by [G]rep",
+				desc = "[F]ind by [G]rep (fff.nvim)",
 			},
 		},
 		opts = {

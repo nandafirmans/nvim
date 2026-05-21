@@ -153,13 +153,6 @@ return {
 				desc = "[ ] Resume Last Find",
 			},
 			{
-				"<leader>ff",
-				function()
-					require("telescope.builtin").find_files()
-				end,
-				desc = "[F]ind [F]iles",
-			},
-			{
 				"<leader>fh",
 				function()
 					require("telescope").extensions.git_file_history.git_file_history()
@@ -172,13 +165,6 @@ return {
 					require("telescope.builtin").grep_string()
 				end,
 				desc = "[F]ind current [W]ord",
-			},
-			{
-				"<leader>fg",
-				function()
-					require("telescope.builtin").live_grep()
-				end,
-				desc = "[F]ind by [G]rep",
 			},
 			{
 				"<leader>fd",
