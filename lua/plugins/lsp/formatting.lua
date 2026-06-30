@@ -53,13 +53,13 @@ return {
 						to_stdin = true,
 					},
 				},
-				format_on_save = {
-					timeout_ms = 500,
-					lsp_format = "first",
-					filter = function(client)
-						return client.name == "eslint"
-					end,
-				},
+				-- format_on_save = {
+				-- 	timeout_ms = 500,
+				-- 	lsp_format = "first",
+				-- 	filter = function(client)
+				-- 		return client.name == "eslint"
+				-- 	end,
+				-- },
 			})
 		end,
 	},

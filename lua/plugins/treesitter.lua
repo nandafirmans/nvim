@@ -27,6 +27,7 @@ local parsers = {
 	"markdown_inline",
 	"vim",
 	"vue",
+	"xml",
 }
 
 return {
