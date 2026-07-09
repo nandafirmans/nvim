@@ -110,6 +110,20 @@ return {
 				desc = "[ ] Find existing buffers",
 			},
 			{
+				"<leader>ff",
+				function()
+					require("telescope.builtin").find_files()
+				end,
+				desc = "[F]ind [F]iles",
+			},
+			{
+				"<leader>fg",
+				function()
+					require("telescope.builtin").live_grep()
+				end,
+				desc = "[F]ind by [G]rep",
+			},
+			{
 				"<leader>f/",
 				function()
 					require("telescope.builtin").current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
