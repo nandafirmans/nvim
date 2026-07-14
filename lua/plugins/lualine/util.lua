@@ -17,8 +17,8 @@ M.options = function()
 	return {
 		theme = "auto",
 		icons_enabled = true,
-		section_separators = { left = "", right = "" },
-		component_separators = "",
+		section_separators = { left = "", right = "" },
+		component_separators = { left = "", right = "" },
 		always_divide_middle = true,
 		disabled_filetypes = {
 			statusline = disabled_filetypes,
@@ -80,6 +80,15 @@ local function macro_recording_component()
 	}
 end
 
+local function filename_component(path)
+	return {
+		"filename",
+		path = path,
+		file_status = true,
+		separator = { left = "", right = "" },
+	}
+end
+
 M.init_recording_event = function()
 	vim.api.nvim_create_autocmd("RecordingEnter", {
 		callback = refresh_statusline,
@@ -130,11 +139,7 @@ M.hide_lualine_buffers = function()
 		options = M.options(),
 		winbar = {
 			lualine_a = {
-				{
-					"filename",
-					path = 0,
-					file_status = true,
-				},
+				filename_component(0),
 			},
 			lualine_b = {
 				"branch",
