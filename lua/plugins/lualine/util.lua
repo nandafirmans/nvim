@@ -1,6 +1,37 @@
 local M = {}
 local uv = vim.uv or vim.loop
 
+local disabled_filetypes = {
+	"help",
+	"startify",
+	"dashboard",
+	"packer",
+	"neogitstatus",
+	"NvimTree",
+	"Trouble",
+	"qf",
+	"copilot-chat",
+}
+
+M.options = function()
+	return {
+		theme = "auto",
+		icons_enabled = true,
+		section_separators = { left = "", right = "" },
+		component_separators = "",
+		always_divide_middle = true,
+		disabled_filetypes = {
+			statusline = disabled_filetypes,
+			winbar = disabled_filetypes,
+		},
+		refresh = {
+			statusline = 100,
+			tabline = 100,
+			winbar = 100,
+		},
+	}
+end
+
 M.show_macro_recording = function()
 	local recording_register = vim.fn.reg_recording()
 
@@ -75,6 +106,7 @@ end
 
 M.show_lualine_buffers = function()
 	require("lualine").setup({
+		options = M.options(),
 		winbar = {
 			lualine_a = {
 				buffers,
@@ -83,10 +115,11 @@ M.show_lualine_buffers = function()
 				macro_recording_component(),
 			},
 			lualine_c = {
+				"branch",
 				"diagnostics",
 				"diff",
 			},
-			lualine_y = { "progress", "branch" },
+			lualine_y = { "progress", },
 			lualine_z = { "mode" },
 		},
 	})
@@ -94,6 +127,7 @@ end
 
 M.hide_lualine_buffers = function()
 	require("lualine").setup({
+		options = M.options(),
 		winbar = {
 			lualine_a = {
 				{
@@ -103,6 +137,7 @@ M.hide_lualine_buffers = function()
 				},
 			},
 			lualine_b = {
+				"branch",
 				"diagnostics",
 				"diff",
 			},

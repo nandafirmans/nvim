@@ -13,37 +13,9 @@ return {
 	},
 	config = function()
 		local lualine_util = require("plugins.lualine.util")
-		local disabled_filetypes = {
-			"help",
-			"startify",
-			"dashboard",
-			"packer",
-			"neogitstatus",
-			"NvimTree",
-			"Trouble",
-			"qf",
-			"copilot-chat",
-		}
 
 		require("lualine").setup({
-			options = {
-				theme = "auto",
-				icons_enabled = true,
-				section_separators = { left = "", right = "" },
-				component_separators = "",
-				always_divide_middle = true,
-				-- disabled_filetypes = {},
-				-- globalstatus = true,
-				disabled_filetypes = {
-					statusline = disabled_filetypes,
-					winbar = disabled_filetypes,
-				},
-				refresh = {
-					statusline = 100,
-					tabline = 100,
-					winbar = 100,
-				},
-			},
+			options = lualine_util.options(),
 			sections = {},
 			inactive_sections = {},
 			winbar = {
