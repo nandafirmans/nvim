@@ -12,6 +12,7 @@ local function load_walltheme()
 	if ok and type(theme.setup) == "function" then
 		theme.setup()
 		pcall(function()
+			require("plugins.lualine.util").hide_lualine_buffers()
 			require("lualine").refresh({ place = { "statusline", "tabline", "winbar" } })
 		end)
 	else

@@ -100,6 +100,55 @@ local function set_terminal_colors()
 	end
 end
 
+function M.lualine_theme()
+	local function section(fg, bg)
+		return { fg = fg, bg = bg, gui = "bold" }
+	end
+
+	return {
+		normal = {
+			a = section(c.on_primary, c.primary),
+			b = section(c.fg, c.surface_container),
+			c = section(c.fg, c.surface),
+			x = section(c.fg, c.surface),
+			y = section(c.fg, c.surface_container),
+			z = section(c.on_primary, c.primary),
+		},
+		insert = {
+			a = section(c.bg, c.secondary),
+			b = section(c.fg, c.surface_container),
+			c = section(c.fg, c.surface),
+			x = section(c.fg, c.surface),
+			y = section(c.fg, c.surface_container),
+			z = section(c.bg, c.secondary),
+		},
+		visual = {
+			a = section(c.bg, c.tertiary),
+			b = section(c.fg, c.surface_container),
+			c = section(c.fg, c.surface),
+			x = section(c.fg, c.surface),
+			y = section(c.fg, c.surface_container),
+			z = section(c.bg, c.tertiary),
+		},
+		command = {
+			a = section(c.on_primary, c.primary),
+			b = section(c.fg, c.surface_container),
+			c = section(c.fg, c.surface),
+			x = section(c.fg, c.surface),
+			y = section(c.fg, c.surface_container),
+			z = section(c.on_primary, c.primary),
+		},
+		inactive = {
+			a = { fg = c.muted, bg = c.surface_container },
+			b = { fg = c.muted, bg = c.surface },
+			c = { fg = c.muted, bg = c.surface },
+			x = { fg = c.muted, bg = c.surface },
+			y = { fg = c.muted, bg = c.surface },
+			z = { fg = c.muted, bg = c.surface_container },
+		},
+	}
+end
+
 function M.setup()
 	vim.opt.termguicolors = true
 	load_base_theme()

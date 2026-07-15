@@ -13,12 +13,21 @@ local disabled_filetypes = {
 	"copilot-chat",
 }
 
+local function theme()
+	local ok, walltheme = pcall(require, "core.walltheme")
+	if ok and type(walltheme.lualine_theme) == "function" then
+		return walltheme.lualine_theme()
+	end
+
+	return "auto"
+end
+
 M.options = function()
 	return {
-		theme = "auto",
+		theme = theme(),
 		icons_enabled = true,
 		section_separators = { left = "", right = "" },
-		component_separators = { left = "", right = "" },
+		component_separators = { left = "", right = "" },
 		always_divide_middle = true,
 		disabled_filetypes = {
 			statusline = disabled_filetypes,
@@ -85,7 +94,6 @@ local function filename_component(path)
 		"filename",
 		path = path,
 		file_status = true,
-		separator = { left = "", right = "" },
 	}
 end
 
@@ -116,7 +124,7 @@ end
 M.show_lualine_buffers = function()
 	require("lualine").setup({
 		options = M.options(),
-		winbar = {
+		sections = {
 			lualine_a = {
 				buffers,
 			},
@@ -128,16 +136,18 @@ M.show_lualine_buffers = function()
 				"diagnostics",
 				"diff",
 			},
-			lualine_y = { "progress", },
+			lualine_y = { "progress" },
 			lualine_z = { "mode" },
 		},
+		winbar = {},
+		inactive_winbar = {},
 	})
 end
 
 M.hide_lualine_buffers = function()
 	require("lualine").setup({
 		options = M.options(),
-		winbar = {
+		sections = {
 			lualine_a = {
 				filename_component(0),
 			},
@@ -152,6 +162,8 @@ M.hide_lualine_buffers = function()
 			lualine_y = { "location" },
 			lualine_z = { "mode" },
 		},
+		winbar = {},
+		inactive_winbar = {},
 	})
 end
 

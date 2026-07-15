@@ -16,16 +16,14 @@ return {
 
 		require("lualine").setup({
 			options = lualine_util.options(),
-			sections = {},
-			inactive_sections = {},
-			winbar = {
+			sections = {
 				lualine_x = {
 					"encoding",
 					"fileformat",
 					"filetype",
 				},
 			},
-			inactive_winbar = {
+			inactive_sections = {
 				lualine_a = {},
 				lualine_b = {},
 				lualine_c = {
@@ -39,6 +37,8 @@ return {
 				lualine_y = {},
 				lualine_z = {},
 			},
+			winbar = {},
+			inactive_winbar = {},
 		})
 
 		lualine_util.init_recording_event()
