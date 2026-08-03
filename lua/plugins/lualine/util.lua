@@ -139,6 +139,7 @@ M.show_lualine_buffers = function()
 			lualine_y = { "progress" },
 			lualine_z = { "mode" },
 		},
+		tabline = {},
 		winbar = {},
 		inactive_winbar = {},
 	})
@@ -162,6 +163,7 @@ M.hide_lualine_buffers = function()
 			lualine_y = { "location" },
 			lualine_z = { "mode" },
 		},
+		tabline = {},
 		winbar = {},
 		inactive_winbar = {},
 	})
@@ -176,13 +178,8 @@ M.toggle_tabline = function()
 end
 
 M.init_toggle_buffers_and_tab = function()
+	vim.o.showtabline = 0
 	M.hide_lualine_buffers()
-
-	vim.api.nvim_create_autocmd("VimEnter", {
-		callback = function()
-			M.toggle_tabline()
-		end,
-	})
 end
 
 return M
