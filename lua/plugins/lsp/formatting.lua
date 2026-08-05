@@ -61,6 +61,12 @@ return {
 				-- 	end,
 				-- },
 			})
+
+			vim.keymap.set("n", "<A-F>", function()
+				require("conform").format({ async = true })
+			end, {
+				desc = "[F]ormat current buffer",
+			})
 		end,
 	},
 }

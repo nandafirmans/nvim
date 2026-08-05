@@ -69,22 +69,6 @@ M.configs = {
 	},
 }
 
-M.on_attach = function(_, bufnr)
-	vim.keymap.set("n", "<A-F>", function()
-		require("conform").format({
-			bufnr = bufnr,
-			async = true,
-			-- lsp_format = "fallback",
-		})
-	end, {
-		buffer = bufnr,
-		desc = "[F]ormatting file",
-	})
-	-- Automatically run `:Format` on save
-	-- vim.api.nvim_create_autocmd("BufWritePre", {
-	--   buffer = bufnr,
-	--   command = "Format",
-	-- })
-end
+M.on_attach = function() end
 
 return M
