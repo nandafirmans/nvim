@@ -1,19 +1,19 @@
--- Generated matugen colors, layered over citruszest for a cleaner base.
+-- Generated matugen colors, layered over tokyonight for a cleaner base.
 local M = {}
 
 local fallback_matugen = {
-	bg = "#1b110f",
-	surface = "#1b110f",
-	surface_container = "#2a1f1d",
-	fg = "#f2deda",
-	muted = "#ddc0ba",
-	primary = "#ffb4a5",
-	on_primary = "#5e0d02",
-	primary_container = "#e16f59",
-	secondary = "#fab6a8",
-	tertiary = "#6dd9c4",
-	error = "#ffb4ab",
-	outline = "#a58b86",
+	bg = "#1a1b26",
+	surface = "#1a1b26",
+	surface_container = "#24283b",
+	fg = "#c0caf5",
+	muted = "#565f89",
+	primary = "#7aa2f7",
+	on_primary = "#15161e",
+	primary_container = "#2e3c64",
+	secondary = "#bb9af7",
+	tertiary = "#7dcfff",
+	error = "#f7768e",
+	outline = "#414868",
 }
 
 local function load_matugen_colors()
@@ -28,48 +28,48 @@ end
 
 local matugen = load_matugen_colors()
 
-local citruszest = {
-	bg = "#121212",
-	float = "#232323",
-	surface = "#232323",
-	surface_container = "#383838",
-	fg = "#bfbfbf",
-	muted = "#767c77",
-	selection = "#404040",
-	cursor = "#ffd700",
-	keyword = "#00bfff",
-	function_name = "#00cc7a",
-	type = "#ff5454",
-	string = "#ffd700",
-	constant = "#af74ee",
-	identifier = "#bfbfbf",
-	statement = "#28c9ff",
-	error = "#ff5454",
-	warning = "#ffaa54",
-	info = "#28c9ff",
-	hint = "#33ffff",
+local tokyonight = {
+	bg = "#1a1b26",
+	float = "#16161e",
+	surface = "#1f2335",
+	surface_container = "#24283b",
+	fg = "#c0caf5",
+	muted = "#565f89",
+	selection = "#2e3c64",
+	cursor = "#c0caf5",
+	keyword = "#bb9af7",
+	function_name = "#7aa2f7",
+	type = "#2ac3de",
+	string = "#9ece6a",
+	constant = "#ff9e64",
+	identifier = "#c0caf5",
+	statement = "#bb9af7",
+	error = "#f7768e",
+	warning = "#e0af68",
+	info = "#7dcfff",
+	hint = "#1abc9c",
 	terminal = {
-		"#232323",
-		"#ff5454",
-		"#00cc7a",
-		"#ffd700",
-		"#00bfff",
-		"#af74ee",
-		"#00ffff",
-		"#bfbfbf",
-		"#767c77",
-		"#ff1a75",
-		"#1affa3",
-		"#ffff00",
-		"#28c9ff",
-		"#af74ee",
-		"#33ffff",
-		"#f9f9f9",
+		"#15161e",
+		"#f7768e",
+		"#9ece6a",
+		"#e0af68",
+		"#7aa2f7",
+		"#bb9af7",
+		"#7dcfff",
+		"#a9b1d6",
+		"#414868",
+		"#f7768e",
+		"#9ece6a",
+		"#e0af68",
+		"#7aa2f7",
+		"#bb9af7",
+		"#7dcfff",
+		"#c0caf5",
 	},
 }
 
-local c = vim.tbl_extend("force", citruszest, {
-	-- Keep citruszest as the solid theme base. Use wallpaper colors only as accents.
+local c = vim.tbl_extend("force", tokyonight, {
+	-- Keep tokyonight as the solid theme base. Use wallpaper colors only as accents.
 	primary = matugen.primary,
 	on_primary = matugen.on_primary,
 	primary_container = matugen.primary_container,
@@ -82,16 +82,17 @@ local c = vim.tbl_extend("force", citruszest, {
 
 local function load_base_theme()
 	pcall(function()
-		require("citruszest").setup({
-			option = {
-				transparent = true,
-				bold = false,
-				italics = true,
+		require("tokyonight").setup({
+			style = "night",
+			transparent = true,
+			styles = {
+				sidebars = "transparent",
+				floats = "transparent",
 			},
 		})
 	end)
 
-	pcall(vim.cmd.colorscheme, "citruszest")
+	pcall(vim.cmd.colorscheme, "tokyonight-night")
 end
 
 local function set_terminal_colors()
@@ -152,7 +153,7 @@ end
 function M.setup()
 	vim.opt.termguicolors = true
 	load_base_theme()
-	vim.g.colors_name = "matugen-citruszest"
+	vim.g.colors_name = "matugen-tokyonight"
 
 	local hl = vim.api.nvim_set_hl
 	hl(0, "Normal", { fg = c.fg, bg = "NONE" })
@@ -177,7 +178,7 @@ function M.setup()
 	hl(0, "Pmenu", { fg = c.fg, bg = c.float })
 	hl(0, "PmenuSel", { fg = c.on_primary, bg = c.primary })
 
-	-- Syntax stays close to citruszest so the wallpaper palette does not wash out code.
+	-- Syntax stays close to tokyonight so the wallpaper palette does not wash out code.
 	hl(0, "Comment", { fg = c.muted, italic = true })
 	hl(0, "String", { fg = c.string })
 	hl(0, "Function", { fg = c.function_name })
@@ -192,7 +193,7 @@ function M.setup()
 	hl(0, "DiagnosticInfo", { fg = c.info })
 	hl(0, "DiagnosticHint", { fg = c.hint })
 
-	-- Lualine/winbar uses wallpaper accents over citruszest surfaces for contrast.
+	-- Lualine/winbar uses wallpaper accents over tokyonight surfaces for contrast.
 	local lualine_groups = {
 		lualine_a_normal = { fg = c.on_primary, bg = c.primary, bold = true },
 		lualine_b_normal = { fg = c.fg, bg = c.surface_container, bold = true },

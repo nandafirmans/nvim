@@ -172,14 +172,22 @@ end
 M.toggle_tabline = function()
 	if vim.o.showtabline == 0 then
 		vim.o.showtabline = 2
+		M.show_lualine_buffers()
 	else
 		vim.o.showtabline = 0
+		M.hide_lualine_buffers()
 	end
 end
 
 M.init_toggle_buffers_and_tab = function()
 	vim.o.showtabline = 0
 	M.hide_lualine_buffers()
+
+	vim.api.nvim_create_autocmd("VimEnter", {
+		callback = function()
+			vim.o.showtabline = 0
+		end,
+	})
 end
 
 return M

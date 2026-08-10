@@ -11,7 +11,7 @@ return {
 				local screen_height = vim.opt.lines:get()
 				local tree_width = 80
 				-- local tree_height = math.floor(tree_width * screen_height / screen_width) + 20
-				local tree_height = 100
+				local tree_height = 80
 
 				return {
 					border = "rounded",

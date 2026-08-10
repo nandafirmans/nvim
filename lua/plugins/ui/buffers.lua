@@ -45,6 +45,7 @@ return {
 		},
 		config = function(_, opts)
 			require("bufferline").setup(opts)
+			vim.o.showtabline = 0
 		end,
 	},
 	{
