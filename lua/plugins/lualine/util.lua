@@ -124,7 +124,7 @@ end
 M.show_lualine_buffers = function()
 	require("lualine").setup({
 		options = M.options(),
-		sections = {
+		winbar = {
 			lualine_a = {
 				buffers,
 			},
@@ -139,8 +139,9 @@ M.show_lualine_buffers = function()
 			lualine_y = { "progress" },
 			lualine_z = { "mode" },
 		},
+		sections = {},
+		inactive_sections = {},
 		tabline = {},
-		winbar = {},
 		inactive_winbar = {},
 	})
 end
@@ -148,7 +149,7 @@ end
 M.hide_lualine_buffers = function()
 	require("lualine").setup({
 		options = M.options(),
-		sections = {
+		winbar = {
 			lualine_a = {
 				filename_component(0),
 			},
@@ -163,8 +164,9 @@ M.hide_lualine_buffers = function()
 			lualine_y = { "location" },
 			lualine_z = { "mode" },
 		},
+		sections = {},
+		inactive_sections = {},
 		tabline = {},
-		winbar = {},
 		inactive_winbar = {},
 	})
 end
