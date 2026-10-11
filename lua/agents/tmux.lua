@@ -18,6 +18,9 @@ local FORMAT = table.concat({
 	"#{@agent_label}",
 	"#{@agent_activity}",
 	"#{@agent_task}",
+	"#{@agent_command}",
+	"#{@agent_claude_session}",
+	"#{@agent_session_id}",
 }, "\t")
 
 local conf_path
@@ -51,19 +54,36 @@ function M.cmd(args)
 	return vim.list_extend({ "tmux", "-L", M.socket, "-f", conf_path }, args)
 end
 
+function M.available()
+	return vim.fn.executable("tmux") == 1
+end
+
+-- What a failed start looks like, so callers never see an exception
+-- (vim.system throws when tmux is not installed).
+local NOT_FOUND = { code = 127, stdout = "", stderr = "tmux is not installed" }
+
 -- Runs a tmux command asynchronously; `cb` gets the vim.system result on the main loop.
 function M.run(args, cb, opts)
-	vim.system(M.cmd(args), vim.tbl_extend("force", { text = true }, opts or {}), function(result)
+	local ok = pcall(vim.system, M.cmd(args), vim.tbl_extend("force", { text = true }, opts or {}), function(result)
 		if cb then
 			vim.schedule(function()
 				cb(result)
 			end)
 		end
 	end)
+	if not ok and cb then
+		vim.schedule(function()
+			cb(NOT_FOUND)
+		end)
+	end
 end
 
 function M.run_sync(args)
-	return vim.system(M.cmd(args), { text = true }):wait()
+	local ok, job = pcall(vim.system, M.cmd(args), { text = true })
+	if not ok then
+		return NOT_FOUND
+	end
+	return job:wait()
 end
 
 -- The command a terminal buffer runs to show one agent. TMUX is unset so it
@@ -94,6 +114,9 @@ function M.list(cb)
 						label = f[11] ~= "" and f[11] or nil,
 						activity_text = f[12] ~= "" and f[12] or nil,
 						task = f[13] ~= "" and f[13] or nil,
+						command = f[14] ~= "" and f[14] or nil,
+						claude_session = f[15] ~= "" and f[15] or nil,
+						session_id = f[16] ~= "" and f[16] or nil,
 					})
 				end
 			end
@@ -160,17 +183,33 @@ function M.set_option(name, key, value)
 	return M.run_sync({ "set-option", "-t", "=" .. name .. ":", "@agent_" .. key, value })
 end
 
-function M.respawn(name)
+-- Restarts the tab's process; with `command`, runs that instead of the original.
+function M.respawn(name, command)
 	M.run_sync({ "set-option", "-t", "=" .. name .. ":", "@agent_status", "" })
-	return M.run_sync({ "respawn-pane", "-k", "-t", "=" .. name .. ":" })
+	local args = { "respawn-pane", "-k", "-t", "=" .. name .. ":" }
+	if command then
+		table.insert(args, command)
+	end
+	return M.run_sync(args)
+end
+
+-- Sends key names (tmux syntax, e.g. "Enter", "Escape") to the tab.
+function M.send_keys(name, ...)
+	M.run(vim.list_extend({ "send-keys", "-t", "=" .. name .. ":" }, { ... }))
 end
 
 -- Pastes text into the agent's prompt with bracketed paste, so multi-line text
 -- is not submitted line by line.
-function M.paste(name, text)
-	M.run({ "load-buffer", "-b", "agents-send", "-" }, function(result)
+-- `done` runs once the text is in the prompt.
+local paste_seq = 0
+
+function M.paste(name, text, done)
+	-- One tmux buffer per paste: concurrent pastes (fan-out) must not share one.
+	paste_seq = paste_seq + 1
+	local buffer = "agents-send-" .. paste_seq
+	M.run({ "load-buffer", "-b", buffer, "-" }, function(result)
 		if result.code == 0 then
-			M.run({ "paste-buffer", "-p", "-d", "-b", "agents-send", "-t", "=" .. name .. ":" })
+			M.run({ "paste-buffer", "-p", "-d", "-b", buffer, "-t", "=" .. name .. ":" }, done)
 		end
 	end, { stdin = text })
 end

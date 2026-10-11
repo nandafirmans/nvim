@@ -2,6 +2,26 @@
 -- the per-agent +/- counts in the sidebar.
 local M = {}
 
+-- vim.system that never throws (it does when git is not installed); a
+-- failed start reports exit code 127 like a shell would.
+local function system(cmd, opts, on_exit)
+	local ok, job = pcall(vim.system, cmd, opts, on_exit)
+	if ok then
+		return job
+	end
+	local failed = { code = 127, stdout = "", stderr = "git is not installed" }
+	if on_exit then
+		vim.schedule(function()
+			on_exit(failed)
+		end)
+	end
+	return {
+		wait = function()
+			return failed
+		end,
+	}
+end
+
 local MAX_UNTRACKED_BYTES = 512 * 1024
 
 local function count_lines(path)
@@ -113,7 +133,7 @@ function M.changes(cwd, cb)
 		end)
 	end
 
-	vim.system(
+	system(
 		vim.list_extend(vim.deepcopy(base), { "status", "--porcelain=v1", "-b", "--untracked-files=all" }),
 		{ text = true },
 		function(result)
@@ -122,7 +142,7 @@ function M.changes(cwd, cb)
 			finish()
 		end
 	)
-	vim.system(vim.list_extend(vim.deepcopy(base), { "diff", "--numstat", "HEAD" }), { text = true }, function(result)
+	system(vim.list_extend(vim.deepcopy(base), { "diff", "--numstat", "HEAD" }), { text = true }, function(result)
 		-- A repo without commits has no HEAD; the status output is still useful.
 		numstat_out = result.code == 0 and result.stdout or ""
 		finish()
@@ -136,7 +156,7 @@ function M.diff(cwd, entry, cb)
 	else
 		vim.list_extend(args, { "diff", "HEAD", "--", entry.path })
 	end
-	vim.system(args, { text = true }, function(result)
+	system(args, { text = true }, function(result)
 		vim.schedule(function()
 			cb(vim.split(result.stdout or "", "\n", { trimempty = true }))
 		end)
@@ -154,14 +174,14 @@ function M.add_worktree(root, branch)
 	if vim.uv.fs_stat(path) then
 		return path
 	end
-	local exists = vim.system({ "git", "-C", root, "rev-parse", "--verify", "--quiet", "refs/heads/" .. branch }):wait()
+	local exists = system({ "git", "-C", root, "rev-parse", "--verify", "--quiet", "refs/heads/" .. branch }):wait()
 	local args = { "git", "-C", root, "worktree", "add" }
 	if exists.code == 0 then
 		vim.list_extend(args, { path, branch })
 	else
 		vim.list_extend(args, { "-b", branch, path })
 	end
-	local result = vim.system(args, { text = true }):wait()
+	local result = system(args, { text = true }):wait()
 	if result.code ~= 0 then
 		return nil, vim.trim(result.stderr or "")
 	end

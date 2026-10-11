@@ -4,7 +4,7 @@
 # Only agents started by the hub have NVIM_AGENT_SESSION; elsewhere this is a no-op.
 #
 # Usage: claude-state.sh <event>, with the hook JSON on stdin.
-#   idle     SessionStart       status idle
+#   idle     SessionStart       status idle, remembers the session id
 #   prompt   UserPromptSubmit   status running, task = the prompt
 #   tool     PreToolUse         status running, activity = what the tool does
 #   running  PostToolUse        status running (after a permission prompt)
@@ -69,9 +69,18 @@ print(" ".join(text.split())[:80])
 
 case "$event" in
 idle)
-	cat >/dev/null 2>&1
+	# Remember the Claude session id, so a restart can resume this exact
+	# conversation and the hub can find its transcript.
+	session=$(python3 -c '
+import json, sys
+try:
+    print(json.loads(sys.stdin.read(), strict=False).get("session_id") or "")
+except Exception:
+    print("")
+' 2>/dev/null)
 	set_opt @agent_status idle
 	set_opt @agent_activity ""
+	[ -n "$session" ] && set_opt @agent_claude_session "$session"
 	;;
 prompt)
 	set_opt @agent_status running

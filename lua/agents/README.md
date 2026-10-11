@@ -10,21 +10,32 @@ running when Neovim exits or crashes.
 
 - Neovim 0.11+ and `tmux` 3.2+
 - Optional: `lazygit` (`g`), `terminal-browser` in WezTerm/Ghostty/kitty (`b`),
-  `python3` for the Claude hooks
+  `gh` (`P`), `python3` (hooks and the usage monitor)
+- Agent CLIs: any of Claude Code, omp, pi, opencode, codex, hermes, or any
+  command. Missing ones are simply not offered; nothing errors.
 
 ## Setup
 
-Once per machine, so Claude Code reports its status and activity to the hub:
+Once per machine, so each agent CLI reports its status, task, activity and
+session id to the hub:
 
 ```vim
-:AgentsInstallHooks
+:AgentsInstallHooks            " every installed CLI
+:AgentsInstallHooks omp codex  " only these
 ```
 
-This adds hooks that run `lua/agents/hooks/claude-state.sh` to
-`~/.claude/settings.json` (a backup is saved as `settings.json.bak-agents`).
-They apply to Claude sessions started afterwards. Remove them with
-`:AgentsUninstallHooks`. Without the hooks the hub guesses Claude's status from
-its screen, as it does for other tools.
+| CLI | What is installed |
+| --- | --- |
+| Claude Code | hooks in `~/.claude/settings.json` running `hooks/claude-state.sh` |
+| omp, pi | extension link in `~/.omp/agent/extensions` / `~/.pi/agent/extensions` |
+| opencode | plugin link in `~/.config/opencode/plugins` |
+| codex | `notify` in `~/.codex/config.toml` (marks a turn done; left alone if you already use `notify`) |
+| hermes | shell hooks in `~/.hermes/config.yaml` (hermes may ask once to allow them) |
+
+Edited files get a `.bak-agents` backup. CLIs that are not installed are
+skipped with a note. `:AgentsUninstallHooks` removes everything again. They
+apply to agents started afterwards (`R` restarts a tab and resumes its
+conversation). Without a hook, the hub guesses status from the screen.
 
 ## Keys
 
@@ -41,13 +52,39 @@ Global:
 | `<leader>md` | Diffview of the selected agent's changes |
 | `<leader>mg` | lazygit in the selected agent's repo |
 | `<leader>mb` | open or close terminal-browser |
+| `<leader>mp` | type a prompt to the selected agent |
+| `<leader>mf` | find a tab (fuzzy) |
+| `<leader>mF` | fan out one prompt to several worktrees |
+| `<leader>ma` | usage monitor for every agent CLI (`:AgentsMonitor`) |
 
 Sidebar: `j`/`k` select, `⏎` focus, `1`-`9` focus tab N, `n` desk, `t` tab,
-`r` rename, `x` kill, `R` restart, `D` diff, `O` office, `b` browser,
-`g` lazygit, `Ctrl-Space` jump, `<Tab>` changes panel, `q` close.
+`p` prompt, `a` approve a permission prompt, `e` Esc (decline or interrupt),
+`F` fan out, `f` find, `r` rename, `x` kill, `R` restart (Claude resumes its
+conversation), `P` push and open a PR, `M` merge the worktree branch,
+`W` remove the worktree, `D` diff, `O` office, `b` browser, `g` lazygit,
+`A` usage monitor, `Ctrl-Space` jump, `<Tab>` changes panel, `?` all keys,
+`q` close.
 
 Changes panel: `⏎` preview diff, `o` open file, `D` Diffview, `g` lazygit,
-`r` refresh. In Diffview, `q` closes it and returns to the hub.
+`S` send review comments, `r` refresh. In the diff preview, `c` comments on
+the line under the cursor and `S` sends all comments to the agent as one
+prompt. In Diffview, `q` closes it and returns to the hub.
+
+## Workflow
+
+- **Fan out** (`F`): one prompt goes to N agents, each in its own worktree
+  and branch (`<prefix>-1..N`). Compare them in the changes panel, `M` merge
+  the best one, `W` remove the others.
+- **Context**: Claude tabs show their context window use (from the
+  transcripts in `~/.claude/projects`); above 80% the office suggests
+  `/compact`.
+- **Notifications**: when an agent finishes or needs input while Neovim is not
+  focused, macOS shows a notification.
+- **Usage monitor** (`<leader>ma`, `A`): sessions, prompts, tool calls,
+  input/output/cache tokens, cost (where the CLI records it), tokens per day,
+  top projects and models, for today / 7 days / 30 days, plus what is live in
+  the hub. Read-only, from each CLI's own files; agents that are not installed
+  or unused show a note instead of numbers.
 
 From an agent's terminal: `Ctrl-Space` jump, `<C-h>`/`<C-l>` move between
 panels, `<C-esc>` normal mode.

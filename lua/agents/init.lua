@@ -4,13 +4,16 @@
 local tmux = require("agents.tmux")
 local git = require("agents.git")
 local office = require("agents.office")
+local flow = require("agents.flow")
+local review = require("agents.review")
+local usage = require("agents.usage")
 
 local M = {}
 
 local config = {
 	roots = { "~/_dev" },
 	scan_depth = 3,
-	tools = { "claude", "omp", "opencode", "codex", "pi" },
+	tools = { "claude", "omp", "opencode", "codex", "pi", "hermes" },
 	sidebar_width = 34,
 	changes_width = 46,
 	-- Fallback for agents without hooks: output within this many seconds counts as running.
@@ -50,6 +53,16 @@ local S = {
 	tails = {}, -- name -> last screen line, for tabs without hooks
 	office_rects = {},
 }
+
+-- Runs a command and waits; a missing program reads as exit code 127
+-- instead of an error (vim.system throws when it cannot start).
+local function run_wait(cmd, timeout)
+	local ok, job = pcall(vim.system, cmd, { text = true })
+	if not ok then
+		return { code = 127, stdout = "", stderr = cmd[1] .. " is not installed" }
+	end
+	return job:wait(timeout)
+end
 
 -- Rendering helpers -----------------------------------------------------------
 
@@ -107,12 +120,17 @@ local function notify_transition(agent, before, after)
 	if viewing or before == after then
 		return
 	end
+	local message, level
 	if after == "waiting" then
-		vim.notify(agent_label(agent) .. " needs input", vim.log.levels.WARN, { title = "Agents" })
+		message, level = "needs input", vim.log.levels.WARN
 	elseif before == "running" and after == "done" then
-		vim.notify(agent_label(agent) .. " is done", vim.log.levels.INFO, { title = "Agents" })
+		message, level = "is done", vim.log.levels.INFO
 	elseif after == "exited" then
-		vim.notify(agent_label(agent) .. " exited", vim.log.levels.WARN, { title = "Agents" })
+		message, level = "exited", vim.log.levels.WARN
+	end
+	if message then
+		vim.notify(agent_label(agent) .. " " .. message, level, { title = "Agents" })
+		flow.system_notify(agent.project, display_name(agent) .. " " .. message)
 	end
 end
 
@@ -203,13 +221,15 @@ local function render_list()
 		-- While working (or asking), what it does says more than the branch.
 		local doing = (status == "running" or status == "waiting")
 			and (agent.activity_text or S.tails[agent.name])
-		local room = total - seg_width(detail) - 4
+		local ctx = usage.context(agent)
+		local ctx_segs = ctx and { { usage.format(ctx), usage.hl(ctx) }, { " " } } or {}
+		local room = total - seg_width(detail) - seg_width(ctx_segs) - 4
 		if doing then
 			table.insert(detail, { " · " .. trunc(doing, room - 1), "AgentsDim" })
 		elseif branch then
 			table.insert(detail, { "  " .. BRANCH_ICON .. " " .. trunc(branch, room - 1), "AgentsDim" })
 		end
-		local second = push(canvas, detail, line_hl)
+		local second = push(canvas, row(detail, ctx_segs, total), line_hl)
 
 		S.list_map[first] = agent.name
 		S.list_map[second] = agent.name
@@ -217,10 +237,9 @@ local function render_list()
 
 	push(canvas, { { "" } })
 	local keys = {
-		{ { "n", "desk" }, { "t", "tab" }, { "r", "rename" } },
-		{ { "x", "kill" }, { "R", "restart" }, { "D", "diff" } },
-		{ { "⏎", "focus" }, { "^␣", "jump" }, { "O", "office" } },
-		{ { "b", "browser" }, { "g", "lazygit" } },
+		{ { "n", "desk" }, { "t", "tab" }, { "p", "prompt" } },
+		{ { "a", "approve" }, { "F", "fan-out" }, { "f", "find" } },
+		{ { "⏎", "focus" }, { "O", "office" }, { "?", "all keys" } },
 	}
 	for _, line in ipairs(keys) do
 		local segs = { { " " } }
@@ -259,7 +278,9 @@ local function render_changes()
 	local agent = selected_agent()
 	local info = agent and S.changes[agent.cwd]
 
+	local pending = agent and review.count(agent.name) or 0
 	push(canvas, row({ { " CHANGES", "AgentsTitle" } }, {
+		{ pending > 0 and ("● " .. pending .. " to send  ") or "", "DiagnosticInfo" },
 		{ info and (#info.files .. (#info.files == 1 and " file " or " files ")) or "", "AgentsDim" },
 	}, total))
 
@@ -311,9 +332,15 @@ local function render_changes()
 		{ "o", "AgentsKey" },
 		{ " open   ", "AgentsDim" },
 		{ "D", "AgentsKey" },
-		{ " diffview   ", "AgentsDim" },
-		{ "g", "AgentsKey" },
-		{ " lazygit", "AgentsDim" },
+		{ " diffview", "AgentsDim" },
+	})
+	push(canvas, {
+		{ " g", "AgentsKey" },
+		{ " lazygit   ", "AgentsDim" },
+		{ "S", "AgentsKey" },
+		{ " send review   ", "AgentsDim" },
+		{ "?", "AgentsKey" },
+		{ " keys", "AgentsDim" },
 	})
 
 	paint(S.bufs.changes, canvas)
@@ -353,6 +380,7 @@ local function render_office()
 		changes_of = function(agent)
 			return S.changes[agent.cwd]
 		end,
+		context_of = usage.context,
 		selected = S.selected,
 		jump_labels = S.jump_labels,
 		tails = S.tails,
@@ -390,7 +418,8 @@ local function update_winbar()
 	if branch then
 		vim.list_extend(parts, { "  ", BRANCH_ICON, " ", esc(branch) })
 	end
-	vim.list_extend(parts, { "%=%#", spec.hl, "#", spec.label, " " })
+	local status_text = status_of(agent.name) == "exited" and "exited · ⏎ or R resumes" or spec.label
+	vim.list_extend(parts, { "%=%#", spec.hl, "#", status_text, " " })
 	vim.wo[S.wins.term].winbar = table.concat(parts)
 end
 
@@ -492,6 +521,17 @@ show_agent = function(name, focus)
 		for _, lhs in ipairs({ "<C-Space>", "<C-@>" }) do
 			vim.keymap.set("t", lhs, M.jump, { buffer = buf, desc = "Jump to tab" })
 		end
+		-- An agent that exited cannot take input; Enter brings it back, resuming
+		-- its conversation, so typing a prompt just works again.
+		vim.keymap.set("t", "<CR>", function()
+			if status_of(name) == "exited" then
+				vim.schedule(function()
+					M.restart_agent(name)
+				end)
+				return ""
+			end
+			return "<CR>"
+		end, { buffer = buf, expr = true, desc = "Enter, or resume an exited agent" })
 		-- Typing should reach the agent as soon as its pane is entered.
 		vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
 			buffer = buf,
@@ -709,7 +749,11 @@ local function next_index(project)
 end
 
 local function current_branch(cwd)
-	local result = vim.system({ "git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD" }, { text = true }):wait()
+	local ok, job = pcall(vim.system, { "git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD" }, { text = true })
+	if not ok then
+		return nil
+	end
+	local result = job:wait()
 	return result.code == 0 and vim.trim(result.stdout) or nil
 end
 
@@ -733,6 +777,8 @@ local function create_agent(spec)
 			index = index,
 			cwd = spec.cwd,
 			branch = spec.branch or current_branch(spec.cwd) or "",
+			command = spec.command,
+			label = spec.label or "",
 		},
 	})
 	if not ok then
@@ -740,13 +786,19 @@ local function create_agent(spec)
 		return
 	end
 
-	S.selected = name
+	local focus = spec.focus ~= false
+	if focus then
+		S.selected = name
+	end
 	M.open()
 	start_timer()
 	poll(function()
 		refresh_changes()
-		select_agent(name, true)
+		if focus then
+			select_agent(name, true)
+		end
 	end)
+	return name
 end
 
 -- Fuzzy picker for the new-agent flow. Uses telescope when it is installed,
@@ -882,7 +934,7 @@ function M.new_agent()
 				end
 				vim.fn.mkdir(path, "p")
 				if choice == 1 then
-					local result = vim.system({ "git", "init", "-q", path }, { text = true }):wait()
+					local result = run_wait({ "git", "init", "-q", path })
 					if result.code ~= 0 then
 						vim.notify("git init failed: " .. vim.trim(result.stderr or ""), vim.log.levels.WARN, { title = "Agents" })
 					end
@@ -978,7 +1030,7 @@ function M.restart_agent(name)
 	if not (name and S.by_name[name]) then
 		return
 	end
-	tmux.respawn(name)
+	tmux.respawn(name, flow.restart_command(S.by_name[name]))
 	poll()
 end
 
@@ -999,7 +1051,9 @@ function M.diffview(path)
 	if path then
 		cmd = cmd .. " -- " .. vim.fn.fnameescape(path)
 	end
-	vim.cmd(cmd)
+	if not pcall(vim.cmd, cmd) then
+		vim.notify("Diffview is not available (sindrets/diffview.nvim)", vim.log.levels.WARN, { title = "Agents" })
+	end
 end
 
 local function preview_change(entry)
@@ -1028,7 +1082,7 @@ local function preview_change(entry)
 			style = "minimal",
 			title = " " .. entry.path .. " ",
 			title_pos = "center",
-			footer = " q close   o open file   D diffview ",
+			footer = " c comment   S send comments   o open file   D diffview   q close ",
 			footer_pos = "center",
 		})
 		local function close()
@@ -1047,7 +1101,94 @@ local function preview_change(entry)
 			close()
 			M.diffview(entry.path)
 		end, opts)
+		review.attach(buf, agent.name, entry.path)
+		vim.keymap.set("n", "S", function()
+			close()
+			M.send_review()
+		end, opts)
 	end)
+end
+
+-- Sends the pending review comments to the selected agent as one prompt.
+function M.send_review()
+	local agent = selected_agent()
+	if not agent then
+		return
+	end
+	local text = review.take(agent.name)
+	if not text then
+		vim.notify("No review comments yet: press c on a line in the diff preview", vim.log.levels.INFO, { title = "Agents" })
+		return
+	end
+	flow.submit(agent.name, text)
+	render_changes()
+	vim.notify("Sent review to " .. agent_label(agent), vim.log.levels.INFO, { title = "Agents" })
+end
+
+local HELP = {
+	{ "Sidebar", "" },
+	{ "j / k", "select tab" },
+	{ "⏎ / 1-9", "focus tab" },
+	{ "n", "new desk (project, agent, worktree)" },
+	{ "t", "new tab in this desk" },
+	{ "p", "type a prompt to the agent" },
+	{ "a", "approve its permission prompt" },
+	{ "e", "Esc: decline / interrupt" },
+	{ "F", "fan out one prompt to N worktrees" },
+	{ "f", "find a tab" },
+	{ "r / x / R", "rename / kill / restart (Claude resumes)" },
+	{ "P", "push branch and open a PR" },
+	{ "M", "merge worktree branch into main repo" },
+	{ "W", "remove worktree" },
+	{ "D / g", "Diffview / lazygit" },
+	{ "b", "terminal-browser" },
+	{ "O", "office view" },
+	{ "A", "usage monitor (all agents)" },
+	{ "Ctrl-Space", "jump mode" },
+	{ "q", "close hub" },
+	{ "", "" },
+	{ "Changes", "" },
+	{ "⏎", "diff preview (c comment, S send)" },
+	{ "o / D", "open file / Diffview" },
+	{ "S", "send review comments" },
+	{ "r", "refresh" },
+}
+
+function M.help()
+	local lines = {}
+	for _, item in ipairs(HELP) do
+		if item[2] == "" then
+			table.insert(lines, item[1] ~= "" and (" " .. item[1]) or "")
+		else
+			table.insert(lines, ("   %-12s %s"):format(item[1], item[2]))
+		end
+	end
+	local buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	vim.bo[buf].modifiable = false
+	vim.bo[buf].bufhidden = "wipe"
+	local w, h = 58, #lines
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = w,
+		height = h,
+		row = math.floor((vim.o.lines - h) / 2),
+		col = math.floor((vim.o.columns - w) / 2),
+		border = "rounded",
+		style = "minimal",
+		title = " Agent hub keys ",
+		title_pos = "center",
+	})
+	for i, item in ipairs(HELP) do
+		if item[2] == "" and item[1] ~= "" then
+			vim.api.nvim_buf_set_extmark(buf, vim.api.nvim_create_namespace("agents_help"), i - 1, 0, { end_col = #lines[i], hl_group = "AgentsTitle" })
+		end
+	end
+	for _, lhs in ipairs({ "q", "<Esc>", "?" }) do
+		vim.keymap.set("n", lhs, function()
+			vim.api.nvim_win_close(win, true)
+		end, { buffer = buf, nowait = true })
+	end
 end
 
 local function change_under_cursor()
@@ -1133,9 +1274,9 @@ local BROWSER_PROCESS = "terminal-browser.app/Contents/MacOS/terminal-browser"
 
 -- Closes any running terminal-browser; returns whether one was running.
 local function close_browser()
-	local running = vim.system({ "pgrep", "-f", BROWSER_PROCESS }):wait(2000).code == 0
+	local running = run_wait({ "pgrep", "-f", BROWSER_PROCESS }, 2000).code == 0
 	if running then
-		vim.system({ "pkill", "-TERM", "-f", BROWSER_PROCESS }):wait(2000)
+		run_wait({ "pkill", "-TERM", "-f", BROWSER_PROCESS }, 2000)
 	end
 	return running
 end
@@ -1250,6 +1391,18 @@ local function map_list(buf)
 	map("O", M.office, "Toggle office view")
 	map("b", M.browser, "Open the web result in terminal-browser")
 	map("g", M.lazygit, "Lazygit in this agent's repo")
+	map("p", flow.prompt, "Prompt the agent")
+	map("a", flow.approve, "Approve the permission prompt")
+	map("e", flow.deny, "Esc: decline or interrupt")
+	map("F", flow.fanout, "Fan out a prompt to worktrees")
+	map("f", flow.find, "Find a tab")
+	map("P", flow.pull_request, "Push and open a PR")
+	map("M", flow.merge, "Merge worktree branch")
+	map("W", flow.remove_worktree, "Remove worktree")
+	map("?", M.help, "All keys")
+	map("A", function()
+		require("agents.monitor").open()
+	end, "Usage monitor")
 	for i = 1, 9 do
 		map(tostring(i), function()
 			if S.agents[i] then
@@ -1300,6 +1453,8 @@ local function map_changes(buf)
 		M.diffview(entry and entry.path)
 	end, "Diffview")
 	map("r", refresh_changes, "Refresh")
+	map("S", M.send_review, "Send review comments")
+	map("?", M.help, "All keys")
 
 	-- Keep the cursor on a file line, so ⏎ / o / D always have a file to act
 	-- on: entering the panel or moving onto the header or footer snaps to the
@@ -1449,6 +1604,10 @@ function M.close()
 end
 
 function M.open()
+	if not tmux.available() then
+		vim.notify("The agent hub needs tmux (brew install tmux / apt install tmux).", vim.log.levels.ERROR, { title = "Agents" })
+		return
+	end
 	if hub_open() then
 		vim.api.nvim_set_current_tabpage(S.tab)
 		return
@@ -1529,11 +1688,34 @@ function M.statusline()
 	return table.concat(parts, " ")
 end
 
+-- Internal API for agents.flow.
+M._hub = {
+	S = S,
+	selected_agent = selected_agent,
+	select_agent = select_agent,
+	status_of = status_of,
+	agent_label = agent_label,
+	display_name = display_name,
+	poll = poll,
+	refresh_changes = function()
+		refresh_changes()
+	end,
+	pick = pick,
+	choose_command = choose_command,
+	create_agent = create_agent,
+	find_projects = find_projects,
+	open = function()
+		M.open()
+	end,
+}
+
 function M.setup(opts)
 	config = vim.tbl_deep_extend("force", config, opts or {})
 	set_highlights()
+	flow.setup(M._hub)
 
 	local group = vim.api.nvim_create_augroup("Agents", { clear = true })
+	flow.track_focus(group)
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		group = group,
 		callback = function()
@@ -1572,12 +1754,31 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("AgentsTab", M.new_tab, { desc = "New tab in the selected desk" })
 	vim.api.nvim_create_user_command("AgentsJump", M.jump, { desc = "Jump to a tab" })
 	vim.api.nvim_create_user_command("AgentsOffice", M.office, { desc = "Toggle the office view" })
-	vim.api.nvim_create_user_command("AgentsInstallHooks", function()
-		require("agents.hooks").install()
-	end, { desc = "Install the Claude Code hooks that report status to the hub" })
-	vim.api.nvim_create_user_command("AgentsUninstallHooks", function()
-		require("agents.hooks").uninstall()
-	end, { desc = "Remove the hub's Claude Code hooks" })
+	vim.api.nvim_create_user_command("AgentsMonitor", function()
+		require("agents.monitor").open()
+	end, { desc = "Usage analytics for every agent CLI" })
+	local hook_agents = { "claude", "omp", "pi", "opencode", "codex", "hermes" }
+	local function only(opts)
+		return #opts.fargs > 0 and opts.fargs or nil
+	end
+	vim.api.nvim_create_user_command("AgentsInstallHooks", function(opts)
+		require("agents.hooks").install(only(opts))
+	end, {
+		nargs = "*",
+		complete = function()
+			return hook_agents
+		end,
+		desc = "Install the hooks that report agent status to the hub (all agents, or the ones named)",
+	})
+	vim.api.nvim_create_user_command("AgentsUninstallHooks", function(opts)
+		require("agents.hooks").uninstall(only(opts))
+	end, {
+		nargs = "*",
+		complete = function()
+			return hook_agents
+		end,
+		desc = "Remove the hub's agent hooks (all agents, or the ones named)",
+	})
 	vim.api.nvim_create_user_command("AgentsBrowser", M.browser, { desc = "Open the web result in terminal-browser" })
 	vim.api.nvim_create_user_command("AgentsSend", M.send, { range = true, desc = "Send file reference to agent" })
 
@@ -1586,6 +1787,12 @@ function M.setup(opts)
 	vim.keymap.set("n", "<leader>mt", M.new_tab, { desc = "Agents: new tab in desk" })
 	vim.keymap.set("n", "<leader>mj", M.jump, { desc = "Agents: jump to tab" })
 	vim.keymap.set("n", "<leader>mo", M.office, { desc = "Agents: office view" })
+	vim.keymap.set("n", "<leader>mp", flow.prompt, { desc = "Agents: prompt the selected agent" })
+	vim.keymap.set("n", "<leader>mf", flow.find, { desc = "Agents: find a tab" })
+	vim.keymap.set("n", "<leader>mF", flow.fanout, { desc = "Agents: fan out a prompt to worktrees" })
+	vim.keymap.set("n", "<leader>ma", function()
+		require("agents.monitor").open()
+	end, { desc = "Agents: usage monitor" })
 	vim.keymap.set("n", "<leader>mg", M.lazygit, { desc = "Agents: lazygit in the selected agent's repo" })
 	vim.keymap.set("n", "<leader>mb", M.browser, { desc = "Agents: open web result in terminal-browser" })
 	vim.keymap.set("n", "<leader>md", function()

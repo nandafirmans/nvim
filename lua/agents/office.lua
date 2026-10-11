@@ -374,6 +374,10 @@ local function cubicle(fb, cx, row, agent, ctx, night)
 
 	-- Speech bubble above the cubicle.
 	local say, bg = bubble(agent, state, ctx)
+	local info_now = ctx.context_of and ctx.context_of(agent)
+	if info_now and info_now.percent >= 80 and (state == "done" or state == "break_waiting") then
+		say, bg = "maybe /compact?", P.bubble_wait
+	end
 	if say then
 		say = " " .. C.trunc(say, CUBE - 3) .. " "
 		text(fb, row, cx + 1, say, P.bubble_text, bg)
@@ -411,8 +415,16 @@ local function cubicle(fb, cx, row, agent, ctx, night)
 		label = label .. " " .. C.age(os.time() - since)
 	end
 	col = text(fb, r2, cx + 2, label, dot)
+	-- Context window use (Claude), right-aligned; the task fills the gap.
+	local info = ctx.context_of and ctx.context_of(agent)
+	local ctx_text = info and (info.percent .. "%") or ""
+	local ctx_col = cx + CUBE - 1 - vim.fn.strchars(ctx_text)
 	if agent.task then
-		text(fb, r2, col, " · " .. C.trunc(agent.task, math.max(0, CUBE - (col - cx) - 4)), P.dim)
+		text(fb, r2, col, " · " .. C.trunc(agent.task, math.max(0, ctx_col - col - 4)), P.dim)
+	end
+	if info then
+		local color = info.percent >= 80 and P.waiting or info.percent >= 60 and P.running or P.dim
+		text(fb, r2, ctx_col, ctx_text, color)
 	end
 	return { name = agent.name, top = row + 1, bottom = row + 10, left = cx + 1, right = cx + CUBE }
 end
