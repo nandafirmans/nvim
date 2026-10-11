@@ -1493,6 +1493,10 @@ function M.open()
 	poll(refresh_changes)
 end
 
+function M.is_open()
+	return hub_open() and true or false
+end
+
 function M.toggle()
 	if hub_open() and vim.api.nvim_get_current_tabpage() == S.tab then
 		if not pcall(vim.cmd, "tabnext #") then
