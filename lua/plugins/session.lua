@@ -34,11 +34,18 @@ return {
 				end
 			end
 
+			-- The agent hub tab only holds terminals and panels; it cannot be restored.
+			local function close_agent_hub()
+				pcall(function()
+					require("agents").close()
+				end)
+			end
+
 			require("auto-session").setup({
 				-- Automatically restore the session for the current working directory.
 				auto_restore = true,
 				suppressed_dirs = { "~/", "/" },
-				pre_save_cmds = { close_alpha_if_open, close_toggleterm_buffers, "tabdo NvimTreeClose", "tabdo DiffviewClose" },
+				pre_save_cmds = { close_alpha_if_open, close_toggleterm_buffers, close_agent_hub, "tabdo NvimTreeClose", "tabdo DiffviewClose" },
 			})
 		end,
 	},

@@ -10,6 +10,8 @@ function M.setup(opts)
   if opts.ui ~= false then
     require("core.ui").setup()
   end
+
+  require("agents").setup()
 end
 
 return M

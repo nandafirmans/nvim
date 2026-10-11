@@ -11,6 +11,11 @@ local disabled_filetypes = {
 	"Trouble",
 	"qf",
 	"copilot-chat",
+	"agentlist",
+	"agentchanges",
+	"agentempty",
+	"agentterm",
+	"agentoffice",
 }
 
 local function theme()

@@ -32,6 +32,8 @@ return {
 		}
 
 		dashboard.section.buttons.val = {
+			dashboard.button("a", "󰚩  Agents      ", ":Agents<CR>"),
+			dashboard.button("o", "󰒱  Agent Office ", ":AgentsOffice<CR>"),
 			dashboard.button("e", "󱪝  New File    ", ":enew<CR>"),
 			dashboard.button("c", "󰋚  Recent Files ", ":Telescope oldfiles<CR>"),
 			dashboard.button("t", "󰊄  Find Text   ", ":Telescope live_grep<CR>"),
