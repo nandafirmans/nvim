@@ -100,4 +100,16 @@ function M.diffstat(add, del)
 	return segs
 end
 
+-- Replaces the current window with a fresh one and returns it. lualine
+-- keeps re-applying the winbar it once set on a window (here, the one
+-- :tabnew opened), which would wipe our own winbars; a new window that gets
+-- our buffer right away is never claimed by it.
+function M.fresh_window()
+	local old = vim.api.nvim_get_current_win()
+	vim.cmd("vsplit")
+	local new = vim.api.nvim_get_current_win()
+	pcall(vim.api.nvim_win_close, old, true)
+	return new
+end
+
 return M

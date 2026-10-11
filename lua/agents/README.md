@@ -55,6 +55,7 @@ Global:
 | `<leader>mp` | type a prompt to the selected agent |
 | `<leader>mf` | find a tab (fuzzy) |
 | `<leader>mF` | fan out one prompt to several worktrees |
+| `<leader>mc` | mission control: every agent's screen in a grid (`:AgentsGrid`) |
 | `<leader>ma` | usage monitor for every agent CLI (`:AgentsMonitor`) |
 
 Sidebar: `j`/`k` select, `⏎` focus, `1`-`9` focus tab N, `n` desk, `t` tab,
@@ -80,6 +81,10 @@ prompt. In Diffview, `q` closes it and returns to the hub.
   `/compact`.
 - **Notifications**: when an agent finishes or needs input while Neovim is not
   focused, macOS shows a notification.
+- **Mission control** (`<leader>mc`, `G`): every agent's live screen in a grid
+  (up to 9). Entering a tile types into that agent; `Ctrl-Space` stops typing,
+  then `o` opens it full size, `p` prompts, `a` approves, `R` restarts. A tile
+  that needs you turns red.
 - **Usage monitor** (`<leader>ma`, `A`): sessions, prompts, tool calls,
   input/output/cache tokens, cost (where the CLI records it), tokens per day,
   top projects and models, for today / 7 days / 30 days, plus what is live in

@@ -16,6 +16,8 @@ local disabled_filetypes = {
 	"agentempty",
 	"agentterm",
 	"agentoffice",
+	"agentgrid",
+	"agentmonitor",
 }
 
 local function theme()

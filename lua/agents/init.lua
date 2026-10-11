@@ -239,7 +239,8 @@ local function render_list()
 	local keys = {
 		{ { "n", "desk" }, { "t", "tab" }, { "p", "prompt" } },
 		{ { "a", "approve" }, { "F", "fan-out" }, { "f", "find" } },
-		{ { "⏎", "focus" }, { "O", "office" }, { "?", "all keys" } },
+		{ { "⏎", "focus" }, { "O", "office" }, { "G", "grid" } },
+		{ { "A", "monitor" }, { "?", "all keys" } },
 	}
 	for _, line in ipairs(keys) do
 		local segs = { { " " } }
@@ -1144,6 +1145,7 @@ local HELP = {
 	{ "b", "terminal-browser" },
 	{ "O", "office view" },
 	{ "A", "usage monitor (all agents)" },
+	{ "G", "mission control grid" },
 	{ "Ctrl-Space", "jump mode" },
 	{ "q", "close hub" },
 	{ "", "" },
@@ -1403,6 +1405,9 @@ local function map_list(buf)
 	map("A", function()
 		require("agents.monitor").open()
 	end, "Usage monitor")
+	map("G", function()
+		require("agents.grid").open()
+	end, "Mission control grid")
 	for i = 1, 9 do
 		map(tostring(i), function()
 			if S.agents[i] then
@@ -1525,6 +1530,8 @@ local function set_highlights()
 	for group, target in pairs(links) do
 		vim.api.nvim_set_hl(0, group, { link = target, default = true })
 	end
+	-- Title bar of a mission-control tile that is waiting for you.
+	vim.api.nvim_set_hl(0, "AgentsWaitingBar", { fg = "#1d1f27", bg = "#f56565", bold = true, default = true })
 end
 
 -- Switches the center pane between the selected agent's terminal and the office.
@@ -1619,7 +1626,7 @@ function M.open()
 	vim.cmd("tabnew")
 	S.tab = vim.api.nvim_get_current_tabpage()
 	local scratch = vim.api.nvim_get_current_buf()
-	S.wins.term = vim.api.nvim_get_current_win()
+	S.wins.term = C.fresh_window()
 
 	vim.cmd("topleft vsplit")
 	S.wins.list = vim.api.nvim_get_current_win()
@@ -1754,6 +1761,9 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("AgentsTab", M.new_tab, { desc = "New tab in the selected desk" })
 	vim.api.nvim_create_user_command("AgentsJump", M.jump, { desc = "Jump to a tab" })
 	vim.api.nvim_create_user_command("AgentsOffice", M.office, { desc = "Toggle the office view" })
+	vim.api.nvim_create_user_command("AgentsGrid", function()
+		require("agents.grid").toggle()
+	end, { desc = "Mission control: every agent's screen in a grid" })
 	vim.api.nvim_create_user_command("AgentsMonitor", function()
 		require("agents.monitor").open()
 	end, { desc = "Usage analytics for every agent CLI" })
@@ -1790,6 +1800,9 @@ function M.setup(opts)
 	vim.keymap.set("n", "<leader>mp", flow.prompt, { desc = "Agents: prompt the selected agent" })
 	vim.keymap.set("n", "<leader>mf", flow.find, { desc = "Agents: find a tab" })
 	vim.keymap.set("n", "<leader>mF", flow.fanout, { desc = "Agents: fan out a prompt to worktrees" })
+	vim.keymap.set("n", "<leader>mc", function()
+		require("agents.grid").toggle()
+	end, { desc = "Agents: mission control grid" })
 	vim.keymap.set("n", "<leader>ma", function()
 		require("agents.monitor").open()
 	end, { desc = "Agents: usage monitor" })
