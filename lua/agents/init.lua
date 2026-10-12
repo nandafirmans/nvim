@@ -57,6 +57,7 @@ local S = {
 	view = "term", -- center pane: "term" (selected agent) or "office"
 	limited = {}, -- name -> usage-limit message seen on its screen
 	limit_checked = {}, -- name -> last screen check (os.time)
+	stale_checked = {}, -- name -> last check of a quiet "running" tab
 	tails = {}, -- name -> last screen line, for tabs without hooks
 	office_rects = {},
 }
@@ -646,6 +647,35 @@ local function poll(cb)
 			update_winbar()
 			render_office()
 			queue.render()
+			-- No hook fires when you interrupt an agent (Esc), so "running"
+			-- from its hooks can go stale. When a "running" tab has been quiet
+			-- for a few seconds, read its screen: an "Interrupted" line, or
+			-- (Claude) no "esc to interrupt" hint, means it is no longer working.
+			for _, agent in ipairs(S.agents) do
+				local quiet = os.time() - agent.activity >= 4
+				local due = os.time() - (S.stale_checked[agent.name] or 0) >= 4
+				if agent.hook == "running" and quiet and due then
+					S.stale_checked[agent.name] = os.time()
+					tmux.run({ "capture-pane", "-p", "-J", "-t", "=" .. agent.name .. ":" }, function(result)
+						if result.code ~= 0 then
+							return
+						end
+						local lines = {}
+						for line in vim.gsplit(result.stdout or "", "\n") do
+							if vim.trim(line) ~= "" then
+								table.insert(lines, line)
+							end
+						end
+						local tail = table.concat(vim.list_slice(lines, math.max(1, #lines - 12), #lines), "\n"):lower()
+						local interrupted = tail:find("interrupted", 1, true) ~= nil
+						local claude_idle = agent.tool == "claude" and not tail:find("esc to interrupt", 1, true)
+						if interrupted or claude_idle then
+							tmux.set_option(agent.name, "status", "idle")
+							tmux.set_option(agent.name, "activity", interrupted and "interrupted" or "")
+						end
+					end)
+				end
+			end
 			-- An agent that stopped may be stopped by a usage limit: look at
 			-- the bottom of its screen (every few seconds, idle agents only).
 			for _, agent in ipairs(S.agents) do
