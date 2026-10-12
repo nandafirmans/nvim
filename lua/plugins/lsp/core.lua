@@ -17,13 +17,10 @@ return {
 			"mason-org/mason-lspconfig.nvim",
 			"nvim-lua/plenary.nvim",
 			"neovim/nvim-lspconfig",
-			"yioneko/nvim-vtsls",
 		},
 		config = function()
 			local lsp_util = require("plugins.lsp.util")
 			local mason_lspconfig = require("mason-lspconfig")
-			local vtsls = require("vtsls")
-			vtsls.config({})
 
 			require("mason").setup({
 				registries = {
@@ -45,7 +42,7 @@ return {
 						return
 					end
 
-					if client.name == "vtsls" then
+					if client.name == "ts_ls" then
 						client.server_capabilities.documentFormattingProvider = false
 					end
 
@@ -59,12 +56,6 @@ return {
 						capabilities = lsp_util.capabilities,
 						settings = lsp_util.servers[server_name],
 					}, lsp_util.configs[server_name] or {})
-
-					if server_name == "vtsls" then
-						vim.lsp.config("vtsls", vim.tbl_deep_extend("force", vtsls.lspconfig, config))
-						vim.lsp.enable("vtsls")
-						return
-					end
 
 					vim.lsp.config(
 						server_name,

@@ -1,11 +1,11 @@
 local M = {}
 
-local vtsls_project_markers = {
+local ts_project_markers = {
 	"tsconfig.json",
 	"jsconfig.json",
 }
 
-local vtsls_fallback_markers = {
+local ts_fallback_markers = {
 	"package.json",
 	".git",
 }
@@ -16,10 +16,7 @@ M.servers = {
 	},
 	lua_ls = {},
 	gopls = {},
-	vtsls = {
-		vtsls = {
-			autoUseWorkspaceTsdk = false,
-		},
+	ts_ls = {
 		typescript = {
 			updateImportsOnFileMove = {
 				enabled = "always",
@@ -48,13 +45,13 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 M.capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 M.configs = {
-	vtsls = {
+	ts_ls = {
 		root_dir = function(bufnr, on_dir)
 			local name = vim.api.nvim_buf_get_name(bufnr)
-			local root = vim.fs.root(name, vtsls_project_markers)
+			local root = vim.fs.root(name, ts_project_markers)
 
 			if not root then
-				root = vim.fs.root(name, vtsls_fallback_markers)
+				root = vim.fs.root(name, ts_fallback_markers)
 			end
 
 			if not root and name ~= "" then
