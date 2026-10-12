@@ -118,10 +118,8 @@ function M.prompt()
 	if not agent then
 		return
 	end
-	vim.ui.input({ prompt = "Prompt for " .. hub.agent_label(agent) .. ": " }, function(text)
-		if text and vim.trim(text) ~= "" then
-			M.submit(agent.name, text)
-		end
+	require("agents.prompt_box").open(agent, "Prompt for " .. hub.agent_label(agent), function(text)
+		M.submit(agent.name, text)
 	end)
 end
 

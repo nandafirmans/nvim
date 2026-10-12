@@ -498,10 +498,10 @@ local function map_view(buf)
 			notify("Select an agent in the hub first", vim.log.levels.WARN)
 			return
 		end
-		vim.ui.input({ prompt = "Add prompt: " }, function(text)
-			if text then
-				add(name, { text })
-			end
+		local agent = hub.S.by_name[name]
+		require("agents.prompt_box").open(agent, "Queue a prompt for " .. ((queues[name] or {}).label or name), function(text)
+			-- One queued prompt, even when it spans several lines.
+			add(name, { text })
 		end)
 	end, "Add a prompt")
 	map("A", function()
