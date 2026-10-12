@@ -36,7 +36,30 @@ return {
 		},
 	},
 	keys = {
-		{ "<leader>gg", "<Cmd>lua _LAZYGIT_TOGGLE()<CR>", mode = "n", desc = "Toggle LazyGit" },
+		{
+			"<leader>gg",
+			function()
+				vim.cmd.enew()
+				vim.cmd.terminal("lazygit")
+				local bufnr = vim.api.nvim_get_current_buf()
+				vim.api.nvim_create_autocmd("TermClose", {
+					buffer = bufnr,
+					once = true,
+					callback = function()
+						if vim.v.event.status == 0 then
+							vim.schedule(function()
+								if vim.api.nvim_buf_is_valid(bufnr) then
+									vim.api.nvim_buf_delete(bufnr, { force = true })
+								end
+							end)
+						end
+					end,
+				})
+				vim.cmd.startinsert()
+			end,
+			mode = "n",
+			desc = "Open LazyGit buffer",
+		},
 		{ "<leader>yy", "<Cmd>lua _YAZI_TOGGLE()<CR>", mode = "n", desc = "Toggle Yazi File Manager" },
 		{ "<leader>tt", "<Cmd>lua _TOP_TOGGLE()<CR>", mode = "n", desc = "Toggle Btop" },
 		{ "<leader>ee", "<Cmd>lua _EKPHOS_TOGGLE()<CR>", mode = "n", desc = "Toggle Ekphos" },
@@ -48,10 +71,9 @@ return {
 		local function set_terminal_keymaps()
 			local options = { buffer = 0 }
 			vim.keymap.set("t", "<C-esc>", [[<C-\><C-n>]], options)
-			vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], options)
-			vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], options)
-			vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], options)
-			vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], options)
+			for _, key in ipairs({ "<C-h>", "<C-j>", "<C-k>", "<C-l>" }) do
+				vim.keymap.set("t", key, [[<C-\><C-n>]] .. key, { buffer = 0, remap = true })
+			end
 			vim.keymap.set("t", "<C-w>", [[<C-\><C-n><C-w>]], options)
 		end
 
@@ -89,7 +111,6 @@ return {
 			callback = set_terminal_keymaps,
 		})
 
-		define_toggle("_LAZYGIT_TOGGLE", create_floating_terminal("lazygit"))
 		define_toggle("_TOP_TOGGLE", create_floating_terminal("btop"))
 		define_toggle("_YAZI_TOGGLE", create_floating_terminal("yazi"))
 		define_toggle("_EKPHOS_TOGGLE", create_floating_terminal("ekphos"))
