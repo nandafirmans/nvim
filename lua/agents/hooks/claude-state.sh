@@ -9,7 +9,7 @@
 #   tool     PreToolUse         status running, activity = what the tool does
 #   running  PostToolUse        status running (after a permission prompt)
 #   waiting  Notification       status waiting, activity = the request
-#   done     Stop               status done
+#   done     Stop               status done, or limited on a usage limit
 if [ -z "${NVIM_AGENT_SESSION:-}" ]; then
 	cat >/dev/null 2>&1
 	exit 0
@@ -100,9 +100,39 @@ waiting)
 	set_opt @agent_activity "$(describe waiting)"
 	;;
 done)
-	cat >/dev/null 2>&1
-	set_opt @agent_status done
-	set_opt @agent_activity ""
+	# A turn that ended on Claude's usage limit ("You've hit your session
+	# limit · resets 1:30am") is reported as limited, so the hub can hand off.
+	limit=$(python3 -c '
+import json, sys
+try:
+    data = json.loads(sys.stdin.read(), strict=False)
+    with open(data.get("transcript_path") or "", "rb") as f:
+        f.seek(0, 2)
+        f.seek(max(0, f.tell() - 65536))
+        lines = f.read().decode("utf-8", "replace").splitlines()
+except Exception:
+    sys.exit(0)
+for line in reversed(lines):
+    try:
+        d = json.loads(line)
+    except Exception:
+        continue
+    m = d.get("message") if isinstance(d.get("message"), dict) else {}
+    if d.get("type") != "assistant":
+        continue
+    if m.get("model") == "<synthetic>":
+        text = " ".join(p.get("text", "") for p in m.get("content") or [] if isinstance(p, dict))
+        if "limit" in text.lower():
+            print(" ".join(text.split())[:80])
+    break
+' 2>/dev/null)
+	if [ -n "$limit" ]; then
+		set_opt @agent_status limited
+		set_opt @agent_activity "$limit"
+	else
+		set_opt @agent_status done
+		set_opt @agent_activity ""
+	fi
 	;;
 *)
 	cat >/dev/null 2>&1

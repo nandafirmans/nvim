@@ -18,6 +18,7 @@ local disabled_filetypes = {
 	"agentoffice",
 	"agentgrid",
 	"agentmonitor",
+	"agentqueue",
 }
 
 local function theme()

@@ -6,6 +6,8 @@ local git = require("agents.git")
 local office = require("agents.office")
 local flow = require("agents.flow")
 local review = require("agents.review")
+local handoff = require("agents.handoff")
+local queue = require("agents.queue")
 local usage = require("agents.usage")
 
 local M = {}
@@ -16,6 +18,8 @@ local config = {
 	tools = { "claude", "omp", "opencode", "codex", "pi", "hermes" },
 	sidebar_width = 34,
 	changes_width = 46,
+	-- Continue a limited agent in its partner CLI; stops when both are limited.
+	handoff = { auto = true, partners = { claude = "omp", omp = "claude" } },
 	-- Fallback for agents without hooks: output within this many seconds counts as running.
 	active_seconds = 3,
 }
@@ -31,6 +35,7 @@ local STATUS = {
 	done = { icon = "\u{f00c}", label = "done", hl = "AgentsDone" },
 	idle = { icon = "\u{f10c}", label = "idle", hl = "AgentsIdle" },
 	exited = { icon = "\u{f00d}", label = "exited", hl = "AgentsExited" },
+	limited = { icon = "\u{f071}", label = "limit reached", hl = "AgentsWaiting" },
 }
 local BRANCH_ICON = "\u{e0a0}"
 
@@ -50,6 +55,8 @@ local S = {
 	tick = 0,
 	timer = nil,
 	view = "term", -- center pane: "term" (selected agent) or "office"
+	limited = {}, -- name -> usage-limit message seen on its screen
+	limit_checked = {}, -- name -> last screen check (os.time)
 	tails = {}, -- name -> last screen line, for tabs without hooks
 	office_rects = {},
 }
@@ -189,6 +196,10 @@ local function render_list()
 		local line_hl = is_selected and "AgentsSel" or nil
 		local changes = S.changes[agent.cwd]
 		local stat = changes and diffstat(changes.add, changes.del) or {}
+		local badge, badge_hl = queue.badge(agent.name)
+		if badge then
+			table.insert(stat, 1, { badge .. " ", badge_hl })
+		end
 		local bar = is_selected and { "▎", "AgentsBar" } or { " " }
 		local jump = S.jump_labels and S.jump_labels[agent.name]
 		local name_hl = is_selected and "AgentsToolSel" or "AgentsTool"
@@ -240,7 +251,7 @@ local function render_list()
 		{ { "n", "desk" }, { "t", "tab" }, { "p", "prompt" } },
 		{ { "a", "approve" }, { "F", "fan-out" }, { "f", "find" } },
 		{ { "⏎", "focus" }, { "O", "office" }, { "G", "grid" } },
-		{ { "A", "monitor" }, { "?", "all keys" } },
+		{ { "E", "files" }, { "A", "monitor" }, { "?", "all keys" } },
 	}
 	for _, line in ipairs(keys) do
 		local segs = { { " " } }
@@ -581,12 +592,28 @@ local function apply_agents(list)
 	for _, agent in ipairs(list) do
 		S.by_name[agent.name] = agent
 		local status = compute_status(agent)
+		if status == "running" then
+			-- Working again: whatever limit it hit is over.
+			if S.limited[agent.name] or status ~= (S.meta[agent.name] or {}).status then
+				S.limited[agent.name] = nil
+				handoff.clear(agent)
+			end
+		elseif S.limited[agent.name] and status ~= "exited" then
+			status = "limited"
+		end
 		local meta = S.meta[agent.name]
 		if not meta then
 			S.meta[agent.name] = { status = status, since = os.time() }
 		elseif meta.status ~= status then
-			notify_transition(agent, meta.status, status)
+			local before = meta.status
+			notify_transition(agent, before, status)
 			meta.status, meta.since = status, os.time()
+			if status == "limited" then
+				handoff.on_limited(agent, S.limited[agent.name] or agent.activity_text or "usage limit reached")
+			end
+			vim.schedule(function()
+				queue.on_status(agent, before, status)
+			end)
 		end
 	end
 	for name, buf in pairs(S.term_bufs) do
@@ -618,6 +645,22 @@ local function poll(cb)
 			render_changes()
 			update_winbar()
 			render_office()
+			queue.render()
+			-- An agent that stopped may be stopped by a usage limit: look at
+			-- the bottom of its screen (every few seconds, idle agents only).
+			for _, agent in ipairs(S.agents) do
+				local status = status_of(agent.name)
+				local due = os.time() - (S.limit_checked[agent.name] or 0) >= 6
+				if due and (status == "done" or status == "idle" or status == "waiting") and not S.limited[agent.name] then
+					S.limit_checked[agent.name] = os.time()
+					handoff.check_screen(agent, function(message)
+						if message and not S.limited[agent.name] and status_of(agent.name) ~= "running" then
+							S.limited[agent.name] = message
+							tmux.set_option(agent.name, "activity", message)
+						end
+					end)
+				end
+			end
 			do
 				-- Tabs without hooks speak through the last line on their screen.
 				for _, agent in ipairs(S.agents) do
@@ -629,6 +672,7 @@ local function poll(cb)
 				end
 			end
 		end
+		queue.tick()
 		if cb then
 			cb()
 		end
@@ -1096,7 +1140,7 @@ local function preview_change(entry)
 		vim.keymap.set("n", "<Esc>", close, opts)
 		vim.keymap.set("n", "o", function()
 			close()
-			vim.cmd("tabedit " .. vim.fn.fnameescape(agent.cwd .. "/" .. entry.path))
+			M.workspace(agent.cwd, entry.path)
 		end, opts)
 		vim.keymap.set("n", "D", function()
 			close()
@@ -1146,12 +1190,16 @@ local HELP = {
 	{ "O", "office view" },
 	{ "A", "usage monitor (all agents)" },
 	{ "G", "mission control grid" },
+	{ "H", "hand off to another CLI (auto on limit)" },
+	{ "Q", "autopilot: queue of prompts (s start/stop)" },
+	{ "E", "open the folder as a workspace (files, edit)" },
 	{ "Ctrl-Space", "jump mode" },
 	{ "q", "close hub" },
 	{ "", "" },
 	{ "Changes", "" },
 	{ "⏎", "diff preview (c comment, S send)" },
-	{ "o / D", "open file / Diffview" },
+	{ "o / D", "open file in workspace / Diffview" },
+	{ "E", "open the folder as a workspace" },
 	{ "S", "send review comments" },
 	{ "r", "refresh" },
 }
@@ -1214,6 +1262,48 @@ function M.send(opts)
 	end
 	tmux.paste(agent.name, ref .. " ")
 	vim.notify("Sent " .. ref .. " to " .. agent_label(agent), vim.log.levels.INFO, { title = "Agents" })
+end
+
+-- Workspace: a tab rooted at an agent's folder (tab-local cwd), so the file
+-- tree, find files and grep all work in that project. One tab per folder.
+S.workspaces = {} -- cwd -> tabpage
+
+local function open_tree(cwd)
+	local ok, api = pcall(require, "nvim-tree.api")
+	if ok then
+		pcall(api.tree.open, { path = cwd })
+	elseif vim.fn.exists(":Explore") == 2 then
+		vim.cmd("Explore " .. vim.fn.fnameescape(cwd))
+	end
+end
+
+function M.workspace(path, file)
+	local agent = selected_agent()
+	local cwd = path or (agent and agent.cwd)
+	if not cwd or vim.fn.isdirectory(cwd) == 0 then
+		vim.notify("No agent folder to open", vim.log.levels.WARN, { title = "Agents" })
+		return
+	end
+	local tab = S.workspaces[cwd]
+	if tab and vim.api.nvim_tabpage_is_valid(tab) then
+		vim.api.nvim_set_current_tabpage(tab)
+	else
+		vim.cmd("tabnew")
+		tab = vim.api.nvim_get_current_tabpage()
+		S.workspaces[cwd] = tab
+		vim.cmd("tcd " .. vim.fn.fnameescape(cwd))
+		vim.t.agents_workspace = cwd
+		vim.notify(
+			("Workspace %s\n<leader>n file tree · <leader>ff find · <leader>fg grep · <leader>mm back to agents"):format(vim.fn.fnamemodify(cwd, ":~")),
+			vim.log.levels.INFO,
+			{ title = "Agents" }
+		)
+	end
+	if file then
+		vim.cmd("edit " .. vim.fn.fnameescape(cwd .. "/" .. file))
+	elseif vim.api.nvim_buf_get_name(0) == "" then
+		open_tree(cwd)
+	end
 end
 
 -- Opens lazygit in a float, in the selected agent's repo (or worktree).
@@ -1408,6 +1498,11 @@ local function map_list(buf)
 	map("G", function()
 		require("agents.grid").open()
 	end, "Mission control grid")
+	map("H", handoff.handoff_selected, "Hand off to another agent CLI")
+	map("Q", queue.open, "Autopilot prompt queue")
+	map("E", function()
+		M.workspace()
+	end, "Open the folder as a workspace")
 	for i = 1, 9 do
 		map(tostring(i), function()
 			if S.agents[i] then
@@ -1450,9 +1545,12 @@ local function map_changes(buf)
 	map("o", function()
 		local agent, entry = selected_agent(), change_under_cursor()
 		if agent and entry then
-			vim.cmd("tabedit " .. vim.fn.fnameescape(agent.cwd .. "/" .. entry.path))
+			M.workspace(agent.cwd, entry.path)
 		end
-	end, "Open file")
+	end, "Open file in the folder's workspace")
+	map("E", function()
+		M.workspace()
+	end, "Open the folder as a workspace")
 	map("D", function()
 		local entry = change_under_cursor()
 		M.diffview(entry and entry.path)
@@ -1720,6 +1818,8 @@ function M.setup(opts)
 	config = vim.tbl_deep_extend("force", config, opts or {})
 	set_highlights()
 	flow.setup(M._hub)
+	handoff.setup(M._hub, config.handoff)
+	queue.setup(M._hub)
 
 	local group = vim.api.nvim_create_augroup("Agents", { clear = true })
 	flow.track_focus(group)
@@ -1761,6 +1861,12 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("AgentsTab", M.new_tab, { desc = "New tab in the selected desk" })
 	vim.api.nvim_create_user_command("AgentsJump", M.jump, { desc = "Jump to a tab" })
 	vim.api.nvim_create_user_command("AgentsOffice", M.office, { desc = "Toggle the office view" })
+	vim.api.nvim_create_user_command("AgentsWorkspace", function()
+		M.workspace()
+	end, { desc = "Open the selected agent's folder as a workspace tab" })
+	vim.api.nvim_create_user_command("AgentsQueue", queue.open, { desc = "Autopilot: queue prompts per agent" })
+	vim.api.nvim_create_user_command("AgentsQueueStop", queue.stop_all, { desc = "Autopilot: stop every queue" })
+	vim.api.nvim_create_user_command("AgentsHandoff", handoff.handoff_selected, { desc = "Continue the selected agent's work in another CLI" })
 	vim.api.nvim_create_user_command("AgentsGrid", function()
 		require("agents.grid").toggle()
 	end, { desc = "Mission control: every agent's screen in a grid" })
@@ -1800,6 +1906,11 @@ function M.setup(opts)
 	vim.keymap.set("n", "<leader>mp", flow.prompt, { desc = "Agents: prompt the selected agent" })
 	vim.keymap.set("n", "<leader>mf", flow.find, { desc = "Agents: find a tab" })
 	vim.keymap.set("n", "<leader>mF", flow.fanout, { desc = "Agents: fan out a prompt to worktrees" })
+	vim.keymap.set("n", "<leader>me", function()
+		M.workspace()
+	end, { desc = "Agents: open the agent's folder as a workspace" })
+	vim.keymap.set("n", "<leader>mq", queue.open, { desc = "Agents: autopilot prompt queue" })
+	vim.keymap.set("n", "<leader>mh", handoff.handoff_selected, { desc = "Agents: hand off to another agent CLI" })
 	vim.keymap.set("n", "<leader>mc", function()
 		require("agents.grid").toggle()
 	end, { desc = "Agents: mission control grid" })

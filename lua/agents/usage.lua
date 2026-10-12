@@ -38,6 +38,8 @@ local function transcript(agent)
 	return newest
 end
 
+M.transcript = transcript
+
 local function read_tail(path)
 	local file = io.open(path, "rb")
 	if not file then

@@ -95,6 +95,12 @@ local TOOLS = {
 	},
 }
 
+-- `base` started with `text` as its first prompt, for CLIs that take one.
+function M.first_prompt_command(tool, base, text)
+	local spec = TOOLS[tool]
+	return spec and spec.prompt(base, text) or base
+end
+
 -- 1. Talk to an agent ------------------------------------------------------------
 
 -- Types text into the agent's prompt and submits it.

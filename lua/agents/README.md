@@ -55,6 +55,8 @@ Global:
 | `<leader>mp` | type a prompt to the selected agent |
 | `<leader>mf` | find a tab (fuzzy) |
 | `<leader>mF` | fan out one prompt to several worktrees |
+| `<leader>mq` | autopilot prompt queue (`:AgentsQueue`, `:AgentsQueueStop`) |
+| `<leader>mh` | hand off the selected agent to another CLI (`:AgentsHandoff`) |
 | `<leader>mc` | mission control: every agent's screen in a grid (`:AgentsGrid`) |
 | `<leader>ma` | usage monitor for every agent CLI (`:AgentsMonitor`) |
 
@@ -85,6 +87,15 @@ prompt. In Diffview, `q` closes it and returns to the hub.
   (up to 9). Entering a tile types into that agent; `Ctrl-Space` stops typing,
   then `o` opens it full size, `p` prompts, `a` approves, `R` restarts. A tile
   that needs you turns red.
+- **Autopilot** (`Q`, `<leader>mq`): a queue of prompts per agent, listed by
+  folder. `a` adds one, `A` adds several (one per line), `s` starts or stops,
+  `S` stops all, `K`/`J` reorder, `e` edits, `d` deletes, `x` clears finished.
+  The next prompt goes out when the agent finishes the previous one; the
+  queue pauses by itself when the agent needs input, hits a limit, exits or
+  does not pick a prompt up. Queues survive a Neovim restart.
+- **Handoff** (`H`, automatic on usage limits): continues an agent's work in
+  another CLI (claude ↔ omp by default) with a brief of the task, recent
+  requests, last report and changed files. When both are limited it stops.
 - **Usage monitor** (`<leader>ma`, `A`): sessions, prompts, tool calls,
   input/output/cache tokens, cost (where the CLI records it), tokens per day,
   top projects and models, for today / 7 days / 30 days, plus what is live in

@@ -3,7 +3,15 @@ return {
 		"nvim-tree/nvim-tree.lua",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		keys = {
-			{ "<leader>n", "<Cmd>NvimTreeToggle<CR>", mode = "n", desc = "Toggle File Explorer" },
+			{
+				"<leader>n",
+				function()
+					-- Root at this tab's folder, so each agent workspace tab shows its own project.
+					require("nvim-tree.api").tree.toggle({ path = vim.fn.getcwd(), find_file = true })
+				end,
+				mode = "n",
+				desc = "Toggle File Explorer",
+			},
 		},
 		config = function()
 			local function open_win_config()

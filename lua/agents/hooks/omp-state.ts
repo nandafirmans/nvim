@@ -124,6 +124,16 @@ export default function (pi) {
     if (!isMain(ctx)) return;
     // A scheduled continuation is not the end of the turn.
     if (event?.willContinue === true) return;
+    // A turn that ended on a usage limit is reported as limited, so the hub
+    // can hand the task to another agent.
+    const messages = Array.isArray(event?.messages) ? event.messages : [];
+    const last = [...messages].reverse().find((m: any) => m?.role === "assistant");
+    const error = last?.stopReason === "error" ? String(last?.errorMessage ?? "") : "";
+    if (/limit|quota|credit|429/i.test(error)) {
+      set("status", "limited");
+      set("activity", error);
+      return;
+    }
     set("status", "done");
     set("activity", "");
   });
