@@ -42,6 +42,17 @@ return {
 				vim.cmd.enew()
 				vim.cmd.terminal("lazygit")
 				local bufnr = vim.api.nvim_get_current_buf()
+				vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "WinEnter" }, {
+					buffer = bufnr,
+					callback = function()
+						if vim.api.nvim_get_current_buf() == bufnr
+							and vim.fn.jobwait({ vim.b[bufnr].terminal_job_id }, 0)[1] == -1
+						then
+							vim.cmd.startinsert()
+						end
+					end,
+					desc = "Resume LazyGit input on focus",
+				})
 				vim.api.nvim_create_autocmd("TermClose", {
 					buffer = bufnr,
 					once = true,
