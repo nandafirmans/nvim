@@ -11,6 +11,8 @@ local CUBE = 22 -- cubicle width in cells
 local CUBE_ROWS = 11 -- bubble, 7 rows of cubicle, 2 nameplate rows, spacer
 local ROOM_ROWS = 9
 local YOUR_TURN_SECONDS = 5 * 60 -- after this a finished agent goes on a break
+local SENT_MS = 6000 -- how long a prompt you sent shows over the cubicle
+local FLIGHT_MS = 1200 -- the envelope's flight from the bubble to the monitor
 
 -- Palette --------------------------------------------------------------------
 
@@ -42,6 +44,9 @@ local P = {
 	bubble_text = "#1d1f27",
 	bubble_wait = "#fbd38d",
 	bubble_done = "#c6f6d5",
+	bubble_sent = "#bee3f8",
+	envelope = "#fefcf3",
+	seal = "#e53e3e",
 	running = "#f6c453",
 	waiting = "#f56565",
 	done = "#68d391",
@@ -378,6 +383,19 @@ local function cubicle(fb, cx, row, agent, ctx, night)
 	if info_now and info_now.percent >= 80 and (state == "done" or state == "break_waiting") then
 		say, bg = "maybe /compact?", P.bubble_wait
 	end
+	-- A prompt you just sent: your words in the bubble, and an envelope that
+	-- drops onto the monitor.
+	local sent = ctx.sent and ctx.sent[agent.name]
+	local sent_age = sent and (vim.uv.now() - sent.at)
+	if sent_age and sent_age < SENT_MS then
+		say, bg = "✉ " .. sent.text:gsub("%s+", " "), P.bubble_sent
+		if sent_age < FLIGHT_MS then
+			local ey = y0 + math.floor(4 * sent_age / FLIGHT_MS)
+			sprite(fb, mx + 2, ey, { "eeee", "esse", "eeee" }, { e = P.envelope, s = P.seal })
+		else
+			rect(fb, mx + 1, my + 1, 6, 3, P.bubble_sent)
+		end
+	end
 	if say then
 		say = " " .. C.trunc(say, CUBE - 3) .. " "
 		text(fb, row, cx + 1, say, P.bubble_text, bg)
@@ -577,11 +595,16 @@ function M.render(agents, width, ctx)
 	for _, s in ipairs(shelves) do
 		for _, zone in ipairs(s.zones) do
 			local label_w = zone.w - 2
-			rect(fb, zone.x, row * 2, label_w, 2, P.band)
-			text(fb, row, zone.x, "▌ ", carpet(zone.project))
-			local c = text(fb, row, zone.x + 2, C.trunc(zone.project, label_w - 10), P.text)
+			local picked = zone.project == ctx.selected_desk
+			local band = picked and P.selected or P.band
+			local ink = picked and P.bubble_text or P.text
+			rect(fb, zone.x, row * 2, label_w, 2, band)
+			text(fb, row, zone.x, "▌ ", picked and P.bubble_text or carpet(zone.project), band)
+			local c = text(fb, row, zone.x + 2, C.trunc(zone.project, label_w - 10), ink, band)
 			local n = #zone.members
-			text(fb, row, c, "  " .. n .. (n == 1 and " seat" or " seats"), P.dim, nil, zone.x + label_w - c)
+			local note = picked and "  p ✉ desk" or ("  " .. n .. (n == 1 and " seat" or " seats"))
+			text(fb, row, c, note, picked and ink or P.dim, band, zone.x + label_w - c)
+			table.insert(rects, { desk = zone.project, top = row + 1, bottom = row + 1, left = zone.x + 1, right = zone.x + label_w })
 			for i, agent in ipairs(zone.members) do
 				local slot = (i - 1) % per_row
 				local line = math.floor((i - 1) / per_row)
@@ -604,12 +627,39 @@ function M.render(agents, width, ctx)
 	return canvas, rects
 end
 
+-- The rect under a position: { name = agent } or { desk = project }.
 function M.hit(rects, lnum, col)
 	for _, r in ipairs(rects) do
 		if lnum >= r.top and lnum <= r.bottom and col >= r.left and col <= r.right then
-			return r.name
+			return r
 		end
 	end
+end
+
+-- The nearest rect from `from` in a direction ("h", "j", "k", "l"), for
+-- moving around the office like a grid.
+function M.neighbour(rects, from, dir)
+	local function center(r)
+		return (r.left + r.right) / 2, (r.top + r.bottom) / 2
+	end
+	local fx, fy = center(from)
+	local best, best_score
+	for _, r in ipairs(rects) do
+		if r ~= from then
+			local x, y = center(r)
+			-- Cells are about twice as tall as wide, so rows count double.
+			local dx, dy = x - fx, (y - fy) * 2
+			local along = ({ h = -dx, l = dx, k = -dy, j = dy })[dir]
+			local across = (dir == "h" or dir == "l") and math.abs(dy) or math.abs(dx)
+			if along > 0 then
+				local score = along + across * 2
+				if not best_score or score < best_score then
+					best, best_score = r, score
+				end
+			end
+		end
+	end
+	return best
 end
 
 return M

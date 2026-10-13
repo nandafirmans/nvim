@@ -275,12 +275,28 @@ end
 -- Box -----------------------------------------------------------------------------
 
 -- Opens the box for `agent`; on_submit(text) gets the prompt (may be multi-line).
-function M.open(agent, title, on_submit)
+-- options.targets: a list of { label, agent, run = function(text) } to choose
+-- from with Tab / S-Tab (options.index is the first one); the chosen target's
+-- run() gets the prompt instead of on_submit, and its agent drives completion.
+function M.open(agent, title, on_submit, options)
+	options = options or {}
+	local targets = options.targets
+	local current = options.index or 1
 	local has_cmp = register_cmp()
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.bo[buf].bufhidden = "wipe"
-	vim.b[buf].agents_tool = agent and agent.tool or nil
-	vim.b[buf].agents_cwd = agent and agent.cwd or nil
+	local function set_agent(a)
+		vim.b[buf].agents_tool = a and a.tool or nil
+		vim.b[buf].agents_cwd = a and a.cwd or nil
+	end
+	local function target_title()
+		local t = targets[current]
+		return (" ✉ %s  ‹ %d/%d › "):format(t.label, current, #targets)
+	end
+	if targets then
+		agent = targets[current].agent or agent
+	end
+	set_agent(agent)
 	vim.bo[buf].filetype = "agentprompt"
 	vim.bo[buf].completefunc = "v:lua.require'agents.prompt_box'.completefunc"
 	local w = math.max(50, math.floor(vim.o.columns * 0.6))
@@ -292,9 +308,10 @@ function M.open(agent, title, on_submit)
 		row = math.floor((vim.o.lines - h) / 2) - 4,
 		col = math.floor((vim.o.columns - w) / 2),
 		border = "rounded",
-		title = " " .. title .. " ",
+		title = targets and target_title() or (" " .. title .. " "),
 		title_pos = "center",
-		footer = " ⏎ send · Ctrl-j new line · / commands & skills · @ files · Esc Esc cancel ",
+		footer = targets and " ⏎ send · Tab next recipient · Ctrl-j new line · / commands · @ files · Esc Esc cancel "
+			or " ⏎ send · Ctrl-j new line · / commands & skills · @ files · Esc Esc cancel ",
 		footer_pos = "center",
 	})
 	vim.wo[win].wrap = true
@@ -315,7 +332,12 @@ function M.open(agent, title, on_submit)
 		end
 		local text = vim.trim(table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n"))
 		close()
-		if text ~= "" then
+		if text == "" then
+			return
+		end
+		if targets then
+			targets[current].run(text)
+		else
 			on_submit(text)
 		end
 	end
@@ -333,6 +355,25 @@ function M.open(agent, title, on_submit)
 	vim.keymap.set("n", "<CR>", submit, opts)
 	vim.keymap.set("n", "q", close, opts)
 	vim.keymap.set("n", "<Esc>", close, opts)
+	if targets and #targets > 1 then
+		local function cycle(step)
+			return function()
+				local ok, cmp = pcall(require, "cmp")
+				if ok and cmp.visible() then
+					return step > 0 and cmp.select_next_item() or cmp.select_prev_item()
+				end
+				current = (current - 1 + step) % #targets + 1
+				set_agent(targets[current].agent or agent)
+				if vim.api.nvim_win_is_valid(win) then
+					vim.api.nvim_win_set_config(win, { title = target_title(), title_pos = "center" })
+				end
+			end
+		end
+		for _, mode in ipairs({ "i", "n" }) do
+			vim.keymap.set(mode, "<Tab>", cycle(1), opts)
+			vim.keymap.set(mode, "<S-Tab>", cycle(-1), opts)
+		end
+	end
 	if not has_cmp then
 		-- Without nvim-cmp: open the completion menu when / or @ is typed.
 		for _, ch in ipairs({ "/", "@" }) do

@@ -60,6 +60,9 @@ local S = {
 	stale_checked = {}, -- name -> last check of a quiet "running" tab
 	tails = {}, -- name -> last screen line, for tabs without hooks
 	office_rects = {},
+	office_desk = nil, -- desk (project) picked in the office, instead of one agent
+	sent = {}, -- name -> { text, at = vim.uv.now() }: prompts just sent, for the office
+	sending_until = 0, -- the office animates every tick until then
 }
 
 -- Runs a command and waits; a missing program reads as exit code 127
@@ -396,6 +399,8 @@ local function render_office()
 		context_of = usage.context,
 		selected = S.selected,
 		jump_labels = S.jump_labels,
+		selected_desk = S.office_desk,
+		sent = S.sent,
 		tails = S.tails,
 		tick = S.tick,
 	})
@@ -408,7 +413,11 @@ local function update_winbar()
 		return
 	end
 	if S.view == "office" then
-		vim.wo[S.wins.term].winbar = "%#AgentsTitle#  Agent Office %#AgentsDim#  ⏎ sit with agent   O terminal   b browser   ^␣ jump"
+		local target = S.office_desk and ("desk " .. S.office_desk)
+			or (selected_agent() and display_name(selected_agent()))
+		vim.wo[S.wins.term].winbar = "%#AgentsTitle#  Agent Office "
+			.. (target and ("%#AgentsToolSel# ✉ " .. target:gsub("%%", "%%%%") .. " ") or "")
+			.. "%#AgentsDim#  p prompt  P desk  hjkl move  ⏎ sit  O terminal  ? keys"
 		return
 	end
 	local agent = selected_agent()
@@ -569,6 +578,7 @@ end
 local function select_agent(name, focus)
 	local changed = name ~= S.selected
 	S.selected = name
+	S.office_desk = nil
 	if changed or focus then
 		show_agent(name, focus)
 	end
@@ -746,6 +756,8 @@ local function on_tick()
 				stop_timer()
 			end
 		end)
+	elseif hub_open() and vim.uv.now() < S.sending_until then
+		render_office()
 	elseif hub_open() then
 		for _, agent in ipairs(S.agents) do
 			if status_of(agent.name) == "running" then
@@ -1232,6 +1244,13 @@ local HELP = {
 	{ "E", "open the folder as a workspace" },
 	{ "S", "send review comments" },
 	{ "r", "refresh" },
+	{ "", "" },
+	{ "Office", "" },
+	{ "h j k l", "move between cubicles and desks" },
+	{ "p", "prompt the agent or desk under the cursor" },
+	{ "P", "prompt the whole desk" },
+	{ "Tab (in the box)", "next recipient: desk, free seats, a seat, new agent" },
+	{ "⏎", "sit with the agent / prompt the desk" },
 }
 
 function M.help()
@@ -1679,6 +1698,113 @@ function M.office()
 	end
 end
 
+-- Remembers a prompt sent to an agent, so the office shows it arriving.
+local function note_sent(name, text)
+	S.sent[name] = { text = text, at = vim.uv.now() }
+	S.sending_until = vim.uv.now() + 6100
+	render_office()
+end
+
+-- Recipients for a prompt written in the office: the agent, its whole desk,
+-- the desk's free seats, each seat, or a new agent at the desk. `first` is
+-- "agent" or "desk", the recipient picked when the box opens.
+local function office_targets(project, agent, first)
+	local members = vim.tbl_filter(function(a)
+		return a.project == project
+	end, S.agents)
+	local live = vim.tbl_filter(function(a)
+		return status_of(a.name) ~= "exited"
+	end, members)
+	local free = vim.tbl_filter(function(a)
+		local st = status_of(a.name)
+		return st ~= "running" and st ~= "waiting"
+	end, live)
+	local home = agent or live[1] or members[1]
+	local function send_all(list)
+		return function(text)
+			for _, a in ipairs(list) do
+				flow.submit(a.name, text)
+			end
+		end
+	end
+
+	local targets, index = {}, 1
+	local function add(t)
+		table.insert(targets, t)
+		return #targets
+	end
+	if agent then
+		local i = add({
+			label = display_name(agent) .. " · " .. project,
+			agent = agent,
+			run = function(text)
+				flow.submit(agent.name, text)
+			end,
+		})
+		index = first == "agent" and i or index
+	end
+	if #live > 1 or not agent then
+		local i = add({
+			label = ("whole desk %s · %d %s"):format(project, #live, #live == 1 and "seat" or "seats"),
+			agent = home,
+			run = send_all(live),
+		})
+		index = first == "desk" and i or index
+		if #free > 0 and #free < #live then
+			add({ label = ("free seats at %s · %d"):format(project, #free), agent = free[1], run = send_all(free) })
+		end
+	end
+	for _, a in ipairs(live) do
+		if a ~= agent then
+			add({
+				label = display_name(a) .. " · " .. project,
+				agent = a,
+				run = function(text)
+					flow.submit(a.name, text)
+				end,
+			})
+		end
+	end
+	if home then
+		add({
+			label = "new agent at " .. project,
+			agent = home,
+			run = function(text)
+				choose_command(false, function(tool, command)
+					local cmd = flow.first_prompt_command(tool, command, text)
+					local name = create_agent({ project = project, cwd = home.cwd, tool = tool, command = cmd, focus = false })
+					if not name then
+						return
+					end
+					if cmd == command then
+						-- A CLI without a first-prompt flag: type it in once it is up.
+						vim.defer_fn(function()
+							flow.submit(name, text)
+						end, 5000)
+					else
+						note_sent(name, text)
+					end
+				end)
+			end,
+		})
+	end
+	return targets, index
+end
+
+-- Opens the prompt box for an office target: { name = agent } or { desk = project }.
+local function office_prompt(target, first)
+	local agent = target.name and S.by_name[target.name]
+	local project = target.desk or (agent and agent.project)
+	if not project then
+		return
+	end
+	local targets, index = office_targets(project, agent, first or (agent and "agent" or "desk"))
+	if #targets == 0 then
+		return
+	end
+	require("agents.prompt_box").open(nil, "", nil, { targets = targets, index = index })
+end
+
 function M._map_office(buf)
 	local function map(lhs, fn, desc)
 		vim.keymap.set("n", lhs, fn, { buffer = buf, nowait = true, desc = desc })
@@ -1687,24 +1813,89 @@ function M._map_office(buf)
 		local lnum = vim.api.nvim_win_get_cursor(0)[1]
 		return office.hit(S.office_rects, lnum, vim.fn.virtcol("."))
 	end
-	map("<CR>", function()
-		local name = under_cursor()
-		if name then
-			select_agent(name, true)
+	local function rect_of_selection()
+		for _, r in ipairs(S.office_rects) do
+			if (S.office_desk and r.desk == S.office_desk) or (not S.office_desk and r.name and r.name == S.selected) then
+				return r
+			end
 		end
-	end, "Sit with agent")
+	end
+	-- The office target: what the cursor is on, else what is selected.
+	local function target()
+		return under_cursor() or rect_of_selection()
+	end
+	-- Makes `r` the selection: an agent, or a whole desk.
+	local function pick_rect(r)
+		if not r then
+			return
+		end
+		if r.desk then
+			if S.office_desk ~= r.desk then
+				S.office_desk = r.desk
+				render_list()
+				render_office()
+				update_winbar()
+			end
+		elseif r.name ~= S.selected or S.office_desk then
+			select_agent(r.name, false)
+		end
+	end
+	local function move(dir)
+		return function()
+			local from = target()
+			local to = from and office.neighbour(S.office_rects, from, dir) or S.office_rects[1]
+			if not to then
+				return
+			end
+			-- Land on the nameplate (or the desk label), in the middle.
+			local lnum = to.desk and to.top or math.max(to.top, to.bottom - 1)
+			local vcol = math.floor((to.left + to.right) / 2)
+			local col = vim.fn.virtcol2col(0, lnum, vcol)
+			pcall(vim.api.nvim_win_set_cursor, 0, { lnum, math.max(0, col - 1) })
+			pick_rect(to)
+		end
+	end
+
+	vim.api.nvim_create_autocmd("CursorMoved", {
+		buffer = buf,
+		callback = function()
+			pick_rect(under_cursor())
+		end,
+	})
+	map("<CR>", function()
+		local r = under_cursor()
+		if r and r.desk then
+			office_prompt(r, "desk")
+		elseif r then
+			select_agent(r.name, true)
+		end
+	end, "Sit with agent / prompt the desk")
 	map("<2-LeftMouse>", function()
-		local name = under_cursor()
-		if name then
-			select_agent(name, true)
+		local r = under_cursor()
+		if r and r.name then
+			select_agent(r.name, true)
 		end
 	end, "Sit with agent")
 	map("<LeftRelease>", function()
-		local name = under_cursor()
-		if name and name ~= S.selected then
-			select_agent(name, false)
+		pick_rect(under_cursor())
+	end, "Select agent or desk")
+	for _, dir in ipairs({ "h", "j", "k", "l" }) do
+		map(dir, move(dir), "Move to the next cubicle or desk")
+	end
+	map("p", function()
+		local r = target()
+		if r then
+			office_prompt(r)
 		end
-	end, "Select agent")
+	end, "Prompt the agent or desk under the cursor")
+	map("P", function()
+		local r = target()
+		if r then
+			office_prompt(r, "desk")
+		end
+	end, "Prompt the whole desk")
+	map("a", flow.approve, "Approve the selected agent")
+	map("?", M.help, "All keys")
 	map("O", M.office, "Back to terminal")
 	map("b", M.browser, "Open the web result in terminal-browser")
 	map("g", M.lazygit, "Lazygit in this agent's repo")
@@ -1838,6 +2029,9 @@ M._hub = {
 	pick = pick,
 	choose_command = choose_command,
 	create_agent = create_agent,
+	note_sent = function(name, text)
+		note_sent(name, text)
+	end,
 	find_projects = find_projects,
 	open = function()
 		M.open()

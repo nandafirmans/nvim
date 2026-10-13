@@ -81,6 +81,12 @@ prompt. In Diffview, `q` closes it and returns to the hub.
 - **Context**: Claude tabs show their context window use (from the
   transcripts in `~/.claude/projects`); above 80% the office suggests
   `/compact`.
+- **Office prompts** (`<leader>mo`, `O`): `h`/`j`/`k`/`l` walk between
+  cubicles and desk labels. `p` prompts what is under the cursor: an agent, or
+  a whole desk (every seat in that folder). In the prompt box `Tab` switches
+  the recipient: the agent, the whole desk, its free seats, another seat, or a
+  new agent at the desk started with the prompt. A sent prompt shows in the
+  agent's bubble while an envelope drops onto its monitor.
 - **Notifications**: when an agent finishes or needs input while Neovim is not
   focused, macOS shows a notification.
 - **Mission control** (`<leader>mc`, `G`): every agent's live screen in a grid

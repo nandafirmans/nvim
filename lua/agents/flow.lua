@@ -105,6 +105,9 @@ end
 
 -- Types text into the agent's prompt and submits it.
 function M.submit(name, text)
+	if hub.note_sent then
+		hub.note_sent(name, text)
+	end
 	tmux.paste(name, text, function()
 		-- Give the TUI a moment to take the paste before Enter submits it.
 		vim.defer_fn(function()
