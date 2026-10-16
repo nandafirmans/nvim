@@ -117,11 +117,14 @@ local function text_of(content)
 	return table.concat(parts, "\n")
 end
 
--- omp keeps sessions in ~/.omp/agent/sessions/-<cwd under home, / as ->/<ts>_<id>.jsonl.
+-- omp keeps sessions in ~/.omp/agent/sessions/-<cwd under home, / as ->/<ts>_<id>.jsonl
+-- (pi in ~/.pi/agent, wowo in its own home).
 local function omp_transcript(agent)
 	local home = vim.uv.os_homedir()
 	local rel = agent.cwd:sub(1, #home) == home and agent.cwd:sub(#home + 1) or agent.cwd
-	local dir = vim.fn.expand("~/.omp/agent/sessions/") .. rel:gsub("/", "-")
+	local agent_dir = agent.tool == "wowo" and require("agents.wowo").agent_dir()
+		or vim.fn.expand(agent.tool == "pi" and "~/.pi/agent" or "~/.omp/agent")
+	local dir = agent_dir .. "/sessions/" .. rel:gsub("/", "-")
 	local newest, newest_time
 	for name, kind in vim.fs.dir(dir) do
 		if kind == "file" and name:match("%.jsonl$") then
@@ -149,7 +152,7 @@ local function conversation(agent, keep)
 				return "assistant", text_of(d.message.content)
 			end
 		end
-	elseif agent.tool == "omp" or agent.tool == "pi" then
+	elseif agent.tool == "omp" or agent.tool == "pi" or agent.tool == "wowo" then
 		path = omp_transcript(agent)
 		role_of = function(d)
 			local m = d.type == "message" and type(d.message) == "table" and d.message
@@ -241,14 +244,25 @@ end
 
 -- Handoff ---------------------------------------------------------------------
 
+local function installed(tool)
+	if tool == "wowo" then
+		return require("agents.wowo").available()
+	end
+	return vim.fn.executable(tool) == 1
+end
+
 -- Starts `target` in the agent's desk and folder with the brief as its first prompt.
 function M.handoff(agent, target, reason)
-	if vim.fn.executable(target) == 0 then
+	if not installed(target) then
 		notify(target .. " is not installed; cannot hand off " .. hub.agent_label(agent), vim.log.levels.WARN)
 		return
 	end
+	if target == "wowo" and not require("agents.wowo").prepare() then
+		return
+	end
 	local brief = M.brief(agent, reason or "handed off by you")
-	local command = require("agents.flow").first_prompt_command(target, target, brief)
+	local base = target == "wowo" and require("agents.wowo").command() or target
+	local command = require("agents.flow").first_prompt_command(target, base, brief)
 	local name = hub.create_agent({
 		project = agent.project,
 		cwd = agent.cwd,
@@ -276,8 +290,8 @@ function M.handoff_selected()
 		return
 	end
 	local targets = vim.tbl_filter(function(tool)
-		return tool ~= agent.tool and vim.fn.executable(tool) == 1
-	end, { "claude", "omp", "opencode", "codex", "pi", "hermes" })
+		return tool ~= agent.tool and installed(tool)
+	end, { "claude", "omp", "wowo", "opencode", "codex", "pi", "hermes" })
 	if #targets == 0 then
 		notify("No other agent CLI installed to hand off to", vim.log.levels.WARN)
 		return
@@ -308,7 +322,7 @@ function M.on_limited(agent, message)
 		end
 		return
 	end
-	if vim.fn.executable(partner) == 0 then
+	if not installed(partner) then
 		handled[agent.name] = true
 		notify(("%s hit its limit and %s is not installed: %s"):format(hub.agent_label(agent), partner, message), vim.log.levels.WARN)
 		return

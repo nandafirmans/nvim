@@ -30,6 +30,7 @@ local P = {
 local AGENT_COLORS = {
 	claude = "#e8875b",
 	omp = "#7aa2f7",
+	wowo = "#f7768e",
 	pi = "#4fd1c5",
 	opencode = "#9ece6a",
 	codex = "#bb9af7",

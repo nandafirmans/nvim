@@ -5,6 +5,7 @@ local tmux = require("agents.tmux")
 local git = require("agents.git")
 local office = require("agents.office")
 local flow = require("agents.flow")
+local wowo = require("agents.wowo")
 local review = require("agents.review")
 local handoff = require("agents.handoff")
 local queue = require("agents.queue")
@@ -15,7 +16,9 @@ local M = {}
 local config = {
 	roots = { "~/_dev" },
 	scan_depth = 3,
-	tools = { "claude", "omp", "opencode", "codex", "pi", "hermes" },
+	tools = { "claude", "omp", "wowo", "opencode", "codex", "pi", "hermes" },
+	-- wowo, the hub's bring-your-own-key agent: see lua/agents/wowo.lua.
+	wowo = {},
 	sidebar_width = 34,
 	changes_width = 46,
 	-- Continue a limited agent in its partner CLI; stops when both are limited.
@@ -154,6 +157,7 @@ local function render_list()
 	local total = config.sidebar_width
 	local canvas = new_canvas()
 	S.list_map = {}
+	S.desk_map = {} -- sidebar line -> desk (project) of a desk header
 
 	push(canvas, row({ { " AGENTS", "AgentsTitle" } }, { { tostring(#S.agents) .. " ", "AgentsDim" } }, total))
 	push(canvas, { { "" } })
@@ -191,7 +195,8 @@ local function render_list()
 			if counts.running > 0 then
 				vim.list_extend(right, { { frame .. " " .. counts.running, STATUS.running.hl }, { " " } })
 			end
-			push(canvas, row({ { "  ▾ ", "AgentsDim" }, { trunc(project, total - 14), "AgentsProject" } }, right, total))
+			local header = push(canvas, row({ { "  ▾ ", "AgentsDim" }, { trunc(project, total - 14), "AgentsProject" } }, right, total))
+			S.desk_map[header] = project
 		end
 
 		local status = status_of(agent.name)
@@ -252,10 +257,12 @@ local function render_list()
 
 	push(canvas, { { "" } })
 	local keys = {
-		{ { "n", "desk" }, { "t", "tab" }, { "p", "prompt" } },
-		{ { "a", "approve" }, { "F", "fan-out" }, { "f", "find" } },
-		{ { "⏎", "focus" }, { "O", "office" }, { "G", "grid" } },
-		{ { "E", "files" }, { "A", "monitor" }, { "?", "all keys" } },
+		{ { "n", "desk" }, { "t", "tab" }, { "T", "terminal" } },
+		{ { "p", "prompt" }, { "a", "approve" }, { "F", "fan-out" } },
+		{ { "f", "find" }, { "⏎", "focus" }, { "O", "office" } },
+		{ { "G", "grid" }, { "E", "files" }, { "A", "monitor" } },
+		{ { "x", "remove" }, { "X", "remove desk" }, { "R", "restart" } },
+		{ { "?", "all keys" } },
 	}
 	for _, line in ipairs(keys) do
 		local segs = { { " " } }
@@ -417,7 +424,7 @@ local function update_winbar()
 			or (selected_agent() and display_name(selected_agent()))
 		vim.wo[S.wins.term].winbar = "%#AgentsTitle#  Agent Office "
 			.. (target and ("%#AgentsToolSel# ✉ " .. target:gsub("%%", "%%%%") .. " ") or "")
-			.. "%#AgentsDim#  p prompt  P desk  hjkl move  ⏎ sit  O terminal  ? keys"
+			.. "%#AgentsDim#  p prompt  P desk  hjkl move  ⏎ sit  x remove  O terminal  ? keys"
 		return
 	end
 	local agent = selected_agent()
@@ -643,8 +650,88 @@ local function apply_agents(list)
 	end
 end
 
+-- Saved tabs ------------------------------------------------------------------
+-- Tabs live in tmux, so they survive Neovim but not a reboot or shutdown,
+-- which kill the tmux server. The hub keeps a snapshot of its tabs; when it
+-- finds the server empty it starts them again, each agent resuming its
+-- conversation (shells and commands just start again in their folder).
+
+local SNAPSHOT = vim.fn.stdpath("state") .. "/agents/tabs.json"
+local SAVED = { "name", "project", "tool", "index", "cwd", "branch", "label", "command", "claude_session", "session_id" }
+
+local function save_snapshot(list)
+	local rows = {}
+	for _, agent in ipairs(list) do
+		local row = {}
+		for _, key in ipairs(SAVED) do
+			row[key] = agent[key]
+		end
+		table.insert(rows, row)
+	end
+	local text = #rows == 0 and "[]" or vim.json.encode(rows)
+	if text == S.snapshot then
+		return
+	end
+	S.snapshot = text
+	vim.fn.mkdir(vim.fs.dirname(SNAPSHOT), "p")
+	vim.fn.writefile({ text }, SNAPSHOT)
+end
+
+-- Starts the saved tabs again when the tmux server came up empty. Returns
+-- how many were started.
+local function restore_snapshot(list)
+	S.restore_checked = true
+	if #list > 0 or vim.fn.filereadable(SNAPSHOT) == 0 then
+		return 0
+	end
+	local ok, rows = pcall(vim.json.decode, table.concat(vim.fn.readfile(SNAPSHOT), "\n"))
+	if not ok or type(rows) ~= "table" then
+		return 0
+	end
+	local started, skipped = 0, {}
+	for _, row in ipairs(rows) do
+		if type(row) == "table" and row.name and row.tool and row.cwd and vim.fn.isdirectory(row.cwd) == 1 then
+			local done = tmux.new_session({
+				name = row.name,
+				cwd = row.cwd,
+				command = flow.restart_command(row),
+				options = {
+					project = row.project,
+					tool = row.tool,
+					index = row.index or 1,
+					cwd = row.cwd,
+					branch = row.branch or "",
+					command = row.command or row.tool,
+					label = row.label or "",
+					claude_session = row.claude_session or "",
+					session_id = row.session_id or "",
+				},
+			})
+			if done then
+				started = started + 1
+			end
+		elseif type(row) == "table" then
+			table.insert(skipped, row.name or "?")
+		end
+	end
+	if started > 0 then
+		vim.notify(
+			("Restored %d %s from before the restart"):format(started, started == 1 and "tab" or "tabs")
+				.. (#skipped > 0 and ("\nSkipped (folder gone): " .. table.concat(skipped, ", ")) or ""),
+			vim.log.levels.INFO,
+			{ title = "Agents" }
+		)
+	end
+	return started
+end
+
 local function poll(cb)
 	tmux.list(function(list)
+		if not S.restore_checked and restore_snapshot(list) > 0 then
+			poll(cb)
+			return
+		end
+		save_snapshot(list)
 		local before = S.selected
 		apply_agents(list)
 		if hub_open() then
@@ -927,13 +1014,16 @@ local function pick(items, opts, cb)
 		:find()
 end
 
-local SHELL_TAB = "shell"
+local SHELL_TAB = "terminal (" .. vim.fs.basename(vim.o.shell) .. ")"
 local CUSTOM_TAB = "custom command…"
 
 -- Asks what a tab runs: an agent CLI, a plain shell, or any command
 -- (a dev server, tests in watch mode). cb(tool, command).
 local function choose_command(with_extras, cb)
 	local items = vim.tbl_filter(function(tool)
+		if tool == "wowo" then
+			return wowo.available()
+		end
 		return vim.fn.executable(tool) == 1
 	end, config.tools)
 	if with_extras then
@@ -953,6 +1043,10 @@ local function choose_command(with_extras, cb)
 				if command ~= "" then
 					cb(command:match("^(%S+)"), command)
 				end
+			end)
+		elseif choice == "wowo" then
+			wowo.choose(pick, function(command)
+				cb("wowo", command)
 			end)
 		elseif choice then
 			cb(choice, choice)
@@ -1046,6 +1140,18 @@ function M.new_tab()
 	end)
 end
 
+-- New plain terminal tab in the selected desk's folder (or worktree), to run
+-- the project: a dev server, tests, git.
+function M.new_terminal()
+	local agent = selected_agent()
+	if not agent then
+		M.new_agent()
+		return
+	end
+	local shell = vim.o.shell
+	create_agent({ project = agent.project, cwd = agent.cwd, tool = vim.fs.basename(shell), command = shell })
+end
+
 function M.rename(name)
 	local agent = S.by_name[name or S.selected]
 	if not agent then
@@ -1098,18 +1204,71 @@ local function list_agent_under_cursor()
 	return S.list_map[vim.api.nvim_win_get_cursor(S.wins.list)[1]]
 end
 
+-- Removes tabs: closes their terminals after one confirmation. The
+-- conversations stay on disk, so a CLI can resume them later.
+function M.remove_agents(names, what)
+	names = vim.tbl_filter(function(name)
+		return S.by_name[name] ~= nil
+	end, names)
+	if #names == 0 then
+		return
+	end
+	local busy = vim.tbl_filter(function(name)
+		local st = status_of(name)
+		return st == "running" or st == "waiting"
+	end, names)
+	local question = ("Remove %s?"):format(what)
+	if #busy > 0 then
+		question = question .. ("\n%d still working; it stops now."):format(#busy)
+	end
+	if vim.fn.confirm(question, "&Remove\n&Cancel", 2) ~= 1 then
+		return
+	end
+	local next_selected
+	if vim.tbl_contains(names, S.selected) then
+		for _, agent in ipairs(S.agents) do
+			if not vim.tbl_contains(names, agent.name) then
+				next_selected = agent.name
+				break
+			end
+		end
+	end
+	for _, name in ipairs(names) do
+		tmux.kill(name)
+		S.meta[name] = nil
+		S.sent[name] = nil
+	end
+	if vim.tbl_contains(names, S.selected) then
+		S.selected = next_selected
+		S.office_desk = nil
+	end
+	poll(function()
+		refresh_changes()
+		if hub_open() and S.view ~= "office" then
+			show_agent(S.selected, false)
+		end
+	end)
+end
+
 function M.kill_agent(name)
 	name = name or S.selected
 	local agent = name and S.by_name[name]
-	if not agent then
-		return
+	if agent then
+		M.remove_agents({ name }, agent_label(agent))
 	end
-	if vim.fn.confirm("Kill " .. agent_label(agent) .. "?", "&Yes\n&No", 2) ~= 1 then
-		return
+end
+
+-- Removes every tab of a desk (project).
+function M.remove_desk(project)
+	local names = {}
+	for _, agent in ipairs(S.agents) do
+		if agent.project == project then
+			table.insert(names, agent.name)
+		end
 	end
-	tmux.kill(name)
-	S.meta[name] = nil
-	poll(refresh_changes)
+	if #names > 0 then
+		M.remove_agents(names, ("desk %s (%d %s)"):format(project, #names, #names == 1 and "tab" or "tabs"))
+	end
 end
 
 function M.restart_agent(name)
@@ -1217,13 +1376,15 @@ local HELP = {
 	{ "j / k", "select tab" },
 	{ "⏎ / 1-9", "focus tab" },
 	{ "n", "new desk (project, agent, worktree)" },
-	{ "t", "new tab in this desk" },
+	{ "t", "new tab in this desk (agent, terminal or command)" },
+	{ "T", "new terminal tab in this desk's folder" },
 	{ "p", "type a prompt to the agent" },
 	{ "a", "approve its permission prompt" },
 	{ "e", "Esc: decline / interrupt" },
 	{ "F", "fan out one prompt to N worktrees" },
 	{ "f", "find a tab" },
-	{ "r / x / R", "rename / kill / restart (Claude resumes)" },
+	{ "r / x / R", "rename / remove / restart (resumes the conversation)" },
+	{ "X", "remove the whole desk (x on a desk header too)" },
 	{ "P", "push branch and open a PR" },
 	{ "M", "merge worktree branch into main repo" },
 	{ "W", "remove worktree" },
@@ -1251,6 +1412,7 @@ local HELP = {
 	{ "P", "prompt the whole desk" },
 	{ "Tab (in the box)", "next recipient: desk, free seats, a seat, new agent" },
 	{ "⏎", "sit with the agent / prompt the desk" },
+	{ "x", "remove the agent or desk under the cursor" },
 }
 
 function M.help()
@@ -1525,6 +1687,7 @@ local function map_list(buf)
 	end, "Focus agent")
 	map("n", M.new_agent, "New desk")
 	map("t", M.new_tab, "New tab in desk")
+	map("T", M.new_terminal, "New terminal tab in desk")
 	map("r", function()
 		M.rename(list_agent_under_cursor())
 	end, "Rename tab")
@@ -1560,8 +1723,21 @@ local function map_list(buf)
 		end, "Focus tab " .. i)
 	end
 	map("x", function()
-		M.kill_agent(list_agent_under_cursor())
-	end, "Kill agent")
+		local lnum = vim.api.nvim_win_get_cursor(S.wins.list)[1]
+		if S.desk_map and S.desk_map[lnum] then
+			M.remove_desk(S.desk_map[lnum])
+		else
+			M.kill_agent(list_agent_under_cursor())
+		end
+	end, "Remove the tab (or the desk on its header)")
+	map("X", function()
+		local lnum = vim.api.nvim_win_get_cursor(S.wins.list)[1]
+		local name = list_agent_under_cursor()
+		local project = (S.desk_map and S.desk_map[lnum]) or (name and S.by_name[name] and S.by_name[name].project)
+		if project then
+			M.remove_desk(project)
+		end
+	end, "Remove every tab of the desk")
 	map("R", function()
 		M.restart_agent(list_agent_under_cursor())
 	end, "Restart agent")
@@ -1895,6 +2071,14 @@ function M._map_office(buf)
 		end
 	end, "Prompt the whole desk")
 	map("a", flow.approve, "Approve the selected agent")
+	map("x", function()
+		local r = target()
+		if r and r.desk then
+			M.remove_desk(r.desk)
+		elseif r then
+			M.kill_agent(r.name)
+		end
+	end, "Remove the agent or desk under the cursor")
 	map("?", M.help, "All keys")
 	map("O", M.office, "Back to terminal")
 	map("b", M.browser, "Open the web result in terminal-browser")
@@ -2042,6 +2226,7 @@ function M.setup(opts)
 	config = vim.tbl_deep_extend("force", config, opts or {})
 	set_highlights()
 	flow.setup(M._hub)
+	wowo.setup(config.wowo)
 	handoff.setup(M._hub, config.handoff)
 	queue.setup(M._hub)
 
@@ -2097,6 +2282,23 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("AgentsMonitor", function()
 		require("agents.monitor").open()
 	end, { desc = "Usage analytics for every agent CLI" })
+	vim.api.nvim_create_user_command("AgentsWowo", function(opts)
+		if opts.args == "check" then
+			wowo.check()
+		elseif wowo.prepare() then
+			vim.notify(
+				"wowo ready: " .. (wowo.default_model() or "no model") .. "\nhome: " .. vim.fn.fnamemodify(wowo.agent_dir(), ":~"),
+				vim.log.levels.INFO,
+				{ title = "WOWO-AGENT" }
+			)
+		end
+	end, {
+		nargs = "?",
+		complete = function()
+			return { "check" }
+		end,
+		desc = "wowo: write its config (check: call each provider and list its models)",
+	})
 	local hook_agents = { "claude", "omp", "pi", "opencode", "codex", "hermes" }
 	local function only(opts)
 		return #opts.fargs > 0 and opts.fargs or nil

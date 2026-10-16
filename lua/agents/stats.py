@@ -276,6 +276,7 @@ def hermes(c):
 COLLECTORS = [
     ("claude", "claude", claude),
     ("omp", "omp", lambda c: pi_like(c, ".omp")),
+    ("wowo", "node", lambda c: pi_like(c, ".wowo")),
     ("pi", "pi", lambda c: pi_like(c, ".pi")),
     ("opencode", "opencode", opencode),
     ("codex", "codex", codex),

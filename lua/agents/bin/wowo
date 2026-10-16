@@ -1,0 +1,17 @@
+#!/bin/sh
+# wowo: the Neovim agent hub's own bring-your-own-key coding agent
+# (lua/agents/wowo-cli). Settings live in ~/.wowo/config.json, which
+# the hub writes from wowo.providers.
+# --home DIR (first) picks another home, as the hub does for wowo.home.
+if [ "$1" = "--home" ]; then
+	WOWO_HOME=$2
+	shift 2
+fi
+export WOWO_HOME="${WOWO_HOME:-$HOME/.wowo}"
+
+if ! command -v node >/dev/null 2>&1; then
+	echo "wowo: node is not installed" >&2
+	exit 127
+fi
+dir=$(cd "$(dirname "$0")/../wowo-cli" && pwd)
+exec node "$dir/main.js" "$@"

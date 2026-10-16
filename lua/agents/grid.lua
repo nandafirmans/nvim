@@ -244,6 +244,9 @@ local function map_tile(buf)
 	map("R", on_tile(function(tile)
 		require("agents").restart_agent(tile.name)
 	end), "Restart (resume) this agent")
+	map("x", on_tile(function(tile)
+		require("agents").kill_agent(tile.name)
+	end), "Remove this agent")
 	map("q", M.close, "Close mission control")
 	-- While typing: Ctrl-Space leaves typing, Ctrl-h/j/k/l move to the next tile.
 	for _, lhs in ipairs({ "<C-Space>", "<C-@>" }) do
@@ -255,7 +258,7 @@ local function map_tile(buf)
 	map("?", function()
 		vim.notify(
 			"Typing goes to the agent. Ctrl-Space stops typing; then:\n"
-				.. "⏎/i type again   o open full size   p prompt   a approve   e Esc   R restart   q close\n"
+				.. "⏎/i type again   o open full size   p prompt   a approve   e Esc   R restart   x remove   q close\n"
 				.. "Ctrl-h/j/k/l or click moves between tiles",
 			vim.log.levels.INFO,
 			{ title = "Mission control" }

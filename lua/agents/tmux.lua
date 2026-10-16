@@ -139,6 +139,8 @@ function M.new_session(opts)
 		"50",
 		"-e",
 		"NVIM_AGENT_SESSION=" .. opts.name,
+		"-e",
+		"NVIM_AGENT_SOCKET=" .. M.socket,
 		opts.command,
 	})
 	if result.code ~= 0 then

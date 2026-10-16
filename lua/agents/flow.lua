@@ -95,6 +95,16 @@ local TOOLS = {
 	},
 }
 
+-- wowo takes the same resume flags and first prompt as omp. Its
+-- command carries its home, so a restart rebuilds it rather than taking
+-- the first word.
+TOOLS.wowo = {
+	resume = function(_, agent)
+		return TOOLS.omp.resume(require("agents.wowo").command(), agent)
+	end,
+	prompt = TOOLS.omp.prompt,
+}
+
 -- `base` started with `text` as its first prompt, for CLIs that take one.
 function M.first_prompt_command(tool, base, text)
 	local spec = TOOLS[tool]

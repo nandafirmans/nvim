@@ -72,6 +72,18 @@ local BUILTIN = {
 	},
 }
 BUILTIN.pi = BUILTIN.omp
+BUILTIN.wowo = {
+	{ "model", "Switch model" },
+	{ "models", "List models" },
+	{ "compact", "Summarize the conversation to free context" },
+	{ "clear", "Start a new conversation" },
+	{ "resume", "Resume a session" },
+	{ "cost", "Tokens used this session" },
+	{ "mode", "Approvals: ask, edits, yolo" },
+	{ "skills", "List skills" },
+	{ "todos", "Show the todo list" },
+	{ "help", "Show commands" },
+}
 
 local function read_description(path)
 	local ok, lines = pcall(vim.fn.readfile, path, "", 40)
@@ -138,6 +150,10 @@ function M.slash_items(tool, cwd)
 				scan(found, { latest .. "/skills" }, { latest .. "/commands" }, plugin .. ":")
 			end
 		end
+	elseif tool == "wowo" then
+		-- Skills run as /name, from the folders wowo reads them from.
+		local own = vim.fs.dirname(require("agents.wowo").agent_dir())
+		scan(found, { own .. "/skills", "~/.claude/skills", cwd .. "/.claude/skills", cwd .. "/.wowo/skills" }, nil)
 	elseif tool == "omp" or tool == "pi" then
 		scan(found, nil, { "~/.pi/agent/prompts", "~/.omp/agent/prompts", cwd .. "/.pi/prompts", cwd .. "/.omp/prompts" })
 		scan(found, { "~/.pi/agent/skills", "~/.omp/agent/skills", cwd .. "/.pi/skills" }, nil, "skill:")
