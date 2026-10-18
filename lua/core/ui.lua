@@ -10,7 +10,11 @@ local function load_walltheme()
 	package.loaded["core.walltheme"] = nil
 	local ok, theme = pcall(require, "core.walltheme")
 	if ok and type(theme.setup) == "function" then
-		theme.setup()
+		-- Lets lua/agents/theme.lua save this as "wallpaper", not its base theme.
+		vim.g.walltheme_loading = true
+		local loaded = pcall(theme.setup)
+		vim.g.walltheme_loading = false
+		vim.g.walltheme_active = loaded
 		pcall(function()
 			require("plugins.lualine.util").hide_lualine_buffers()
 			require("lualine").refresh({ place = { "statusline", "tabline", "winbar" } })

@@ -33,7 +33,9 @@ function startTtyd() {
   const args = [
     "-W", "-i", "lo0", "-p", String(TTYD_PORT), "-b", "/t", "-a",
     "-t", "disableLeaveAlert=true", "-t", "disableResizeOverlay=true", "-t", "titleFixed=agents",
-    "-t", 'theme={"background":"#1b1416","foreground":"#e6e9f0","cursor":"#ffd23f","selectionBackground":"#5c2418"}',
+    // The page applies the Neovim theme itself (it can change while open);
+    // this is only the first paint.
+    "-t", `theme=${JSON.stringify(xtermTheme(readTheme()) || { background: "#1b1416", foreground: "#e6e9f0", cursor: "#ffd23f", selectionBackground: "#5c2418" })}`,
   ];
   if (fs.existsSync(TERMINAL_PAGE)) args.push("-I", TERMINAL_PAGE);
   args.push(AGENTS_BIN, "--web");
@@ -42,6 +44,72 @@ function startTtyd() {
     log("ttyd exited", code, "- restarting");
     setTimeout(startTtyd, 2000);
   });
+}
+
+// Theme --------------------------------------------------------------------------------
+// lua/agents/theme.lua writes the Neovim colorscheme's palette to theme.json and
+// its name to `colorscheme`; every Neovim with the hub watches that name. A
+// theme picked here is written there, and with no Neovim running, a headless
+// one applies it once to make the palette.
+
+const THEME_FILE = path.join(STATE, "theme.json");
+const THEMES_FILE = path.join(STATE, "themes.json");
+const CHOICE_FILE = path.join(STATE, "colorscheme");
+
+function readJson(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+const readTheme = () => readJson(THEME_FILE);
+
+function themeRev() {
+  try {
+    return fs.statSync(THEME_FILE).mtimeMs;
+  } catch {
+    return 0;
+  }
+}
+
+const ANSI = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"];
+ANSI.push(...ANSI.map((c) => "bright" + c[0].toUpperCase() + c.slice(1)));
+
+function xtermTheme(p) {
+  if (!p || !Array.isArray(p.terminal)) return null;
+  const theme = { background: p.bg, foreground: p.fg, cursor: p.cursor, cursorAccent: p.bg, selectionBackground: p.selection };
+  ANSI.forEach((key, i) => p.terminal[i] && (theme[key] = p.terminal[i]));
+  return theme;
+}
+
+let exporting = null;
+function exportTheme() {
+  exporting ??= new Promise((resolve) => {
+    execFile("nvim", ["--headless", "-c", 'lua require("agents.theme").export()', "-c", "qa!"],
+      { timeout: 30_000, env: { ...env, AGENTS_STATE: STATE } }, (err) => {
+        if (err) log("theme export failed", err.message);
+        exporting = null;
+        resolve();
+      });
+  });
+  return exporting;
+}
+
+async function setTheme(name) {
+  const list = readJson(THEMES_FILE) || [];
+  if (!list.some((t) => t.name === name)) return false;
+  const tmp = `${CHOICE_FILE}.tmp${process.pid}`;
+  fs.writeFileSync(tmp, name + "\n");
+  fs.renameSync(tmp, CHOICE_FILE);
+  // An open Neovim applies it and writes the palette within a second.
+  for (let i = 0; i < 12; i++) {
+    await new Promise((r) => setTimeout(r, 150));
+    if (readTheme()?.name === name) return true;
+  }
+  await exportTheme();
+  return readTheme()?.name === name;
 }
 
 // Auth ---------------------------------------------------------------------------------
@@ -219,7 +287,18 @@ async function api(req, res, url) {
     sessions.delete(cookies(req).agents_session);
     return json(res, 200, { ok: true }, { "set-cookie": "agents_session=; Path=/; Max-Age=0" });
   }
-  if (url.pathname === "/api/agents") return json(res, 200, { agents: await listAgents(), now: Math.floor(Date.now() / 1000) });
+  if (url.pathname === "/api/agents") return json(res, 200, { agents: await listAgents(), now: Math.floor(Date.now() / 1000), themeRev: themeRev() });
+  if (url.pathname === "/api/theme" && req.method === "GET") {
+    if (!fs.existsSync(THEMES_FILE)) await exportTheme();
+    const theme = readTheme();
+    return json(res, 200, { theme, xterm: xtermTheme(theme), themes: readJson(THEMES_FILE) || [], rev: themeRev() });
+  }
+  if (url.pathname === "/api/theme" && req.method === "POST") {
+    const { name } = await readBody(req);
+    if (!(await setTheme(String(name || "")))) return json(res, 400, { error: "unknown theme" });
+    const theme = readTheme();
+    return json(res, 200, { theme, xterm: xtermTheme(theme), rev: themeRev() });
+  }
   const m = url.pathname.match(/^\/api\/agents\/([\w.-]+)\/(send|approve|deny)$/);
   if (m && req.method === "POST") {
     const [, name, action] = m;

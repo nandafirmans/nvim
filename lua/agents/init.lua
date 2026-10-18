@@ -277,7 +277,7 @@ local function render_list()
 			{ "<CR>", "⏎", "open" }, { "p", "p", "prompt" }, { "a", "a", "approve" }, { "e", "e", "esc" },
 			{ "t", "t", "tab" }, { "T", "T", "terminal" }, { "n", "n", "desk" }, { "R", "R", "restart" },
 			{ "O", "O", "office", true }, { "G", "G", "grid" }, { "A", "A", "monitor" }, { "f", "f", "find" },
-			{ "x", "x", "remove" }, { "?", "?", "all keys" },
+			{ "x", "x", "remove" }, { "C", "C", "theme" }, { "?", "?", "all keys" },
 		}
 		local segs, width, hits = { { " " } }, 1, {}
 		local function flush()
@@ -309,7 +309,7 @@ local function render_list()
 		{ { "f", "find" }, { "⏎", "focus" }, { "O", "office" } },
 		{ { "G", "grid" }, { "E", "files" }, { "A", "monitor" } },
 		{ { "x", "remove" }, { "X", "remove desk" }, { "R", "restart" } },
-		{ { "?", "all keys" } },
+		{ { "C", "theme" }, { "?", "all keys" } },
 	}
 	for _, line in ipairs(keys) do
 		local segs = { { " " } }
@@ -1501,6 +1501,7 @@ local HELP = {
 	{ "H", "hand off to another CLI (auto on limit)" },
 	{ "Q", "autopilot: queue of prompts (s start/stop)" },
 	{ "E", "open the folder as a workspace (files, edit)" },
+	{ "C", "theme (shared with the phone dashboard)" },
 	{ "Ctrl-Space", "jump mode" },
 	{ "q", "close hub" },
 	{ "", "" },
@@ -1827,6 +1828,9 @@ local function map_list(buf)
 	map("M", flow.merge, "Merge worktree branch")
 	map("W", flow.remove_worktree, "Remove worktree")
 	map("?", M.help, "All keys")
+	map("C", function()
+		require("agents.theme").pick()
+	end, "Theme")
 	map("A", function()
 		require("agents.monitor").open()
 	end, "Usage monitor")
@@ -2494,6 +2498,7 @@ function M.setup(opts)
 
 	local group = vim.api.nvim_create_augroup("Agents", { clear = true })
 	flow.track_focus(group)
+	require("agents.theme").setup(group)
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		group = group,
 		callback = function()

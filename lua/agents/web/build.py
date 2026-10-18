@@ -26,7 +26,13 @@ HEAD = """
 <link rel="apple-touch-icon" href="ICON">
 <link rel="icon" type="image/png" href="ICON">
 <style>
-  html, body { background: #1b1416; overscroll-behavior: none; }
+  /* The fire colours, until the Neovim theme arrives (applyTheme below). */
+  :root {
+    --k-page: #1b1416; --k-bar1: #2a1d1f; --k-bar2: #1f1618; --k-line: #3d2a2c;
+    --k-btn1: #3e2b2d; --k-btn2: #33242a; --k-shadow: #1a1012; --k-hi: #4c3638; --k-fg: #ffe6a8;
+    --k-accent1: #ffb547; --k-accent2: #ff8a1c; --k-on-accent: #1b1416;
+  }
+  html, body { background: var(--k-page); overscroll-behavior: none; }
   #terminal-container { box-sizing: border-box; }
   /* The cells rarely fill the width exactly: centre them, so the spare pixels
      split into two thin edges instead of one strip on the right. */
@@ -38,7 +44,7 @@ HEAD = """
   #agents-keys {
     position: fixed; left: 0; right: 0; z-index: 10; box-sizing: border-box;
     width: 100vw; padding: 6px 6px; display: flex; flex-direction: column; gap: 6px;
-    background: linear-gradient(#2a1d1f, #1f1618); border-top: 1px solid #3d2a2c;
+    background: linear-gradient(var(--k-bar1), var(--k-bar2)); border-top: 1px solid var(--k-line);
     -webkit-user-select: none; user-select: none; touch-action: manipulation;
   }
   #agents-keys .row { display: flex; gap: 5px; width: 100%; }
@@ -46,13 +52,14 @@ HEAD = """
   #agents-keys.open .row.more { display: flex; }
   #agents-keys button {
     flex: 1 1 0; min-width: 0; height: 38px; padding: 0;
-    border: 0; border-radius: 9px; color: #ffe6a8;
-    background: linear-gradient(#3e2b2d, #33242a); box-shadow: 0 1px 0 #1a1012, inset 0 1px 0 #4c3638;
+    border: 0; border-radius: 9px; color: var(--k-fg);
+    background: linear-gradient(var(--k-btn1), var(--k-btn2)); box-shadow: 0 1px 0 var(--k-shadow), inset 0 1px 0 var(--k-hi);
     font: 600 14px -apple-system, system-ui, sans-serif; letter-spacing: .2px;
   }
   #agents-keys button.wide { flex-grow: 1.4; }
-  #agents-keys button.accent { color: #1b1416; background: linear-gradient(#ffb547, #ff8a1c); box-shadow: 0 1px 0 #7a3a10; }
-  #agents-keys button.on { color: #1b1416; background: linear-gradient(#ffd23f, #ff9f1c); }
+  #agents-keys button.accent, #agents-keys button.on {
+    color: var(--k-on-accent); background: linear-gradient(var(--k-accent1), var(--k-accent2)); box-shadow: 0 1px 0 var(--k-shadow);
+  }
   #agents-keys button:active { transform: translateY(1px); filter: brightness(1.25); }
   #agents-keys button small { font-size: 11px; opacity: .75; font-weight: 500; }
 </style>
@@ -256,6 +263,37 @@ BODY = r"""
     }).catch(() => {});
   };
 
+  // The Neovim colorscheme (lua/agents/theme.lua): the terminal's colours and
+  // the key bar's. The dashboard sends a new one when it changes; on its own,
+  // the page asks again when it comes back to the front.
+  let xtermTheme = null;
+  const mix = (a, b, t) => "#" + [1, 3, 5].map((i) => {
+    const x = parseInt(a.substr(i, 2), 16), y = parseInt(b.substr(i, 2), 16);
+    return Math.round(x + (y - x) * t).toString(16).padStart(2, "0");
+  }).join("");
+  const light = (c) => (parseInt(c.substr(1, 2), 16) * 299 + parseInt(c.substr(3, 2), 16) * 587 + parseInt(c.substr(5, 2), 16) * 114) / 255000 > 0.6;
+  const applyTheme = (data) => {
+    const p = data && data.theme;
+    if (!p || !p.bg) return;
+    const css = document.documentElement.style;
+    const set = (k, v) => css.setProperty("--k-" + k, v);
+    set("page", p.bg); set("bar1", mix(p.bg, p.fg, 0.09)); set("bar2", mix(p.bg, p.fg, 0.05));
+    set("line", mix(p.bg, p.fg, 0.16)); set("btn1", mix(p.bg, p.fg, 0.2)); set("btn2", mix(p.bg, p.fg, 0.14));
+    set("shadow", mix(p.bg, "#000000", 0.4)); set("hi", mix(p.bg, p.fg, 0.26)); set("fg", p.fg);
+    set("accent1", mix(p.accent, "#ffffff", 0.15)); set("accent2", p.accent);
+    set("on-accent", light(p.accent) ? mix(p.bg, "#000000", 0.3) : "#ffffff");
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = p.bg;
+    xtermTheme = data.xterm;
+    if (term() && xtermTheme) term().options.theme = xtermTheme;
+  };
+  const loadTheme = () => fetch("/api/theme").then((r) => r.ok && r.json()).then(applyTheme).catch(() => {});
+  loadTheme();
+  document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && loadTheme());
+  window.addEventListener("message", (e) => {
+    if (e.origin === location.origin && e.data && e.data.type === "agents:theme") applyTheme(e.data);
+  });
+
   // Once the terminal exists: font, layout, and a sticky Ctrl that turns
   // the next typed key into its control character.
   const wait = setInterval(() => {
@@ -263,6 +301,7 @@ BODY = r"""
     clearInterval(wait);
     term().options.fontSize = fontSize;
     term().options.lineHeight = 1.1;
+    if (xtermTheme) term().options.theme = xtermTheme;
     layout();
     useFont();
     term().attachCustomKeyEventHandler((e) => {

@@ -146,6 +146,13 @@ itself.
   a restart; `agents web stop` removes it and turns the URL off. Safari's
   Share → Add to Home Screen makes it a full-screen app on an iPhone.
 
+The phone pages use the Neovim colorscheme (`theme.lua`): every colorscheme
+change writes its palette to `~/.local/state/agents/theme.json`, and the
+dashboard, the terminal and its key bar repaint in it. Theme in the
+dashboard's dock (or `C` in the hub, or `:AgentsTheme [name]`) lists every
+installed colorscheme plus `wallpaper` (core/walltheme.lua); a pick applies in
+every open Neovim and is used again at the next start.
+
 Below `compact_below` columns (120) the hub stacks the sidebar over the
 changes panel in one narrow column, and switches back when the window
 widens, so it is usable from a phone in landscape. Below `phone_below` (80)

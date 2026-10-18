@@ -15,6 +15,8 @@
   :root {
     --bg: #140f10; --panel: #1d1517; --card: #231a1c; --line: #33262a; --text: #f1e9e4; --dim: #9a8c88; --faint: #6b5f5c;
     --yellow: #ffd23f; --orange: #ff9f1c; --red: #ff5a4e; --green: #6fdc8c; --blue: #7aa2f7; --violet: #b69cff;
+    /* Replaced by the Neovim theme once it loads (applyTheme). */
+    --accent: #ff9f1c; --accent2: #ffd23f; --on-accent: #1b1112; --card-hi: #2a1f22; --text2: #d9cdc8; --running: var(--orange);
     --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,24 +31,24 @@
   #login h1 { margin: 0; font-size: 26px; letter-spacing: 1px; background: linear-gradient(90deg, var(--yellow), var(--orange), var(--red)); -webkit-background-clip: text; color: transparent; }
   #login form { display: flex; flex-direction: column; gap: 10px; width: min(300px, 100%); }
   #login input { font: 600 20px ui-monospace, Menlo, monospace; letter-spacing: 6px; text-align: center; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
-  #login input:focus { border-color: var(--orange); }
-  #login .go { padding: 14px; border-radius: 14px; font-weight: 700; color: #1b1112; background: linear-gradient(var(--yellow), var(--orange)); }
+  #login input:focus { border-color: var(--accent); }
+  #login .go { padding: 14px; border-radius: 14px; font-weight: 700; color: var(--on-accent); background: linear-gradient(var(--accent2), var(--accent)); }
   #login .err { color: var(--red); min-height: 20px; font-size: 14px; text-align: center; }
 
   /* Dashboard */
   #app { display: none; min-height: 100%; padding: calc(var(--safe-top) + 6px) 14px calc(var(--safe-bottom) + 90px); }
-  header { position: sticky; top: 0; z-index: 5; margin: 0 -14px; padding: calc(var(--safe-top) + 8px) 14px 10px; background: linear-gradient(var(--bg) 70%, #140f1000); display: flex; align-items: center; gap: 10px; }
+  header { position: sticky; top: 0; z-index: 5; margin: 0 -14px; padding: calc(var(--safe-top) + 8px) 14px 10px; background: linear-gradient(var(--bg) 70%, transparent); display: flex; align-items: center; gap: 10px; }
   header img { width: 30px; height: 30px; border-radius: 8px; image-rendering: pixelated; }
   header h1 { margin: 0; font-size: 20px; letter-spacing: .5px; flex: 1; }
   .chips { display: flex; gap: 6px; }
   .chip { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--card); color: var(--dim); }
-  .chip.running { color: var(--orange); } .chip.waiting { color: var(--red); } .chip.done { color: var(--green); }
+  .chip.running { color: var(--running); } .chip.waiting { color: var(--red); } .chip.done { color: var(--green); }
   .desk { margin-top: 18px; }
   .desk h2 { margin: 0 2px 8px; font-size: 13px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 8px; }
   .desk h2 .count { color: var(--faint); font-weight: 600; }
   .card { position: relative; display: block; width: 100%; text-align: left; margin-bottom: 10px; padding: 13px 14px 12px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
   .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, var(--faint)); }
-  .card:active { transform: scale(.985); background: #2a1f22; }
+  .card:active { transform: scale(.985); background: var(--card-hi); }
   .card .top { display: flex; align-items: center; gap: 8px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--faint)); flex: none; }
   .running .dot, .waiting .dot { animation: pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 0 var(--c); }
@@ -56,37 +58,52 @@
   .card .status { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--c); text-transform: uppercase; letter-spacing: .6px; }
   .card .meta { margin-top: 4px; font-size: 13px; color: var(--dim); display: flex; gap: 10px; flex-wrap: wrap; }
   .card .meta .add { color: var(--green); } .card .meta .del { color: var(--red); }
-  .card .doing { margin-top: 8px; font-size: 13px; color: #d9cdc8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .doing { margin-top: 8px; font-size: 13px; color: var(--text2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .card .actions { margin-top: 10px; display: flex; gap: 8px; }
-  .card .actions button { flex: 1; padding: 9px 0; border-radius: 10px; font-size: 14px; font-weight: 700; background: #33262a; }
-  .card .actions .yes { color: #10230f; background: var(--green); }
-  .running { --c: var(--orange); } .waiting { --c: var(--red); } .done { --c: var(--green); } .idle { --c: var(--faint); }
-  .limited { --c: var(--violet); } .exited { --c: #5b4f4c; }
+  .card .actions button { flex: 1; padding: 9px 0; border-radius: 10px; font-size: 14px; font-weight: 700; background: var(--line); }
+  .card .actions .yes { color: var(--on-green, #10230f); background: var(--green); }
+  .running { --c: var(--running); } .waiting { --c: var(--red); } .done { --c: var(--green); } .idle { --c: var(--faint); }
+  .limited { --c: var(--violet); } .exited { --c: var(--faint); }
   .empty { margin-top: 30vh; text-align: center; color: var(--dim); }
-  .dock { position: fixed; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 10px); z-index: 6; display: flex; gap: 8px; padding: 8px; border-radius: 18px; background: #1d1517ee; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); }
+  .dock { position: fixed; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 10px); z-index: 6; display: flex; gap: 8px; padding: 8px; border-radius: 18px; background: color-mix(in srgb, var(--panel) 93%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); }
   .dock button { flex: 1; padding: 11px 0; border-radius: 12px; font-weight: 700; font-size: 14px; background: var(--card); }
-  .dock button.primary { color: #1b1112; background: linear-gradient(var(--yellow), var(--orange)); }
+  .dock button.primary { color: var(--on-accent); background: linear-gradient(var(--accent2), var(--accent)); }
 
   /* Terminal sheet */
-  #term { position: fixed; inset: 0; z-index: 20; display: none; flex-direction: column; background: #1b1416; }
+  #term { position: fixed; inset: 0; z-index: 20; display: none; flex-direction: column; background: var(--bg); }
   #term .bar { display: flex; align-items: center; gap: 8px; padding: calc(var(--safe-top) + 6px) 10px 8px; background: var(--panel); border-bottom: 1px solid var(--line); }
-  #term .bar .back { font-size: 26px; line-height: 1; padding: 2px 10px 4px 4px; color: var(--orange); }
+  #term .bar .back { font-size: 26px; line-height: 1; padding: 2px 10px 4px 4px; color: var(--accent); }
   #term .bar .title { flex: 1; min-width: 0; }
   #term .bar .title b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #term .bar .title span { font-size: 12px; color: var(--c, var(--dim)); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
   #term .bar .act { padding: 7px 12px; border-radius: 10px; background: var(--card); font-size: 13px; font-weight: 700; }
-  #term iframe { flex: 1; width: 100%; border: 0; background: #1b1416; padding-bottom: var(--safe-bottom); }
+  #term iframe { flex: 1; width: 100%; border: 0; background: var(--bg); padding-bottom: var(--safe-bottom); }
 
   /* Prompt sheet */
   #prompt { position: fixed; inset: 0; z-index: 30; display: none; background: #0008; }
   #prompt .sheet { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 14px calc(var(--safe-bottom) + 14px); background: var(--panel); border-radius: 20px 20px 0 0; border-top: 1px solid var(--line); }
   #prompt h3 { margin: 0 0 10px; font-size: 15px; }
   #prompt textarea { width: 100%; min-height: 110px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: 15px/1.4 -apple-system, system-ui, sans-serif; outline: none; resize: none; }
-  #prompt textarea:focus { border-color: var(--orange); }
+  #prompt textarea:focus { border-color: var(--accent); }
   #prompt .row { display: flex; gap: 8px; margin-top: 10px; }
   #prompt .row button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; background: var(--card); }
-  #prompt .row .send { color: #1b1112; background: linear-gradient(var(--yellow), var(--orange)); }
-  .toast { position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 90px); transform: translateX(-50%); z-index: 40; padding: 10px 16px; border-radius: 12px; background: #2d2225; color: var(--text); font-size: 14px; box-shadow: 0 6px 30px #0008; display: none; }
+  #prompt .row .send { color: var(--on-accent); background: linear-gradient(var(--accent2), var(--accent)); }
+
+  /* Theme sheet */
+  #themes { position: fixed; inset: 0; z-index: 30; display: none; background: #0008; }
+  #themes .sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 78vh; display: flex; flex-direction: column; padding: 16px 14px calc(var(--safe-bottom) + 12px); background: var(--panel); border-radius: 20px 20px 0 0; border-top: 1px solid var(--line); }
+  #themes h3 { margin: 0 0 4px; font-size: 15px; }
+  #themes .hint { margin: 0 0 10px; font-size: 12px; color: var(--dim); }
+  #themes input { padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: 15px -apple-system, system-ui, sans-serif; outline: none; }
+  #themes input:focus { border-color: var(--accent); }
+  #themes .list { margin-top: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #themes .group { margin: 12px 4px 6px; font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--faint); }
+  #themes .item { display: flex; align-items: center; width: 100%; padding: 12px; border-radius: 12px; text-align: left; font-size: 15px; }
+  #themes .item:active { background: var(--card-hi); }
+  #themes .item.on { background: var(--card); color: var(--accent); font-weight: 700; }
+  #themes .item.on::after { content: "●"; margin-left: auto; }
+  #themes .item.busy { opacity: .5; }
+  .toast { position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 90px); transform: translateX(-50%); z-index: 40; padding: 10px 16px; border-radius: 12px; background: var(--card-hi); color: var(--text); font-size: 14px; box-shadow: 0 6px 30px #0008; display: none; }
 </style>
 </head>
 <body>
@@ -110,6 +127,7 @@
   <div class="dock">
     <button data-open="hub">Hub</button>
     <button data-open="shell">Shell</button>
+    <button id="theme-open">Theme</button>
     <button class="primary" id="refresh">Refresh</button>
   </div>
 </div>
@@ -128,6 +146,14 @@
     <h3 id="prompt-title">Prompt</h3>
     <textarea id="prompt-text" placeholder="Tell the agent what to do…"></textarea>
     <div class="row"><button id="prompt-cancel">Cancel</button><button class="send" id="prompt-send">Send</button></div>
+  </div>
+</div>
+<div id="themes">
+  <div class="sheet">
+    <h3>Theme</h3>
+    <p class="hint">Your Neovim colorschemes. The pick applies in Neovim too.</p>
+    <input id="themes-find" type="search" placeholder="Search" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="list" id="themes-list"></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -207,11 +233,12 @@
       const data = await api("/api/agents");
       agents = data.agents;
       now = data.now;
+      if (data.themeRev && data.themeRev !== themeRev) loadTheme();
       render();
       if (openName) {
         const a = agents.find((x) => x.name === openName);
         $("term-status").textContent = a ? a.status : "";
-        $("term").style.setProperty("--c", a ? `var(--${{ running: "orange", waiting: "red", done: "green" }[a.status] || "dim"})` : "");
+        $("term").style.setProperty("--c", a ? `var(--${{ running: "running", waiting: "red", done: "green" }[a.status] || "dim"})` : "");
       }
     } catch (e) {}
   }
@@ -325,6 +352,82 @@
     window.visualViewport.addEventListener("resize", fitSheet);
     window.visualViewport.addEventListener("scroll", fitSheet);
   }
+
+  // Theme: the Neovim colorscheme's palette (lua/agents/theme.lua), kept here
+  // too so the next visit paints in it straight away.
+  let themeRev = 0;
+  let themeData = null;
+  const store = (k, v) => { try { v === undefined ? (v = localStorage.getItem(k)) : localStorage.setItem(k, v); } catch (e) {} return v; };
+  const mix = (a, b, t) => "#" + [1, 3, 5].map((i) => {
+    const x = parseInt(a.substr(i, 2), 16), y = parseInt(b.substr(i, 2), 16);
+    return Math.round(x + (y - x) * t).toString(16).padStart(2, "0");
+  }).join("");
+  const isLight = (c) => (parseInt(c.substr(1, 2), 16) * 299 + parseInt(c.substr(3, 2), 16) * 587 + parseInt(c.substr(5, 2), 16) * 114) / 255000 > 0.6;
+  const onColor = (c, p) => isLight(c) ? mix(p.bg, "#000000", isLight(p.bg) ? 0.85 : 0.3) : "#ffffff";
+  function paint(p) {
+    if (!p || !p.bg || !p.fg) return;
+    const vars = {
+      bg: p.bg, panel: mix(p.bg, p.fg, 0.04), card: mix(p.bg, p.fg, 0.07), "card-hi": mix(p.bg, p.fg, 0.12),
+      line: mix(p.bg, p.fg, 0.15), text: p.fg, text2: mix(p.fg, p.bg, 0.12), dim: mix(p.fg, p.bg, 0.4), faint: mix(p.fg, p.bg, 0.6),
+      yellow: p.warn, orange: p.warn, running: p.warn, red: p.err, green: p.ok, blue: p.info, violet: p.accent2,
+      accent: p.accent, accent2: mix(p.accent, isLight(p.bg) ? "#000000" : "#ffffff", 0.2),
+      "on-accent": onColor(p.accent, p), "on-green": onColor(p.ok, p),
+    };
+    for (const [k, v] of Object.entries(vars)) document.documentElement.style.setProperty("--" + k, v);
+    document.documentElement.style.colorScheme = p.background === "light" ? "light" : "dark";
+    document.querySelector('meta[name="theme-color"]').content = p.bg;
+  }
+  try { paint(JSON.parse(store("agents.theme") || "null")); } catch (e) {}
+  function applyTheme(data) {
+    if (!data || !data.theme) return;
+    themeData = data;
+    themeRev = data.rev;
+    paint(data.theme);
+    store("agents.theme", JSON.stringify(data.theme));
+    const frame = $("term-frame").contentWindow;
+    if (frame && openName) frame.postMessage({ type: "agents:theme", theme: data.theme, xterm: data.xterm }, location.origin);
+  }
+  async function loadTheme() {
+    try {
+      applyTheme(await api("/api/theme"));
+    } catch (e) {}
+  }
+
+  function renderThemes() {
+    const q = $("themes-find").value.trim().toLowerCase();
+    const current = themeData && themeData.theme && themeData.theme.name;
+    const list = ((themeData && themeData.themes) || []).filter((t) => !q || t.name.toLowerCase().includes(q));
+    const item = (t) => `<button class="item${t.name === current ? " on" : ""}" data-theme="${esc(t.name)}">${t.name === "wallpaper" ? "wallpaper (matugen)" : esc(t.name)}</button>`;
+    const mine = list.filter((t) => !t.builtin), stock = list.filter((t) => t.builtin);
+    $("themes-list").innerHTML = (list.length ? "" : `<div class="group">No match</div>`)
+      + (mine.length ? `<div class="group">Installed</div>` + mine.map(item).join("") : "")
+      + (stock.length ? `<div class="group">Built-in</div>` + stock.map(item).join("") : "");
+  }
+  async function openThemes() {
+    $("themes-find").value = "";
+    $("themes").style.display = "block";
+    if (!themeData || !themeData.themes) await loadTheme();
+    renderThemes();
+    const on = $("themes-list").querySelector(".on");
+    if (on) on.scrollIntoView({ block: "center" });
+  }
+  $("theme-open").addEventListener("click", openThemes);
+  $("themes-find").addEventListener("input", renderThemes);
+  $("themes").addEventListener("click", async (e) => {
+    if (e.target === $("themes")) return ($("themes").style.display = "none");
+    const btn = e.target.closest("[data-theme]");
+    if (!btn) return;
+    btn.classList.add("busy");
+    try {
+      const data = await api("/api/theme", { name: btn.dataset.theme });
+      applyTheme({ ...data, themes: themeData && themeData.themes });
+      renderThemes();
+      toast("Theme: " + btn.dataset.theme);
+    } catch (err) {
+      btn.classList.remove("busy");
+      if (err.message !== "login") toast(err.message);
+    }
+  });
 
   // The terminal page asks to close itself (its Menu key).
   window.addEventListener("message", (e) => { if (e.data === "agents:close") closeTerm(); });
