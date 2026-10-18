@@ -16,7 +16,10 @@ export PATH
 SOCKET=${AGENTS_SOCKET:-nvim-agents}
 CONF="$HOME/.local/share/nvim/agents/tmux.conf"
 STATE="$HOME/.local/state/agents"
-PORT=7681
+PORT=${AGENTS_WEB_PORT:-7681}
+# The HTTPS port `tailscale serve` publishes on; change it when 443 already
+# serves something else on this machine.
+HTTPS_PORT=${AGENTS_WEB_HTTPS_PORT:-443}
 
 tm() {
 	if [ -f "$CONF" ]; then
@@ -117,10 +120,57 @@ web_open() {
 	esac
 }
 
+# Tailscale is optional and per machine: whoever runs this uses their own
+# tailnet. The CLI is on PATH for the standalone and Homebrew installs; the
+# Mac App Store app keeps it inside the bundle.
+find_tailscale() {
+	command -v tailscale 2>/dev/null && return
+	for c in /Applications/Tailscale.app/Contents/MacOS/Tailscale; do
+		[ -x "$c" ] && echo "$c" && return
+	done
+	return 1
+}
+
+# This machine's MagicDNS name, e.g. my-mac.tailnet-name.ts.net.
+tailnet_host() {
+	"$1" status --json 2>/dev/null | node -e '
+		let s = ""; process.stdin.on("data", d => s += d).on("end", () => {
+			try { console.log(JSON.parse(s).Self.DNSName.replace(/\.$/, "")) } catch {}
+		})'
+}
+
+publish() {
+	ts=$(find_tailscale) || {
+		cat <<'MSG'
+
+The dashboard runs on this machine only. To open it from your phone or another
+device, set up Tailscale (free; your own account):
+  1. Install it here: https://tailscale.com/download (or: brew install tailscale)
+  2. Log in, and install Tailscale on the other device with the same account.
+  3. Run `agents web` again; it prints your private URL.
+MSG
+		return 0
+	}
+	if ! "$ts" status >/dev/null 2>&1; then
+		echo
+		echo "Tailscale is installed but not logged in: open it and log in (or run: tailscale up),"
+		echo "then run \`agents web\` again to get the URL for your other devices."
+		return 0
+	fi
+	# The first time, Tailscale asks to enable Serve for the tailnet and waits
+	# here with a link; open it, approve, and this carries on.
+	echo "Publishing on your tailnet (tailscale serve)…"
+	"$ts" serve --bg --https="$HTTPS_PORT" "http://127.0.0.1:$PORT" || return 1
+	host=$(tailnet_host "$ts")
+	suffix=""
+	[ "$HTTPS_PORT" = 443 ] || suffix=":$HTTPS_PORT"
+	echo "agents web: https://${host:-<this-machine>.<tailnet>.ts.net}$suffix/  (only devices in your tailnet can open it)"
+}
+
 web() {
 	mkdir -p "$STATE"
 	if [ "$1" = "stop" ]; then
-		tailscale serve --https=443 off >/dev/null 2>&1
+		ts=$(find_tailscale) && "$ts" serve --https="$HTTPS_PORT" off >/dev/null 2>&1
 		launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null
 		rm -f "$PLIST"
 		echo "agents web stopped (ttyd service removed, tailnet URL off)"
@@ -134,10 +184,12 @@ web() {
 		echo "agents web needs Node: brew install node" >&2
 		return 1
 	}
-	if ! tailscale status >/dev/null 2>&1; then
-		echo "Tailscale is not running: open Tailscale.app and log in (or run: tailscale up)" >&2
+	if [ "$(uname)" != Darwin ]; then
+		echo "agents web installs a macOS LaunchAgent; on other systems run:" >&2
+		echo "  AGENTS_WEB_PORT=$PORT AGENTS_STATE=$STATE AGENTS_BIN=\$(command -v agents) node $(dirname "$(readlink -f "$0")")/../web/server.mjs" >&2
 		return 1
 	fi
+	[ -f "$PIN_FILE" ] || echo "No PIN yet: run \`agents pin\` first, or the dashboard stays locked."
 	self=$(readlink -f "$0")
 	web_dir=$(cd "$(dirname "$self")/../web" && pwd)
 	# The terminal page: ttyd's own page plus a home-screen name and icon, a
@@ -186,13 +238,8 @@ PLIST
 	launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null
 	sleep 1
 	launchctl bootstrap "gui/$(id -u)" "$PLIST" || return 1
-	# The first time, Tailscale asks to enable Serve for the tailnet and waits
-	# here with a link; open it, approve, and this carries on.
-	echo "Publishing on the tailnet (tailscale serve)…"
-	tailscale serve --bg --https=443 "http://127.0.0.1:$PORT" || return 1
-	host=$(tailscale status --json 2>/dev/null | sed -n 's/.*"DNSName": *"\([^"]*\)\.".*/\1/p' | head -1)
-	echo "agents web: https://${host:-<this-mac>.ts.net}/  (only your tailnet devices can open it)"
-	echo "runs as a login service ($LABEL); stop with: agents web stop"
+	echo "Dashboard running on http://127.0.0.1:$PORT (login service $LABEL; stop with: agents web stop)"
+	publish
 }
 
 case "$1" in

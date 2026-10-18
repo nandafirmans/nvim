@@ -114,10 +114,16 @@ The tabs are sessions on the hub's tmux server, so any terminal that reaches
 this Mac can attach to them. Keep it inside a Tailscale tailnet; never expose
 it with a public tunnel.
 
-1. On the Mac: log in to Tailscale and turn on System Settings → General →
-   Sharing → Remote Login. Keep it awake while plugged in (Energy settings).
+Nothing here is tied to one person's tailnet: each machine uses its own
+Tailscale account, and the URLs come from `tailscale status` at run time.
+Tailscale is optional; without it everything still works on the machine
+itself.
+
+1. On the Mac: install Tailscale (https://tailscale.com/download), log in with
+   your account, and turn on System Settings → General → Sharing → Remote
+   Login. Keep it awake while plugged in (Energy settings).
 2. On the phone: Tailscale (same account) and an SSH app (Termius, Blink).
-3. `ssh <user>@<mac>.ts.net`, then `agents`.
+3. `ssh <user>@<your-mac>.<your-tailnet>.ts.net`, then `agents`.
 
 `lua/agents/bin/agents` (linked as `~/.local/bin/agents`):
 
@@ -133,8 +139,10 @@ it with a public tunnel.
   for a PIN (set it on the Mac with `agents pin`; only a salted hash is
   stored, in `~/.local/state/agents/pin`), then keeps a login cookie for 30
   days; wrong PINs lock it for a minute, then longer. Everything listens on
-  loopback; `tailscale serve` publishes it over HTTPS to your own devices
-  only. It runs as a LaunchAgent (`local.agents.ttyd`), so it comes back after
+  loopback; when Tailscale is installed and logged in, `tailscale serve`
+  publishes it over HTTPS to the devices in your tailnet only and `agents web`
+  prints the URL (otherwise it prints how to set Tailscale up).
+  `AGENTS_WEB_PORT` (7681) and `AGENTS_WEB_HTTPS_PORT` (443) change the ports. It runs as a LaunchAgent (`local.agents.ttyd`), so it comes back after
   a restart; `agents web stop` removes it and turns the URL off. Safari's
   Share → Add to Home Screen makes it a full-screen app on an iPhone.
 
