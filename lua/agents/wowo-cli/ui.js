@@ -207,7 +207,11 @@ export class UI {
     const w = boxWidth();
     write("\n");
     for (const line of wordmark(width() - 2)) write(` ${line}\n`);
-    const art = w >= 84 ? forest(28, 14, 3) : w >= 62 ? forest(22, 11, 3) : [];
+    // Wide: the forest beside the details. Narrow (a phone): a wide, low
+    // forest above them, so neither gets squeezed.
+    const stacked = w < 62;
+    const art = w >= 84 ? forest(28, 14, 3) : !stacked ? forest(22, 11, 3) : [];
+    const strip = stacked && w >= 30 ? forest(w - 4, 8, 3) : [];
     const artWidth = art.length ? visibleLength(art[0]) + 2 : 0;
     const room = w - 4 - artWidth;
     let where = cwd.startsWith(home) ? "~" + cwd.slice(home.length) : cwd;
@@ -246,7 +250,7 @@ export class UI {
       heading(`Skills (${skills.length})`),
       skills.length ? list(skills.map((s) => s.name)) : grey("none · add some to ~/.wowo/skills"),
     ].filter((l) => l !== null);
-    const lines = [];
+    const lines = strip.length ? [...strip, ""] : [];
     for (let i = 0; i < Math.max(art.length, info.length); i++) {
       const left = art.length ? pad(art[i] ?? "", artWidth) : "";
       const right = info[i] ?? "";
@@ -256,6 +260,35 @@ export class UI {
     const footer = grey(`${tools.length} tools · ${skills.length} skills · /help for commands`);
     write(card(title, lines, "#ff9f1c", footer));
     write("\n");
+  }
+
+  // Prints a conversation again, as it looked live: prompts, replies, tool
+  // calls and their results (after a resize redraws the screen).
+  replay(messages, summaryOf = () => undefined) {
+    for (const m of messages) {
+      if (m.role === "user" && typeof m.content === "string") {
+        if (m.content.startsWith("This session continues from an earlier conversation")) continue;
+        this.userMessage(m.content);
+      } else if (m.role === "assistant") {
+        for (const part of m.content ?? []) {
+          if (part.type === "text" && part.text?.trim()) {
+            this.wroteText = false;
+            this.pending = "";
+            this.thinkingShown = false;
+            this.text(part.text);
+            this.endReply();
+          } else if (part.type === "toolCall") {
+            this.toolStart(part.name, part.arguments, summaryOf(part.name, part.arguments));
+            this.unspin();
+          }
+        }
+      } else if (m.role === "toolResult") {
+        this.toolEnd(m.toolName, m.content?.map((c) => c.text).join("\n"), m.isError);
+        this.unspin();
+      }
+    }
+    this.turnStart = null;
+    this.streamed = 0;
   }
 
   // The prompt just sent, as a bubble (replaces the editor's echo).
@@ -343,8 +376,9 @@ export class UI {
     const tint = rgb(m.color);
     const badge = mode === "ask" ? `${tint("●")} ${grey("ask")}` : `${tint("⏵⏵")} ${c.bold(tint(m.label))} ${grey("on")}`;
     const left = ` ${badge} ${faint("· ⇧tab mode")} `;
-    const hint = " ⏎ send · \\⏎ newline · / commands ";
     const w = boxWidth();
+    // Narrow screens get the short hint, so the line never wraps.
+    const hint = w >= 70 ? " ⏎ send · \\⏎ newline · / commands " : w >= 46 ? " ⏎ send · / cmds " : " ";
     const fill = Math.max(1, w - visibleLength(left) - hint.length - 1);
     return faint("─") + left + faint("─".repeat(fill) + hint);
   }
@@ -360,8 +394,17 @@ export class UI {
       const elapsed = this.turnStart ? duration(Date.now() - this.turnStart) : "";
       const word = this.spinText === "Thinking…" ? `${verb}…` : this.spinText;
       const shimmer = gradient(word, [P.violet, P.pink, P.yellow, P.pink, P.violet], (i % 30) / 30);
-      const stats = [elapsed, this.streamed ? `↓ ${k(Math.round(this.streamed / 4))} tokens` : "", "esc to interrupt"].filter(Boolean).join(" · ");
-      write(`\r${ESC}2K${accent(SPARK[i % SPARK.length])} ${shimmer} ${faint(`(${stats})`)}`);
+      // One line, always: a line that wraps leaves its first half behind on
+      // every frame (\r only returns to the start of the last row).
+      const room = width() - 1;
+      const parts = [elapsed, this.streamed ? `↓ ${k(Math.round(this.streamed / 4))} tokens` : "", "esc to interrupt"].filter(Boolean);
+      let line;
+      do {
+        const stats = parts.length ? ` ${faint(`(${parts.join(" · ")})`)}` : "";
+        line = `${accent(SPARK[i % SPARK.length])} ${shimmer}${stats}`;
+      } while (visibleLength(line) > room && parts.pop() !== undefined);
+      if (visibleLength(line) > room) line = cutAnsi(line, room);
+      write(`\r${ESC}2K${line}`);
       i++;
     };
     draw();
@@ -488,12 +531,12 @@ export class UI {
     if (bullet) {
       const box = bullet[2] ? (bullet[2].includes("x") || bullet[2].includes("X") ? green("✔ ") : grey("○ ")) : "";
       const mark = box || accent(bullet[1].length ? "◦ " : "• ");
-      write(`${indent}${bullet[1]}${mark}${inline(bullet[3])}\n`);
+      this.flow(`${indent}${bullet[1]}${mark}`, bullet[3]);
       return;
     }
     const numbered = raw.match(/^(\s*)(\d+)[.)]\s+(.*)$/);
     if (numbered) {
-      write(`${indent}${numbered[1]}${violet(numbered[2] + ".")} ${inline(numbered[3])}\n`);
+      this.flow(`${indent}${numbered[1]}${violet(numbered[2] + ".")} `, numbered[3]);
       return;
     }
     if (/^\s*\|.*\|\s*$/.test(raw)) {
@@ -504,7 +547,17 @@ export class UI {
       write(`${indent}${raw.replace(/\|/g, faint("│")).replace(/[^│]+/g, (cell) => inline(cell))}\n`);
       return;
     }
-    write(`${indent}${inline(raw)}\n`);
+    this.flow(indent, raw);
+  }
+
+  // Text after a prefix, wrapped at word boundaries to the screen with a
+  // hanging indent (the terminal's own wrap splits words and drops the indent).
+  flow(prefix, body) {
+    const lead = visibleLength(prefix);
+    const room = Math.max(10, width() - 1 - lead);
+    wrap(body, room).forEach((piece, i) => {
+      write(`${i === 0 ? prefix : " ".repeat(lead)}${inline(piece)}\n`);
+    });
   }
 
   endReply() {

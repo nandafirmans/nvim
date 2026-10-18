@@ -108,6 +108,43 @@ project files: `↑`/`↓` select, `Tab` completes, `⏎` runs the command (or
 inserts the file), `Esc` hides the list. Keys: `⏎` sends,
 `\⏎` or `Ctrl-J` new line, `⇧tab` approval mode, `Esc` interrupts, `Tab` completes, `↑`/`↓` history.
 
+## From another device (phone, laptop)
+
+The tabs are sessions on the hub's tmux server, so any terminal that reaches
+this Mac can attach to them. Keep it inside a Tailscale tailnet; never expose
+it with a public tunnel.
+
+1. On the Mac: log in to Tailscale and turn on System Settings → General →
+   Sharing → Remote Login. Keep it awake while plugged in (Energy settings).
+2. On the phone: Tailscale (same account) and an SSH app (Termius, Blink).
+3. `ssh <user>@<mac>.ts.net`, then `agents`.
+
+`lua/agents/bin/agents` (linked as `~/.local/bin/agents`):
+
+- `agents`: a menu of the tabs (status, tool); `⏎` attaches, `Ctrl-b d`
+  comes back to the menu. Also opens the hub or a shell.
+- `agents <name>` attaches one tab, `agents ls` lists them, `agents hub` opens
+  Neovim with the hub.
+- `agents web` serves a phone dashboard (`web/server.mjs`, `web/dashboard.html`,
+  Node, no dependencies): one card per tab with its status, branch, what it is
+  doing and its `+/-`, Approve / Deny / Stop / Prompt buttons, and a tap opens
+  the tab's terminal (ttyd, behind the same login) with a row of Esc / Tab /
+  Ctrl / arrow keys, swipe to scroll, tap to click and pinch to zoom. It asks
+  for a PIN (set it on the Mac with `agents pin`; only a salted hash is
+  stored, in `~/.local/state/agents/pin`), then keeps a login cookie for 30
+  days; wrong PINs lock it for a minute, then longer. Everything listens on
+  loopback; `tailscale serve` publishes it over HTTPS to your own devices
+  only. It runs as a LaunchAgent (`local.agents.ttyd`), so it comes back after
+  a restart; `agents web stop` removes it and turns the URL off. Safari's
+  Share → Add to Home Screen makes it a full-screen app on an iPhone.
+
+Below `compact_below` columns (120) the hub stacks the sidebar over the
+changes panel in one narrow column, and switches back when the window
+widens, so it is usable from a phone in landscape. Below `phone_below` (80)
+the hub shows one panel at a time under a tab bar (`claude #1 │ Agents 5 │
+Changes 2`): tap a tab, or move into a panel, to switch. Picking a tab
+opens the agent ready for typing.
+
 ## Keys
 
 Global:
@@ -143,6 +180,11 @@ Changes panel: `⏎` preview diff, `o` open file, `D` Diffview, `g` lazygit,
 `S` send review comments, `r` refresh. In the diff preview, `c` comments on
 the line under the cursor and `S` sends all comments to the agent as one
 prompt. In Diffview, `q` closes it and returns to the hub.
+
+An agent started in a folder that is not a repository but holds several
+(`attendance/` with `attendance-web/` and `attendance-api/`) gets one group
+per repository in the changes panel, each with its branch and `+/-`; the
+keys act on the repository of the file under the cursor.
 
 ## Workflow
 

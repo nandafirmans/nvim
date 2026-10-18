@@ -21,6 +21,14 @@ local config = {
 	wowo = {},
 	sidebar_width = 34,
 	changes_width = 46,
+	-- Below this many columns (a phone, a small window) the hub stacks the
+	-- sidebar over the changes panel in one narrow column, leaving the rest
+	-- to the agent.
+	compact_below = 120,
+	-- Below this many columns (a phone held upright) the panels stack over
+	-- each other at full width: tabs on top, the agent below, the changes
+	-- panel folded to its header line until you enter it.
+	phone_below = 80,
 	-- Continue a limited agent in its partner CLI; stops when both are limited.
 	handoff = { auto = true, partners = { claude = "omp", omp = "claude" } },
 	-- Fallback for agents without hooks: output within this many seconds counts as running.
@@ -150,17 +158,22 @@ end
 
 -- Sidebar ---------------------------------------------------------------------
 
+local phone_heights -- set with the hub layout below
+
 local function render_list()
 	if not hub_open() then
 		return
 	end
-	local total = config.sidebar_width
+	local total = vim.api.nvim_win_get_width(S.wins.list)
 	local canvas = new_canvas()
 	S.list_map = {}
 	S.desk_map = {} -- sidebar line -> desk (project) of a desk header
 
-	push(canvas, row({ { " AGENTS", "AgentsTitle" } }, { { tostring(#S.agents) .. " ", "AgentsDim" } }, total))
-	push(canvas, { { "" } })
+	-- On a phone the tab bar already names the panel.
+	if S.layout ~= "phone" then
+		push(canvas, row({ { " AGENTS", "AgentsTitle" } }, { { tostring(#S.agents) .. " ", "AgentsDim" } }, total))
+		push(canvas, { { "" } })
+	end
 
 	if #S.agents == 0 then
 		push(canvas, { { "  No agents running.", "AgentsDim" } })
@@ -256,7 +269,41 @@ local function render_list()
 	end
 
 	push(canvas, { { "" } })
-	local keys = {
+	-- A phone has no room for the key hints; ? lists them.
+	S.hint_map = {}
+	if S.layout == "phone" then
+		-- A phone: the keys as buttons to tap, packed into rows.
+		local buttons = {
+			{ "<CR>", "⏎", "open" }, { "p", "p", "prompt" }, { "a", "a", "approve" }, { "e", "e", "esc" },
+			{ "t", "t", "tab" }, { "T", "T", "terminal" }, { "n", "n", "desk" }, { "R", "R", "restart" },
+			{ "O", "O", "office", true }, { "G", "G", "grid" }, { "A", "A", "monitor" }, { "f", "f", "find" },
+			{ "x", "x", "remove" }, { "?", "?", "all keys" },
+		}
+		local segs, width, hits = { { " " } }, 1, {}
+		local function flush()
+			-- A gap between rows: bigger targets for a finger.
+			push(canvas, { { "" } })
+			local lnum = push(canvas, segs)
+			S.hint_map[lnum] = hits
+			segs, width, hits = { { " " } }, 1, {}
+		end
+		for _, b in ipairs(buttons) do
+			local label = " " .. b[2] .. " " .. b[3] .. " "
+			local w = vim.fn.strdisplaywidth(label)
+			if width + w + 1 > total and #hits > 0 then
+				flush()
+			end
+			local start = 0
+			for _, seg in ipairs(segs) do
+				start = start + #seg[1]
+			end
+			table.insert(hits, { start + 1, start + #label, b[1], b[4] })
+			vim.list_extend(segs, { { label, "AgentsChip" }, { " " } })
+			width = width + w + 1
+		end
+		flush()
+	end
+	local keys = S.layout == "phone" and {} or {
 		{ { "n", "desk" }, { "t", "tab" }, { "T", "terminal" } },
 		{ { "p", "prompt" }, { "a", "approve" }, { "F", "fan-out" } },
 		{ { "f", "find" }, { "⏎", "focus" }, { "O", "office" } },
@@ -273,6 +320,9 @@ local function render_list()
 	end
 
 	paint(S.bufs.list, canvas)
+	if S.layout == "phone" then
+		phone_heights()
+	end
 
 	-- Keep the cursor on the selected agent so the highlight and cursor agree.
 	if vim.api.nvim_get_current_win() ~= S.wins.list then
@@ -295,17 +345,19 @@ local function render_changes()
 	if not hub_open() then
 		return
 	end
-	local total = config.changes_width
+	local total = vim.api.nvim_win_get_width(S.wins.changes)
 	local canvas = new_canvas()
 	S.change_map = {}
 	local agent = selected_agent()
 	local info = agent and S.changes[agent.cwd]
 
 	local pending = agent and review.count(agent.name) or 0
-	push(canvas, row({ { " CHANGES", "AgentsTitle" } }, {
-		{ pending > 0 and ("● " .. pending .. " to send  ") or "", "DiagnosticInfo" },
-		{ info and (#info.files .. (#info.files == 1 and " file " or " files ")) or "", "AgentsDim" },
-	}, total))
+	if S.layout ~= "phone" then
+		push(canvas, row({ { " CHANGES", "AgentsTitle" } }, {
+			{ pending > 0 and ("● " .. pending .. " to send  ") or "", "DiagnosticInfo" },
+			{ info and (#info.files .. (#info.files == 1 and " file " or " files ")) or "", "AgentsDim" },
+		}, total))
+	end
 
 	if not agent then
 		push(canvas, { { "" } })
@@ -315,29 +367,16 @@ local function render_changes()
 		push(canvas, { { "  " .. trunc(vim.fn.fnamemodify(agent.cwd, ":~"), total - 3), "AgentsDim" } })
 		push(canvas, { { "  Loading, or not a git repository.", "AgentsDim" } })
 	else
-		push(
-			canvas,
-			row(
-				{ { " " .. BRANCH_ICON .. " ", "AgentsDim" }, { trunc(info.branch or "detached", total - 18), "AgentsProject" } },
-				vim.list_extend(diffstat(info.add, info.del), { { " " } }),
-				total
-			)
-		)
-		push(canvas, { { " " .. trunc_left(vim.fn.fnamemodify(agent.cwd, ":~"), total - 2), "AgentsDim" } })
-		push(canvas, { { "" } })
-		if #info.files == 0 then
-			push(canvas, { { "  Working tree clean.", "AgentsDim" } })
-		end
-		for _, entry in ipairs(info.files) do
+		local function file_line(entry, indent)
 			local stat = entry.binary and { { "bin", "AgentsDim" } } or diffstat(entry.add, entry.del)
 			table.insert(stat, { " " })
 			local name = vim.fs.basename(entry.path)
 			local dir = vim.fs.dirname(entry.path)
 			local left = {
-				{ " " },
+				{ indent },
 				{ KIND_LABEL[entry.kind] or entry.kind, KIND_HL[entry.kind] },
 				{ " " },
-				{ trunc(name, total - seg_width(stat) - 6), entry.kind == "D" and "AgentsDim" or "AgentsFile" },
+				{ trunc(name, total - seg_width(stat) - 5 - #indent), entry.kind == "D" and "AgentsDim" or "AgentsFile" },
 			}
 			local room = total - seg_width(left) - seg_width(stat) - 2
 			if dir ~= "." and room > 4 then
@@ -345,6 +384,52 @@ local function render_changes()
 			end
 			local lnum = push(canvas, row(left, stat, total))
 			S.change_map[lnum] = entry
+		end
+		if info.repos then
+			-- A folder holding several repos: one group per repo.
+			push(
+				canvas,
+				row(
+					{ { " ⊞ ", "AgentsDim" }, { #info.repos .. " repos", "AgentsProject" } },
+					vim.list_extend(diffstat(info.add, info.del), { { " " } }),
+					total
+				)
+			)
+			push(canvas, { { " " .. trunc_left(vim.fn.fnamemodify(agent.cwd, ":~"), total - 2), "AgentsDim" } })
+			for _, repo in ipairs(info.repos) do
+				push(canvas, { { "" } })
+				local stat = vim.list_extend(diffstat(repo.info.add, repo.info.del), { { " " } })
+				local branch = " " .. BRANCH_ICON .. " " .. (repo.info.branch or "detached")
+				local left = { { " ▾ " .. repo.name, "AgentsProject" } }
+				local room = total - seg_width(left) - seg_width(stat) - 2
+				if room > 4 then
+					table.insert(left, { trunc(branch, room), "AgentsDim" })
+				end
+				push(canvas, row(left, stat, total))
+				if #repo.info.files == 0 then
+					push(canvas, { { "   clean", "AgentsDim" } })
+				end
+				for _, entry in ipairs(repo.info.files) do
+					file_line(entry, "   ")
+				end
+			end
+		else
+			push(
+				canvas,
+				row(
+					{ { " " .. BRANCH_ICON .. " ", "AgentsDim" }, { trunc(info.branch or "detached", total - 18), "AgentsProject" } },
+					vim.list_extend(diffstat(info.add, info.del), { { " " } }),
+					total
+				)
+			)
+			push(canvas, { { " " .. trunc_left(vim.fn.fnamemodify(agent.cwd, ":~"), total - 2), "AgentsDim" } })
+			push(canvas, { { "" } })
+			if #info.files == 0 then
+				push(canvas, { { "  Working tree clean.", "AgentsDim" } })
+			end
+			for _, entry in ipairs(info.files) do
+				file_line(entry, " ")
+			end
 		end
 	end
 
@@ -417,6 +502,11 @@ end
 
 local function update_winbar()
 	if not hub_open() then
+		return
+	end
+	if S.layout == "phone" then
+		-- The phone tab bar stands in for the winbar.
+		phone_heights()
 		return
 	end
 	if S.view == "office" then
@@ -1287,13 +1377,28 @@ local function load_diffview()
 	end
 end
 
-function M.diffview(path)
+-- The repository to run git tools in: the entry's own repo when the folder
+-- holds several, else the first of them, else the agent's folder.
+local function repo_of(agent, entry)
+	if entry and entry.repo then
+		return entry.repo
+	end
+	local info = S.changes[agent.cwd]
+	return info and info.repos and info.repos[1].cwd or agent.cwd
+end
+
+-- The entry's path from the agent's folder (repo folder first when it has several).
+local function path_of(entry)
+	return entry.prefix and (entry.prefix .. "/" .. entry.path) or entry.path
+end
+
+function M.diffview(path, repo)
 	local agent = selected_agent()
 	if not agent then
 		return
 	end
 	load_diffview()
-	local cmd = "DiffviewOpen -C" .. vim.fn.fnameescape(agent.cwd)
+	local cmd = "DiffviewOpen -C" .. vim.fn.fnameescape(repo or repo_of(agent))
 	if path then
 		cmd = cmd .. " -- " .. vim.fn.fnameescape(path)
 	end
@@ -1307,7 +1412,7 @@ local function preview_change(entry)
 	if not (agent and entry) then
 		return
 	end
-	git.diff(agent.cwd, entry, function(lines)
+	git.diff(repo_of(agent, entry), entry, function(lines)
 		if #lines == 0 then
 			lines = { "No textual diff (binary or unchanged)." }
 		end
@@ -1326,7 +1431,7 @@ local function preview_change(entry)
 			col = math.floor((vim.o.columns - w) / 2),
 			border = "rounded",
 			style = "minimal",
-			title = " " .. entry.path .. " ",
+			title = " " .. path_of(entry) .. " ",
 			title_pos = "center",
 			footer = " c comment   S send comments   o open file   D diffview   q close ",
 			footer_pos = "center",
@@ -1341,13 +1446,13 @@ local function preview_change(entry)
 		vim.keymap.set("n", "<Esc>", close, opts)
 		vim.keymap.set("n", "o", function()
 			close()
-			M.workspace(agent.cwd, entry.path)
+			M.workspace(agent.cwd, path_of(entry))
 		end, opts)
 		vim.keymap.set("n", "D", function()
 			close()
-			M.diffview(entry.path)
+			M.diffview(entry.path, repo_of(agent, entry))
 		end, opts)
-		review.attach(buf, agent.name, entry.path)
+		review.attach(buf, agent.name, path_of(entry))
 		vim.keymap.set("n", "S", function()
 			close()
 			M.send_review()
@@ -1536,7 +1641,7 @@ function M.lazygit()
 	toggleterm.Terminal
 		:new({
 			cmd = "lazygit",
-			dir = agent.cwd,
+			dir = repo_of(agent, vim.api.nvim_get_current_win() == S.wins.changes and change_under_cursor() or nil),
 			direction = "float",
 			close_on_exit = true,
 			hidden = true,
@@ -1658,6 +1763,24 @@ local function map_list(buf)
 	local function map(lhs, fn, desc)
 		vim.keymap.set("n", lhs, fn, { buffer = buf, nowait = true, desc = desc })
 	end
+	-- A tap on a key button (phone layout) presses that key.
+	vim.keymap.set("n", "<LeftMouse>", function()
+		local pos = vim.fn.getmousepos()
+		for _, hit in ipairs(S.hint_map and S.hint_map[pos.line] or {}) do
+			if pos.winid == S.wins.list and pos.column >= hit[1] and pos.column <= hit[2] then
+				vim.schedule(function()
+					vim.api.nvim_set_current_win(S.wins.list)
+					vim.api.nvim_feedkeys(vim.keycode(hit[3]), "mx", false)
+					-- Keys that change the main view (office) show it.
+					if hit[4] and hub_open() then
+						vim.api.nvim_set_current_win(S.wins.term)
+					end
+				end)
+				return ""
+			end
+		end
+		return "<LeftMouse>"
+	end, { buffer = buf, expr = true, desc = "Click, or press a key button" })
 	local function step(delta)
 		if #S.agents == 0 then
 			return
@@ -1770,15 +1893,15 @@ local function map_changes(buf)
 	map("o", function()
 		local agent, entry = selected_agent(), change_under_cursor()
 		if agent and entry then
-			M.workspace(agent.cwd, entry.path)
+			M.workspace(agent.cwd, path_of(entry))
 		end
 	end, "Open file in the folder's workspace")
 	map("E", function()
 		M.workspace()
 	end, "Open the folder as a workspace")
 	map("D", function()
-		local entry = change_under_cursor()
-		M.diffview(entry and entry.path)
+		local agent, entry = selected_agent(), change_under_cursor()
+		M.diffview(entry and entry.path, agent and repo_of(agent, entry))
 	end, "Diffview")
 	map("r", refresh_changes, "Refresh")
 	map("S", M.send_review, "Send review comments")
@@ -1849,10 +1972,19 @@ local function set_highlights()
 		AgentsAdd = "Added",
 		AgentsDel = "Removed",
 		AgentsChange = "Changed",
+		AgentsSegment = "Comment",
 	}
 	for group, target in pairs(links) do
 		vim.api.nvim_set_hl(0, group, { link = target, default = true })
 	end
+	-- The phone tab bar: the open segment as a solid pill.
+	local title = vim.api.nvim_get_hl(0, { name = "Title", link = false })
+	local panel = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
+	vim.api.nvim_set_hl(0, "AgentsSegmentOn", { fg = panel.bg or 0x1b1416, bg = title.fg or 0xff9f1c, bold = true, default = true })
+	vim.api.nvim_set_hl(0, "AgentsSegmentBar", { bg = panel.bg, default = true })
+	local key = vim.api.nvim_get_hl(0, { name = "Special", link = false })
+	local sel = vim.api.nvim_get_hl(0, { name = "CursorLine", link = false })
+	vim.api.nvim_set_hl(0, "AgentsChip", { fg = key.fg, bg = sel.bg, default = true })
 	-- Title bar of a mission-control tile that is waiting for you.
 	vim.api.nvim_set_hl(0, "AgentsWaitingBar", { fg = "#1d1f27", bg = "#f56565", bold = true, default = true })
 end
@@ -2113,6 +2245,118 @@ function M.close()
 	S.wins = {}
 end
 
+-- "wide" (three columns), "compact" (one narrow column for both panels) or
+-- "phone" (everything stacked at full width).
+local function layout()
+	if vim.o.columns < config.phone_below then
+		return "phone"
+	end
+	return vim.o.columns < config.compact_below and "compact" or "wide"
+end
+
+-- Panel widths for the current screen.
+local function panel_widths()
+	local mode = layout()
+	if mode == "wide" then
+		return config.sidebar_width, config.changes_width
+	elseif mode == "phone" then
+		return vim.o.columns, vim.o.columns
+	end
+	local w = math.max(18, math.min(config.sidebar_width, math.floor(vim.o.columns * 0.34)))
+	return w, w
+end
+
+-- Phone layout heights: the tabs take a third, the changes panel folds to
+-- its header line unless it has focus.
+phone_heights = function()
+	if not (hub_open() and S.layout == "phone") then
+		return
+	end
+	-- Phone: one panel at a time, picked in the tab bar at the top (Agent /
+	-- Agents / Changes) or by moving into it; the others fold away.
+	local current = vim.api.nvim_get_current_win()
+	S.phone_view = current == S.wins.list and "agents" or current == S.wins.changes and "changes" or "agent"
+	local shown = ({ agent = S.wins.term, agents = S.wins.list, changes = S.wins.changes })[S.phone_view]
+	-- The tab bar is the shown panel's winbar (the tabline belongs to the
+	-- bufferline plugin); folded panels get none, so nothing doubles up.
+	local bar = "%!v:lua.require'agents'.phone_tabline()"
+	for _, win in ipairs({ S.wins.list, S.wins.term, S.wins.changes }) do
+		vim.wo[win].winfixheight = false
+		local want = win == shown and bar or ""
+		if vim.wo[win].winbar ~= want then
+			vim.wo[win].winbar = want
+		end
+		if win ~= shown and vim.api.nvim_win_get_height(win) ~= 0 then
+			vim.api.nvim_win_set_height(win, 0)
+		end
+	end
+	-- Space freed above goes to a neighbour; hand all of it to the shown panel.
+	vim.api.nvim_win_set_height(shown, vim.o.lines)
+	if shown ~= S.wins.term then
+		-- Folded, the panel scrolled to its cursor; show it from the top.
+		vim.api.nvim_win_call(shown, function()
+			if vim.fn.line("$") <= vim.api.nvim_win_get_height(0) then
+				vim.fn.winrestview({ topline = 1 })
+			end
+		end)
+	end
+end
+
+-- The phone tab bar, shown as the open panel's winbar.
+function M.phone_tabline()
+	local width = vim.o.columns
+	local agent = selected_agent()
+	local info = agent and S.changes[agent.cwd]
+	local segments = {
+		{ "agent", agent and display_name(agent) or "Agent" },
+		{ "agents", "Agents " .. #S.agents },
+		{ "changes", "Changes" .. (info and (" " .. #info.files) or "") },
+	}
+	local each = math.floor(width / #segments)
+	local out = {}
+	for i, seg in ipairs(segments) do
+		local w = i == #segments and width - each * (#segments - 1) or each
+		local label = seg[2]
+		if vim.fn.strdisplaywidth(label) > w - 2 then
+			label = vim.fn.strcharpart(label, 0, w - 3) .. "…"
+		end
+		local pad = w - vim.fn.strdisplaywidth(label)
+		local left = math.floor(pad / 2)
+		local hl = S.phone_view == seg[1] and "%#AgentsSegmentOn#" or "%#AgentsSegment#"
+		table.insert(out, ("%%%d@v:lua.AgentsPhoneTab@%s%s%s%s%%X"):format(i, hl, (" "):rep(left), label:gsub("%%", "%%%%"), (" "):rep(pad - left)))
+	end
+	return table.concat(out) .. "%#AgentsSegmentBar#"
+end
+
+-- A tap on the tab bar: open that panel.
+function _G.AgentsPhoneTab(index)
+	if not hub_open() then
+		return
+	end
+	local win = ({ S.wins.term, S.wins.list, S.wins.changes })[index]
+	if win then
+		vim.cmd.stopinsert()
+		vim.api.nvim_set_current_win(win)
+		if win == S.wins.term then
+			-- Straight to typing into the agent.
+			vim.cmd.startinsert()
+		end
+	end
+end
+
+-- Folded panels are 0 rows tall, which needs winminheight 0 while the hub
+-- tab is current in the phone layout.
+local saved_minheight
+local function phone_tabline_on(on)
+	if on and not saved_minheight then
+		saved_minheight = vim.o.winminheight
+		vim.o.winminheight = 0
+	elseif not on and saved_minheight then
+		vim.o.winminheight = saved_minheight
+		saved_minheight = nil
+	end
+end
+
 function M.open()
 	if not tmux.available() then
 		vim.notify("The agent hub needs tmux (brew install tmux / apt install tmux).", vim.log.levels.ERROR, { title = "Agents" })
@@ -2131,18 +2375,36 @@ function M.open()
 	local scratch = vim.api.nvim_get_current_buf()
 	S.wins.term = C.fresh_window()
 
-	vim.cmd("topleft vsplit")
+	S.layout = layout()
+	vim.cmd(S.layout == "phone" and "topleft split" or "topleft vsplit")
 	S.wins.list = vim.api.nvim_get_current_win()
 	local list_buf = panel_buf("list", "agentlist")
 	vim.api.nvim_win_set_buf(S.wins.list, list_buf)
-	set_panel_win_options(S.wins.list, config.sidebar_width)
 
-	vim.api.nvim_set_current_win(S.wins.term)
-	vim.cmd("botright vsplit")
+	local list_width, changes_width = panel_widths()
+	set_panel_win_options(S.wins.list, list_width)
+	if S.layout == "compact" then
+		vim.cmd("belowright split")
+	else
+		vim.api.nvim_set_current_win(S.wins.term)
+		vim.cmd(S.layout == "phone" and "botright split" or "botright vsplit")
+	end
 	S.wins.changes = vim.api.nvim_get_current_win()
 	local changes_buf = panel_buf("changes", "agentchanges")
 	vim.api.nvim_win_set_buf(S.wins.changes, changes_buf)
-	set_panel_win_options(S.wins.changes, config.changes_width)
+	set_panel_win_options(S.wins.changes, changes_width)
+	if S.layout == "compact" then
+		vim.api.nvim_win_set_height(S.wins.list, math.floor(vim.o.lines * 0.55))
+	elseif S.layout == "phone" then
+		for _, win in ipairs({ S.wins.list, S.wins.changes }) do
+			vim.wo[win].winfixwidth = false
+		end
+		phone_tabline_on(true)
+		vim.api.nvim_set_current_win(S.wins.term)
+		phone_heights()
+	else
+		phone_tabline_on(false)
+	end
 
 	if not vim.b[list_buf].agents_mapped then
 		map_list(list_buf)
@@ -2154,7 +2416,7 @@ function M.open()
 	if vim.api.nvim_buf_is_valid(scratch) and scratch ~= vim.api.nvim_win_get_buf(S.wins.term) then
 		pcall(vim.api.nvim_buf_delete, scratch, { force = true })
 	end
-	vim.api.nvim_set_current_win(S.wins.list)
+	vim.api.nvim_set_current_win(S.layout == "phone" and S.wins.term or S.wins.list)
 
 	render_list()
 	render_changes()
@@ -2242,10 +2504,44 @@ function M.setup(opts)
 	vim.api.nvim_create_autocmd("VimResized", {
 		group = group,
 		callback = function()
-			if hub_open() then
-				vim.api.nvim_win_set_width(S.wins.list, config.sidebar_width)
-				vim.api.nvim_win_set_width(S.wins.changes, config.changes_width)
+			if not hub_open() then
+				return
 			end
+			-- Crossing the compact width (a phone attaching) needs the other layout.
+			if layout() ~= S.layout then
+				local current = vim.api.nvim_get_current_tabpage()
+				local here = current == S.tab
+				M.close()
+				M.open()
+				if not here and vim.api.nvim_tabpage_is_valid(current) then
+					vim.api.nvim_set_current_tabpage(current)
+				end
+				return
+			end
+			if S.layout == "phone" then
+				phone_heights()
+			else
+				local list_width, changes_width = panel_widths()
+				vim.api.nvim_win_set_width(S.wins.list, list_width)
+				vim.api.nvim_win_set_width(S.wins.changes, changes_width)
+			end
+			render_list()
+			render_changes()
+		end,
+	})
+	-- Phone layout: the changes panel opens up while it has focus.
+	vim.api.nvim_create_autocmd("WinEnter", {
+		group = group,
+		callback = function()
+			if S.layout == "phone" and vim.api.nvim_get_current_tabpage() == S.tab then
+				phone_heights()
+			end
+		end,
+	})
+	vim.api.nvim_create_autocmd("TabEnter", {
+		group = group,
+		callback = function()
+			phone_tabline_on(S.layout == "phone" and vim.api.nvim_get_current_tabpage() == S.tab)
 		end,
 	})
 	-- The browser pane belongs to this Neovim; do not leave it behind.

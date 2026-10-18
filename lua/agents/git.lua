@@ -103,7 +103,7 @@ local function apply_numstat(info, stdout)
 end
 
 -- Calls cb({ branch, files, add, del }) on the main loop, or cb(nil) when cwd is not a repo.
-function M.changes(cwd, cb)
+local function repo_changes(cwd, cb)
 	local base = { "git", "-C", cwd, "-c", "core.quotePath=false" }
 	local pending, status_out, numstat_out, failed = 2, nil, nil, false
 
@@ -149,6 +149,67 @@ function M.changes(cwd, cb)
 	end)
 end
 
+function M.root(path)
+	return vim.fs.root(path, ".git")
+end
+
+-- Folders one level down that are repositories, for a folder that holds
+-- several (attendance/ with attendance-web/ and attendance-api/).
+local function sub_repos(cwd)
+	local names = {}
+	for name, kind in vim.fs.dir(cwd) do
+		if (kind == "directory" or kind == "link") and name:sub(1, 1) ~= "." and vim.uv.fs_stat(cwd .. "/" .. name .. "/.git") then
+			table.insert(names, name)
+		end
+	end
+	table.sort(names)
+	return names
+end
+
+-- Calls cb({ branch, files, add, del }) on the main loop, or cb(nil) when
+-- there is nothing to show. A folder that is not a repo but holds repos gets
+-- { repos = { { name, cwd, info } }, files, add, del }: every repo's files,
+-- each with `repo` (its repository) and `prefix` (its folder name).
+function M.changes(cwd, cb)
+	if M.root(cwd) then
+		repo_changes(cwd, cb)
+		return
+	end
+	local names = vim.fn.isdirectory(cwd) == 1 and sub_repos(cwd) or {}
+	if #names == 0 then
+		vim.schedule(function()
+			cb(nil)
+		end)
+		return
+	end
+	local found, pending = {}, #names
+	for i, name in ipairs(names) do
+		local repo = cwd .. "/" .. name
+		repo_changes(repo, function(sub)
+			if sub then
+				for _, entry in ipairs(sub.files) do
+					entry.repo, entry.prefix = repo, name
+				end
+				found[i] = { name = name, cwd = repo, info = sub }
+			end
+			pending = pending - 1
+			if pending > 0 then
+				return
+			end
+			local info = { repos = {}, files = {}, add = 0, del = 0 }
+			for j = 1, #names do
+				local r = found[j]
+				if r then
+					table.insert(info.repos, r)
+					vim.list_extend(info.files, r.info.files)
+					info.add, info.del = info.add + r.info.add, info.del + r.info.del
+				end
+			end
+			cb(#info.repos > 0 and info or nil)
+		end)
+	end
+end
+
 function M.diff(cwd, entry, cb)
 	local args = { "git", "-C", cwd, "-c", "core.quotePath=false", "--no-pager" }
 	if entry.kind == "?" then
@@ -161,10 +222,6 @@ function M.diff(cwd, entry, cb)
 			cb(vim.split(result.stdout or "", "\n", { trimempty = true }))
 		end)
 	end)
-end
-
-function M.root(path)
-	return vim.fs.root(path, ".git")
 end
 
 -- Creates a worktree beside the repo, reusing the branch when it already exists.

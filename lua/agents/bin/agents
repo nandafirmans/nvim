@@ -1,0 +1,207 @@
+#!/bin/sh
+# agents: reach the Neovim agent hub's tabs from another device (SSH over
+# Tailscale, or a browser through `agents web`). The tabs are sessions on the
+# hub's own tmux server, so attaching here shows the same agents, live.
+#
+#   agents              menu: pick a tab to attach, the hub, or a shell
+#   agents <name>       attach a tab directly (e.g. hermina360-fe-1)
+#   agents ls           list the tabs
+#   agents hub          open Neovim with the hub
+#   agents web [stop]   serve the phone dashboard, only inside the tailnet
+#   agents pin          set the PIN the dashboard asks for
+#
+# In a tab, Ctrl-b d detaches back to the menu.
+PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PATH
+SOCKET=${AGENTS_SOCKET:-nvim-agents}
+CONF="$HOME/.local/share/nvim/agents/tmux.conf"
+STATE="$HOME/.local/state/agents"
+PORT=7681
+
+tm() {
+	if [ -f "$CONF" ]; then
+		tmux -L "$SOCKET" -f "$CONF" "$@"
+	else
+		tmux -L "$SOCKET" "$@"
+	fi
+}
+
+list() {
+	tm list-sessions -F '#{session_name}	#{@agent_project}	#{@agent_tool}	#{?@agent_status,#{@agent_status},-}	#{@agent_label}' 2>/dev/null |
+		awk -F '\t' -v narrow="$(($(tput cols 2>/dev/null || echo 80) < 64))" '$3 != "" {
+			# A phone is narrow: name, tool and status only.
+			if (narrow) printf "%-18s %-6s %s\n", $1, $3, $4
+			else printf "%-24s %-8s %-8s %s\n", $1, $3, $4, $5
+		}'
+}
+
+attach() {
+	unset TMUX
+	tm attach-session -t "=$1"
+}
+
+menu() {
+	while :; do
+		choice=$({
+			list
+			echo "hub                      open Neovim with the hub"
+			echo "shell                    a shell in ~"
+			echo "quit"
+		} | fzf --reverse --no-sort --height=100% --prompt='agents › ' \
+			--header='⏎ attach · Ctrl-b d in a tab comes back here' | awk '{print $1}')
+		case "$choice" in
+		"" | quit) return ;;
+		hub) nvim -c 'lua require("agents").open()' ;;
+		shell) (cd && ${SHELL:-zsh} -l) ;;
+		*) attach "$choice" ;;
+		esac
+	done
+}
+
+# The dashboard (lua/agents/web/server.mjs, which also runs ttyd) is a
+# LaunchAgent, so it starts again at login after a restart; the Tailscale
+# serve config persists by itself.
+LABEL=local.agents.ttyd
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+
+PIN_FILE="$STATE/pin"
+
+hash_pin() {
+	printf '%s:%s' "$1" "$2" | shasum -a 256 | awk '{print $1}'
+}
+
+read_secret() {
+	printf '%s' "$1"
+	stty -echo 2>/dev/null
+	IFS= read -r secret
+	stty echo 2>/dev/null
+	echo
+}
+
+# Stores a salted hash of the PIN (never the PIN), readable only by you.
+set_pin() {
+	mkdir -p "$STATE"
+	read_secret "New PIN (6+ characters): "
+	first=$secret
+	if [ ${#first} -lt 6 ]; then
+		echo "Too short; use at least 6 characters." >&2
+		return 1
+	fi
+	read_secret "Repeat PIN: "
+	if [ "$first" != "$secret" ]; then
+		echo "The PINs differ; nothing changed." >&2
+		return 1
+	fi
+	salt=$(openssl rand -hex 16)
+	umask 077
+	printf '%s:%s\n' "$salt" "$(hash_pin "$salt" "$first")" >"$PIN_FILE"
+	chmod 600 "$PIN_FILE"
+	echo "PIN saved. The dashboard asks for it from now on."
+}
+
+# What the dashboard's terminal runs (ttyd passes ?arg=<x>): a tab by name,
+# the hub, a shell, or the menu. The dashboard has checked the PIN already.
+web_open() {
+	case "$1" in
+	"") menu ;;
+	hub) nvim -c 'lua require("agents").open()' ;;
+	shell) cd && exec "${SHELL:-zsh}" -l ;;
+	*)
+		if tm has-session -t "=$1" 2>/dev/null; then
+			attach "$1"
+		else
+			echo "No tab named $1."
+			sleep 3
+		fi
+		;;
+	esac
+}
+
+web() {
+	mkdir -p "$STATE"
+	if [ "$1" = "stop" ]; then
+		tailscale serve --https=443 off >/dev/null 2>&1
+		launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null
+		rm -f "$PLIST"
+		echo "agents web stopped (ttyd service removed, tailnet URL off)"
+		return
+	fi
+	ttyd=$(command -v ttyd) || {
+		echo "agents web needs ttyd: brew install ttyd" >&2
+		return 1
+	}
+	node=$(command -v node) || {
+		echo "agents web needs Node: brew install node" >&2
+		return 1
+	}
+	if ! tailscale status >/dev/null 2>&1; then
+		echo "Tailscale is not running: open Tailscale.app and log in (or run: tailscale up)" >&2
+		return 1
+	fi
+	self=$(readlink -f "$0")
+	web_dir=$(cd "$(dirname "$self")/../web" && pwd)
+	# The terminal page: ttyd's own page plus a home-screen name and icon, a
+	# row of Esc / Tab / Ctrl / arrow keys and touch gestures (web/build.py).
+	echo "Building the phone pages…"
+	"$ttyd" -i lo0 -p 7699 true >/dev/null 2>&1 &
+	builder=$!
+	sleep 1
+	curl -sf http://127.0.0.1:7699/ -o "$STATE/ttyd-index.html"
+	kill $builder 2>/dev/null
+	python3 -I "$web_dir/build.py" "$STATE/ttyd-index.html" "$STATE/web" || return 1
+	mkdir -p "$(dirname "$PLIST")"
+	# Bound to loopback only; Tailscale serves it over HTTPS to your own devices.
+	cat >"$PLIST" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>$LABEL</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>$node</string>
+		<string>$web_dir/server.mjs</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key><string>$PATH</string>
+		<key>LANG</key><string>en_US.UTF-8</string>
+		<key>AGENTS_WEB_PORT</key><string>$PORT</string>
+		<key>AGENTS_STATE</key><string>$STATE</string>
+		<key>AGENTS_SOCKET</key><string>$SOCKET</string>
+		<key>AGENTS_BIN</key><string>$self</string>
+		<key>AGENTS_TTYD</key><string>$ttyd</string>
+	</dict>
+	<key>WorkingDirectory</key><string>$HOME</string>
+	<key>RunAtLoad</key><true/>
+	<key>KeepAlive</key><true/>
+	<key>StandardOutPath</key><string>$STATE/web.log</string>
+	<key>StandardErrorPath</key><string>$STATE/web.log</string>
+</dict>
+</plist>
+PLIST
+	# A ttyd started by an older `agents web` holds the port.
+	[ -f "$STATE/ttyd.pid" ] && kill "$(cat "$STATE/ttyd.pid")" 2>/dev/null
+	rm -f "$STATE/ttyd.pid"
+	launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null
+	sleep 1
+	launchctl bootstrap "gui/$(id -u)" "$PLIST" || return 1
+	# The first time, Tailscale asks to enable Serve for the tailnet and waits
+	# here with a link; open it, approve, and this carries on.
+	echo "Publishing on the tailnet (tailscale serve)…"
+	tailscale serve --bg --https=443 "http://127.0.0.1:$PORT" || return 1
+	host=$(tailscale status --json 2>/dev/null | sed -n 's/.*"DNSName": *"\([^"]*\)\.".*/\1/p' | head -1)
+	echo "agents web: https://${host:-<this-mac>.ts.net}/  (only your tailnet devices can open it)"
+	echo "runs as a login service ($LABEL); stop with: agents web stop"
+}
+
+case "$1" in
+"") menu ;;
+--web) shift; web_open "$@" ;;
+pin) set_pin ;;
+ls) list ;;
+hub) nvim -c 'lua require("agents").open()' ;;
+web) shift; web "$@" ;;
+-h | --help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
+*) attach "$1" ;;
+esac

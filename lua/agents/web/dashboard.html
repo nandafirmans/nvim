@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="agents">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#140f10">
+<title>agents</title>
+<link rel="apple-touch-icon" href="data:image/png;base64,ICON">
+<link rel="icon" type="image/png" href="data:image/png;base64,ICON">
+<style>
+  :root {
+    --bg: #140f10; --panel: #1d1517; --card: #231a1c; --line: #33262a; --text: #f1e9e4; --dim: #9a8c88; --faint: #6b5f5c;
+    --yellow: #ffd23f; --orange: #ff9f1c; --red: #ff5a4e; --green: #6fdc8c; --blue: #7aa2f7; --violet: #b69cff;
+    --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+  body { font: 15px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; overscroll-behavior-y: contain; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  /* Login */
+  #login { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; }
+  #login img { width: 84px; height: 84px; border-radius: 20px; image-rendering: pixelated; box-shadow: 0 10px 40px #ff5f1f33; }
+  #login h1 { margin: 0; font-size: 26px; letter-spacing: 1px; background: linear-gradient(90deg, var(--yellow), var(--orange), var(--red)); -webkit-background-clip: text; color: transparent; }
+  #login form { display: flex; flex-direction: column; gap: 10px; width: min(300px, 100%); }
+  #login input { font: 600 20px ui-monospace, Menlo, monospace; letter-spacing: 6px; text-align: center; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
+  #login input:focus { border-color: var(--orange); }
+  #login .go { padding: 14px; border-radius: 14px; font-weight: 700; color: #1b1112; background: linear-gradient(var(--yellow), var(--orange)); }
+  #login .err { color: var(--red); min-height: 20px; font-size: 14px; text-align: center; }
+
+  /* Dashboard */
+  #app { display: none; min-height: 100%; padding: calc(var(--safe-top) + 6px) 14px calc(var(--safe-bottom) + 90px); }
+  header { position: sticky; top: 0; z-index: 5; margin: 0 -14px; padding: calc(var(--safe-top) + 8px) 14px 10px; background: linear-gradient(var(--bg) 70%, #140f1000); display: flex; align-items: center; gap: 10px; }
+  header img { width: 30px; height: 30px; border-radius: 8px; image-rendering: pixelated; }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: .5px; flex: 1; }
+  .chips { display: flex; gap: 6px; }
+  .chip { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--card); color: var(--dim); }
+  .chip.running { color: var(--orange); } .chip.waiting { color: var(--red); } .chip.done { color: var(--green); }
+  .desk { margin-top: 18px; }
+  .desk h2 { margin: 0 2px 8px; font-size: 13px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 8px; }
+  .desk h2 .count { color: var(--faint); font-weight: 600; }
+  .card { position: relative; display: block; width: 100%; text-align: left; margin-bottom: 10px; padding: 13px 14px 12px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, var(--faint)); }
+  .card:active { transform: scale(.985); background: #2a1f22; }
+  .card .top { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--faint)); flex: none; }
+  .running .dot, .waiting .dot { animation: pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 0 var(--c); }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--c); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .card .name { font-weight: 700; font-size: 16px; }
+  .card .num { color: var(--faint); font-weight: 500; }
+  .card .status { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--c); text-transform: uppercase; letter-spacing: .6px; }
+  .card .meta { margin-top: 4px; font-size: 13px; color: var(--dim); display: flex; gap: 10px; flex-wrap: wrap; }
+  .card .meta .add { color: var(--green); } .card .meta .del { color: var(--red); }
+  .card .doing { margin-top: 8px; font-size: 13px; color: #d9cdc8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .actions { margin-top: 10px; display: flex; gap: 8px; }
+  .card .actions button { flex: 1; padding: 9px 0; border-radius: 10px; font-size: 14px; font-weight: 700; background: #33262a; }
+  .card .actions .yes { color: #10230f; background: var(--green); }
+  .running { --c: var(--orange); } .waiting { --c: var(--red); } .done { --c: var(--green); } .idle { --c: var(--faint); }
+  .limited { --c: var(--violet); } .exited { --c: #5b4f4c; }
+  .empty { margin-top: 30vh; text-align: center; color: var(--dim); }
+  .dock { position: fixed; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 10px); z-index: 6; display: flex; gap: 8px; padding: 8px; border-radius: 18px; background: #1d1517ee; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); }
+  .dock button { flex: 1; padding: 11px 0; border-radius: 12px; font-weight: 700; font-size: 14px; background: var(--card); }
+  .dock button.primary { color: #1b1112; background: linear-gradient(var(--yellow), var(--orange)); }
+
+  /* Terminal sheet */
+  #term { position: fixed; inset: 0; z-index: 20; display: none; flex-direction: column; background: #1b1416; }
+  #term .bar { display: flex; align-items: center; gap: 8px; padding: calc(var(--safe-top) + 6px) 10px 8px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  #term .bar .back { font-size: 26px; line-height: 1; padding: 2px 10px 4px 4px; color: var(--orange); }
+  #term .bar .title { flex: 1; min-width: 0; }
+  #term .bar .title b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #term .bar .title span { font-size: 12px; color: var(--c, var(--dim)); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+  #term .bar .act { padding: 7px 12px; border-radius: 10px; background: var(--card); font-size: 13px; font-weight: 700; }
+  #term iframe { flex: 1; width: 100%; border: 0; background: #1b1416; padding-bottom: var(--safe-bottom); }
+
+  /* Prompt sheet */
+  #prompt { position: fixed; inset: 0; z-index: 30; display: none; background: #0008; }
+  #prompt .sheet { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 14px calc(var(--safe-bottom) + 14px); background: var(--panel); border-radius: 20px 20px 0 0; border-top: 1px solid var(--line); }
+  #prompt h3 { margin: 0 0 10px; font-size: 15px; }
+  #prompt textarea { width: 100%; min-height: 110px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: 15px/1.4 -apple-system, system-ui, sans-serif; outline: none; resize: none; }
+  #prompt textarea:focus { border-color: var(--orange); }
+  #prompt .row { display: flex; gap: 8px; margin-top: 10px; }
+  #prompt .row button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; background: var(--card); }
+  #prompt .row .send { color: #1b1112; background: linear-gradient(var(--yellow), var(--orange)); }
+  .toast { position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 90px); transform: translateX(-50%); z-index: 40; padding: 10px 16px; border-radius: 12px; background: #2d2225; color: var(--text); font-size: 14px; box-shadow: 0 6px 30px #0008; display: none; }
+</style>
+</head>
+<body>
+<div id="login">
+  <img src="data:image/png;base64,ICON" alt="">
+  <h1>WOWO · agents</h1>
+  <form id="login-form">
+    <input id="pin" type="password" autocomplete="current-password" placeholder="PIN" autofocus>
+    <button class="go" type="submit">Unlock</button>
+    <div class="err" id="login-err"></div>
+  </form>
+</div>
+
+<div id="app">
+  <header>
+    <img src="data:image/png;base64,ICON" alt="">
+    <h1>agents</h1>
+    <div class="chips" id="chips"></div>
+  </header>
+  <main id="list"></main>
+  <div class="dock">
+    <button data-open="hub">Hub</button>
+    <button data-open="shell">Shell</button>
+    <button class="primary" id="refresh">Refresh</button>
+  </div>
+</div>
+
+<div id="term">
+  <div class="bar">
+    <button class="back" id="term-back" aria-label="Back">‹</button>
+    <div class="title"><b id="term-name"></b><span id="term-status"></span></div>
+    <button class="act" id="term-prompt">Prompt</button>
+  </div>
+  <iframe id="term-frame" title="terminal"></iframe>
+</div>
+
+<div id="prompt">
+  <div class="sheet">
+    <h3 id="prompt-title">Prompt</h3>
+    <textarea id="prompt-text" placeholder="Tell the agent what to do…"></textarea>
+    <div class="row"><button id="prompt-cancel">Cancel</button><button class="send" id="prompt-send">Send</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  let agents = [];
+  let now = Date.now() / 1000;
+  let openName = null;
+  let promptName = null;
+  let timer = null;
+
+  const toast = (msg) => {
+    const t = $("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    clearTimeout(t._h);
+    t._h = setTimeout(() => (t.style.display = "none"), 2200);
+  };
+
+  const api = async (path, body) => {
+    const res = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401 && path !== "/api/login") { showLogin(); throw new Error("login"); }
+    if (!res.ok) throw new Error(data.error || "failed");
+    return data;
+  };
+
+  const ago = (t) => {
+    const s = Math.max(0, Math.round(now - t));
+    if (s < 60) return s + "s";
+    if (s < 3600) return Math.floor(s / 60) + "m";
+    if (s < 86400) return Math.floor(s / 3600) + "h";
+    return Math.floor(s / 86400) + "d";
+  };
+  const title = (a) => a.label || a.tool;
+
+  function render() {
+    const counts = {};
+    agents.forEach((a) => (counts[a.status] = (counts[a.status] || 0) + 1));
+    $("chips").innerHTML = ["waiting", "running", "done"].filter((s) => counts[s])
+      .map((s) => `<span class="chip ${s}">${counts[s]} ${s}</span>`).join("");
+    if (!agents.length) {
+      $("list").innerHTML = `<div class="empty">No tabs running.<br>Open one from the hub.</div>`;
+      return;
+    }
+    const desks = new Map();
+    agents.forEach((a) => desks.set(a.project, [...(desks.get(a.project) || []), a]));
+    $("list").innerHTML = [...desks].map(([project, tabs]) => `
+      <section class="desk">
+        <h2>${esc(project)} <span class="count">${tabs.length}</span></h2>
+        ${tabs.map((a) => {
+          const ch = a.changes;
+          const meta = [
+            a.branch ? `⑂ ${esc(a.branch)}` : "",
+            `${a.status === "running" ? "active" : "quiet"} ${ago(a.activity)}`,
+            ch && ch.files ? `${ch.files} files${ch.add ? ` <span class="add">+${ch.add}</span>` : ""}${ch.del ? ` <span class="del">−${ch.del}</span>` : ""}` : "",
+          ].filter(Boolean).join(" · ");
+          const doing = a.doing || a.task || "";
+          const actions = a.status === "waiting"
+            ? `<div class="actions"><button class="yes" data-act="approve" data-name="${esc(a.name)}">Approve</button><button data-act="deny" data-name="${esc(a.name)}">Deny</button><button data-act="prompt" data-name="${esc(a.name)}">Prompt</button></div>`
+            : `<div class="actions"><button data-act="prompt" data-name="${esc(a.name)}">Prompt</button>${a.status === "running" ? `<button data-act="deny" data-name="${esc(a.name)}">Stop</button>` : ""}</div>`;
+          return `<div class="card ${a.status}" data-open="${esc(a.name)}">
+            <div class="top"><span class="dot"></span><span class="name">${esc(title(a))} <span class="num">#${a.index}</span></span><span class="status">${a.status}</span></div>
+            <div class="meta">${meta}</div>
+            ${doing ? `<div class="doing mono">${esc(doing)}</div>` : ""}
+            ${actions}
+          </div>`;
+        }).join("")}
+      </section>`).join("");
+  }
+
+  async function refresh() {
+    try {
+      const data = await api("/api/agents");
+      agents = data.agents;
+      now = data.now;
+      render();
+      if (openName) {
+        const a = agents.find((x) => x.name === openName);
+        $("term-status").textContent = a ? a.status : "";
+        $("term").style.setProperty("--c", a ? `var(--${{ running: "orange", waiting: "red", done: "green" }[a.status] || "dim"})` : "");
+      }
+    } catch (e) {}
+  }
+
+  function showLogin() {
+    clearInterval(timer);
+    $("app").style.display = "none";
+    $("term").style.display = "none";
+    $("login").style.display = "flex";
+    setTimeout(() => $("pin").focus(), 50);
+  }
+
+  function showApp() {
+    $("login").style.display = "none";
+    $("app").style.display = "block";
+    refresh();
+    clearInterval(timer);
+    timer = setInterval(() => document.visibilityState === "visible" && refresh(), 3000);
+  }
+
+  function openTerm(name) {
+    openName = name;
+    const a = agents.find((x) => x.name === name);
+    $("term-name").textContent = a ? `${a.project} · ${title(a)} #${a.index}` : name === "hub" ? "Hub (Neovim)" : "Shell";
+    $("term-status").textContent = a ? a.status : "";
+    $("term-prompt").style.display = a ? "" : "none";
+    $("term-frame").src = "/t/?arg=" + encodeURIComponent(name);
+    $("term").style.display = "flex";
+    fitSheet();
+    refresh();
+  }
+
+  function closeTerm() {
+    openName = null;
+    $("term").style.display = "none";
+    $("term-frame").src = "about:blank";
+    refresh();
+  }
+
+  function openPrompt(name) {
+    const a = agents.find((x) => x.name === name);
+    promptName = name;
+    $("prompt-title").textContent = a ? `Prompt · ${a.project} · ${title(a)} #${a.index}` : "Prompt";
+    $("prompt").style.display = "block";
+    setTimeout(() => $("prompt-text").focus(), 50);
+  }
+
+  async function act(action, name) {
+    try {
+      await api(`/api/agents/${encodeURIComponent(name)}/${action}`, {});
+      toast(action === "approve" ? "Approved" : action === "deny" ? "Sent Esc" : "Done");
+      setTimeout(refresh, 400);
+    } catch (e) { if (e.message !== "login") toast(e.message); }
+  }
+
+  $("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("login-err").textContent = "";
+    try {
+      await api("/api/login", { pin: $("pin").value });
+      $("pin").value = "";
+      showApp();
+    } catch (err) {
+      $("login-err").textContent = err.message;
+      $("pin").select();
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const actBtn = e.target.closest("[data-act]");
+    if (actBtn) {
+      e.stopPropagation();
+      const { act: action, name } = actBtn.dataset;
+      return action === "prompt" ? openPrompt(name) : act(action, name);
+    }
+    const opener = e.target.closest("[data-open]");
+    if (opener) openTerm(opener.dataset.open);
+  });
+  $("refresh").addEventListener("click", refresh);
+  $("term-back").addEventListener("click", closeTerm);
+  $("term-prompt").addEventListener("click", () => openPrompt(openName));
+  $("prompt-cancel").addEventListener("click", () => ($("prompt").style.display = "none"));
+  $("prompt").addEventListener("click", (e) => { if (e.target === $("prompt")) $("prompt").style.display = "none"; });
+  $("prompt-send").addEventListener("click", async () => {
+    const text = $("prompt-text").value;
+    if (!text.trim()) return;
+    try {
+      await api(`/api/agents/${encodeURIComponent(promptName)}/send`, { text });
+      $("prompt-text").value = "";
+      $("prompt").style.display = "none";
+      toast("Sent");
+      setTimeout(refresh, 600);
+    } catch (e) { if (e.message !== "login") toast(e.message); }
+  });
+  // iOS shrinks only the top page for the on-screen keyboard, not the frame
+  // inside it: size the terminal sheet to what is visible, so the frame
+  // shrinks too and the line being typed stays above the keyboard.
+  const fitSheet = () => {
+    const vv = window.visualViewport;
+    const sheet = $("term");
+    if (!vv) return;
+    const keyboard = window.innerHeight - vv.height > 120;
+    sheet.style.bottom = "auto";
+    sheet.style.top = vv.offsetTop + "px";
+    sheet.style.height = vv.height + "px";
+    $("term-frame").style.paddingBottom = keyboard ? "0" : "";
+    document.documentElement.style.overflow = openName ? "hidden" : "";
+    if (openName) window.scrollTo(0, 0);
+  };
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", fitSheet);
+    window.visualViewport.addEventListener("scroll", fitSheet);
+  }
+
+  // The terminal page asks to close itself (its Menu key).
+  window.addEventListener("message", (e) => { if (e.data === "agents:close") closeTerm(); });
+
+  api("/api/agents").then((data) => { agents = data.agents; now = data.now; showApp(); }).catch(() => {});
+})();
+</script>
+</body>
+</html>

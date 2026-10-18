@@ -280,8 +280,28 @@ async function main() {
   if (resumed) {
     const last = [...messages].reverse().find((m) => m.role === "user" && typeof m.content === "string");
     ui.info(`  ${violet("↺")} ${grey(`${messages.length} messages`)}${last ? ` ${faint("· last request:")} ${text(last.content.split("\n")[0].slice(0, 70))}` : ""}\n`);
+    // The end of the conversation, as it looked, to pick up where it stopped.
+    ui.replay(messages.slice(-20), (name, args) => TOOLS.find((t) => t.name === name)?.summary?.(args));
   }
   hub.status("idle", "");
+
+  // A resize (the hub's pane on a phone, then back on the Mac) garbles what
+  // was drawn for the old width; while waiting for input, draw it all again.
+  const REPLAY = 40;
+  let resizeTimer = null;
+  process.stdout.on("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!editor.active || agent.busy || ui.onKey) return;
+      process.stdout.write("\x1b[2J\x1b[3J\x1b[H");
+      ui.banner({ model: agent.model, cwd, branch: branchOf(cwd), session: session.id, mode: agent.mode, resumed, skills, tools: TOOLS.map((t) => t.name), version: VERSION });
+      const shown = agent.messages.slice(-REPLAY);
+      if (agent.messages.length > shown.length) ui.info(`  ${faint(`… ${agent.messages.length - shown.length} earlier messages`)}\n`);
+      ui.replay(shown, (name, args) => TOOLS.find((t) => t.name === name)?.summary?.(args));
+      editor.cursorRow = 0;
+      editor.render();
+    }, 200);
+  });
 
   const run = async (text) => {
     await agent.prompt(text);
